@@ -17,7 +17,7 @@ const buildConfig = require( './build-config' );
 module.exports = {
 	devtool: 'source-map',
 
-	entry: path.resolve( __dirname, 'src', 'ckeditor.js' ),
+	entry: path.resolve( __dirname, 'src', 'op-ckeditor.js' ),
 
 	output: {
 		path: path.resolve( __dirname, 'build' ),

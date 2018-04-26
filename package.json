@@ -14,22 +14,23 @@
     "build"
   ],
   "devDependencies": {
-    "@ckeditor/ckeditor5-adapter-ckfinder": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-autoformat": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-basic-styles": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-block-quote": "^1.0.0-beta.1",
+    "@ckeditor/ckeditor5-adapter-ckfinder": "v10.0.0",
+    "@ckeditor/ckeditor5-autoformat": "v10.0.0",
+    "@ckeditor/ckeditor5-basic-styles": "v10.0.0",
+    "@ckeditor/ckeditor5-block-quote": "v10.0.0",
     "@ckeditor/ckeditor5-dev-utils": "^7.0.3",
     "@ckeditor/ckeditor5-dev-webpack-plugin": "^3.0.4",
-    "@ckeditor/ckeditor5-easy-image": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-editor-balloon": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-essentials": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-heading": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-image": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-link": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-list": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-paragraph": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-theme-lark": "^1.0.0-beta.1",
-    "@ckeditor/ckeditor5-upload": "^1.0.0-beta.1",
+    "@ckeditor/ckeditor5-easy-image": "v10.0.0",
+    "@ckeditor/ckeditor5-editor-balloon": "v10.0.0",
+    "@ckeditor/ckeditor5-editor-classic": "v10.0.0",
+    "@ckeditor/ckeditor5-essentials": "v10.0.0",
+    "@ckeditor/ckeditor5-heading": "v10.0.0",
+    "@ckeditor/ckeditor5-image": "v10.0.0",
+    "@ckeditor/ckeditor5-link": "v10.0.0",
+    "@ckeditor/ckeditor5-list": "v10.0.0",
+    "@ckeditor/ckeditor5-paragraph": "v10.0.0",
+    "@ckeditor/ckeditor5-theme-lark": "v10.0.0",
+    "@ckeditor/ckeditor5-upload": "v10.0.0",
     "babel-minify-webpack-plugin": "^0.3.0",
     "postcss-loader": "^2.0.10",
     "raw-loader": "^0.5.1",
@@ -50,12 +51,13 @@
     "url": "https://github.com/ckeditor/ckeditor5-build-balloon.git"
   },
   "scripts": {
-    "build": "npm run create-entry-file && npm run build-ckeditor",
-    "create-entry-file": "node bin/create-entry-file.js",
+    "build": "npm run build-ckeditor",
+    "postbuild": "sh bin/dist.sh",
     "build-ckeditor": "sh bin/build-ckeditor.sh",
+    "create-entry-file": "node bin/create-entry-file.js",
     "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-markdown-gfm": "^1.0.0-beta.1"
+    "@ckeditor/ckeditor5-markdown-gfm": "v10.0.0"
   }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Building 'build/ckeditor.js'..."
+echo "Building 'build/op-ckeditor.js'..."
 echo ""
 
 webpack

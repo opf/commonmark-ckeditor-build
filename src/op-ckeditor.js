@@ -4,6 +4,7 @@
  */
 
 import BalloonEditorBase from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
+import ClassicEditorBase from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
 import UploadadapterPlugin from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter';
 import AutoformatPlugin from '@ckeditor/ckeditor5-autoformat/src/autoformat';
@@ -23,9 +24,14 @@ import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Imageupload1Plugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import CommonmarkPlugin from '../../ckeditor5-markdown-gfm/src/commonmark';
 
-export default class BalloonEditor extends BalloonEditorBase {}
+export class BalloonEditor extends BalloonEditorBase {}
+export class ClassicEditor extends ClassicEditorBase {}
 
-BalloonEditor.build = {
+// Export the two common interfaces
+window.OPBalloonEditor = BalloonEditor;
+window.OPClassicEditor = ClassicEditor;
+
+const config = {
 	plugins: [
 		EssentialsPlugin,
 		UploadadapterPlugin,
@@ -73,3 +79,6 @@ BalloonEditor.build = {
 		language: 'en'
 	}
 };
+
+ClassicEditor.build = config;
+BalloonEditor.build = config;
