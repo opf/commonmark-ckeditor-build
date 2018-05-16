@@ -21,8 +21,9 @@ import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
 import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
-import Imageupload1Plugin from '@ckeditor/ckeditor5-image/src/imageupload';
-import CommonmarkPlugin from '../../ckeditor5-markdown-gfm/src/commonmark';
+import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
+import CommonMarkPlugin from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
+import OpUploadPlugin from './plugins/op-upload-plugin';
 
 export class BalloonEditor extends BalloonEditorBase {}
 export class ClassicEditor extends ClassicEditorBase {}
@@ -33,6 +34,7 @@ window.OPClassicEditor = ClassicEditor;
 
 const config = {
 	plugins: [
+		CommonMarkPlugin,
 		EssentialsPlugin,
 		UploadadapterPlugin,
 		AutoformatPlugin,
@@ -49,8 +51,8 @@ const config = {
 		LinkPlugin,
 		ListPlugin,
 		ParagraphPlugin,
-		Imageupload1Plugin,
-		CommonmarkPlugin
+		ImageuploadPlugin,
+		OpUploadPlugin
 	],
 	config: {
 		toolbar: {
