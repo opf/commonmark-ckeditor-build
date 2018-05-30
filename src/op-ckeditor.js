@@ -20,6 +20,7 @@ import ImagetoolbarPlugin from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
 import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
+import Table from '@ckeditor/ckeditor5-table/src/table';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import CommonMarkPlugin from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
@@ -52,6 +53,7 @@ const config = {
 		ListPlugin,
 		ParagraphPlugin,
 		ImageuploadPlugin,
+		Table,
 		OpUploadPlugin
 	],
 	config: {
@@ -66,6 +68,11 @@ const config = {
 				'numberedList',
 				'imageUpload',
 				'blockQuote',
+				'|',
+				'insertTable',
+				'insertRowBelow',
+				'insertColumnAfter',
+				'|',
 				'undo',
 				'redo'
 			]
@@ -73,7 +80,6 @@ const config = {
 		image: {
 			toolbar: [
 				'imageStyle:full',
-				'imageStyle:side',
 				'|',
 				'imageTextAlternative'
 			]
