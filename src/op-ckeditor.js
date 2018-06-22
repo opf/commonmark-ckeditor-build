@@ -23,7 +23,7 @@ import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
-import CommonMarkPlugin from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
+import GFMDataProcessor from '@ckeditor/ckeditor5-markdown-gfm/src/gfmdataprocessor';
 import OpUploadPlugin from './plugins/op-upload-plugin';
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -33,9 +33,15 @@ export class ClassicEditor extends ClassicEditorBase {}
 window.OPBalloonEditor = BalloonEditor;
 window.OPClassicEditor = ClassicEditor;
 
+
+// Simple plugin which loads the GFM processor.
+function MarkdownGfmPlugin( editor ) {
+	editor.data.processor = new GFMDataProcessor();
+}
+
 const config = {
 	plugins: [
-		CommonMarkPlugin,
+		MarkdownGfmPlugin,
 		EssentialsPlugin,
 		UploadadapterPlugin,
 		AutoformatPlugin,
