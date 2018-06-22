@@ -1,6 +1,6 @@
 {
   "name": "@openproject/commonmark-ckeditor-build",
-  "version": "v10.0.0",
+  "version": "v10.1.0",
   "description": "CKEditor 5 editor build with CommonMark and plugins for OpenProject.",
   "keywords": [
     "ckeditor5",
