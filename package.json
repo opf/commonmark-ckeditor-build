@@ -32,7 +32,7 @@
     "@ckeditor/ckeditor5-paragraph": "git+https://github.com/ckeditor/ckeditor5-paragraph.git#master",
     "@ckeditor/ckeditor5-theme-lark": "git+https://github.com/ckeditor/ckeditor5-theme-lark.git#master",
     "@ckeditor/ckeditor5-upload": "git+https://github.com/ckeditor/ckeditor5-upload.git#master",
-    "@ckeditor/ckeditor5-markdown-gfm": "git+https://github.com/ckeditor/ckeditor5-markdonw-gfm.git#master",
+    "@ckeditor/ckeditor5-markdown-gfm": "git+https://github.com/ckeditor/ckeditor5-markdown-gfm.git#master",
     "@ckeditor/ckeditor5-table": "git+https://github.com/ckeditor/ckeditor5-table.git#master",
     "babel-minify-webpack-plugin": "^0.3.0",
     "postcss-loader": "^2.0.10",
