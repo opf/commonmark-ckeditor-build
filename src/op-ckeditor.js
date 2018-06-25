@@ -1,8 +1,3 @@
-/**
- * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md.
- */
-
 import BalloonEditorBase from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
 import ClassicEditorBase from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
@@ -20,6 +15,7 @@ import ImagetoolbarPlugin from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
 import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
 import Table from '@ckeditor/ckeditor5-table/src/table';
+import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import GFMDataProcessor from '@ckeditor/ckeditor5-markdown-gfm/src/gfmdataprocessor';
@@ -40,7 +36,6 @@ function MarkdownGfmPlugin( editor ) {
 
 const config = {
 	plugins: [
-		MarkdownGfmPlugin,
 		EssentialsPlugin,
 		UploadadapterPlugin,
 		AutoformatPlugin,
@@ -57,7 +52,10 @@ const config = {
 		LinkPlugin,
 		ListPlugin,
 		ParagraphPlugin,
+
+		MarkdownGfmPlugin,
 		Table,
+		TableToolbar,
 		OpUploadPlugin
 	],
 	config: {
@@ -74,8 +72,6 @@ const config = {
 				'blockQuote',
 				'|',
 				'insertTable',
-				'insertRowBelow',
-				'insertColumnAfter',
 				'|',
 				'undo',
 				'redo'
@@ -87,6 +83,9 @@ const config = {
 				'|',
 				'imageTextAlternative'
 			]
+		},
+		table: {
+			toolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells' ]
 		},
 		language: 'en'
 	}
