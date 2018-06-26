@@ -18,8 +18,10 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
-import GFMDataProcessor from '@ckeditor/ckeditor5-markdown-gfm/src/gfmdataprocessor';
+import CommonMark from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
 import OpUploadPlugin from './plugins/op-upload-plugin';
+import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
+
 
 export class BalloonEditor extends BalloonEditorBase {}
 export class ClassicEditor extends ClassicEditorBase {}
@@ -27,12 +29,6 @@ export class ClassicEditor extends ClassicEditorBase {}
 // Export the two common interfaces
 window.OPBalloonEditor = BalloonEditor;
 window.OPClassicEditor = ClassicEditor;
-
-
-// Simple plugin which loads the GFM processor.
-function MarkdownGfmPlugin( editor ) {
-	editor.data.processor = new GFMDataProcessor();
-}
 
 const config = {
 	plugins: [
@@ -53,7 +49,9 @@ const config = {
 		ListPlugin,
 		ParagraphPlugin,
 
-		MarkdownGfmPlugin,
+		OPMacroTocPlugin,
+
+		CommonMark,
 		Table,
 		TableToolbar,
 		OpUploadPlugin
@@ -73,6 +71,8 @@ const config = {
 				'|',
 				'insertTable',
 				'|',
+				'insertToc',
+				'|',
 				'undo',
 				'redo'
 			]
@@ -85,7 +85,7 @@ const config = {
 			]
 		},
 		table: {
-			toolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells' ]
+			toolbar: [ 'tableColumn', 'tableRow' ]
 		},
 		language: 'en'
 	}
