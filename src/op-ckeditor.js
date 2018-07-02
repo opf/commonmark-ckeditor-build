@@ -1,8 +1,3 @@
-/**
- * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md.
- */
-
 import BalloonEditorBase from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
 import ClassicEditorBase from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
@@ -17,14 +12,16 @@ import ImagePlugin from '@ckeditor/ckeditor5-image/src/image';
 import ImagecaptionPlugin from '@ckeditor/ckeditor5-image/src/imagecaption';
 import ImagestylePlugin from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImagetoolbarPlugin from '@ckeditor/ckeditor5-image/src/imagetoolbar';
-import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
 import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
 import Table from '@ckeditor/ckeditor5-table/src/table';
+import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
-import CommonMarkPlugin from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
+import CommonMark from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
 import OpUploadPlugin from './plugins/op-upload-plugin';
+import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
+
 
 export class BalloonEditor extends BalloonEditorBase {}
 export class ClassicEditor extends ClassicEditorBase {}
@@ -35,7 +32,6 @@ window.OPClassicEditor = ClassicEditor;
 
 const config = {
 	plugins: [
-		CommonMarkPlugin,
 		EssentialsPlugin,
 		UploadadapterPlugin,
 		AutoformatPlugin,
@@ -52,8 +48,12 @@ const config = {
 		LinkPlugin,
 		ListPlugin,
 		ParagraphPlugin,
-		ImageuploadPlugin,
+
+		OPMacroTocPlugin,
+
+		CommonMark,
 		Table,
+		TableToolbar,
 		OpUploadPlugin
 	],
 	config: {
@@ -70,8 +70,8 @@ const config = {
 				'blockQuote',
 				'|',
 				'insertTable',
-				'insertRowBelow',
-				'insertColumnAfter',
+				'|',
+				'insertToc',
 				'|',
 				'undo',
 				'redo'
@@ -83,6 +83,9 @@ const config = {
 				'|',
 				'imageTextAlternative'
 			]
+		},
+		table: {
+			toolbar: [ 'tableColumn', 'tableRow' ]
 		},
 		language: 'en'
 	}
