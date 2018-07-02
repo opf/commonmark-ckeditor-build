@@ -25,6 +25,8 @@ import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
 import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-table-plugin';
 import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
 import OPWikiIncludePagePlugin from './plugins/op-macro-wiki-include/op-macro-wiki-include-plugin';
+import OPLinkingWpPlugin from './plugins/op-linking-wp-plugin';
+import {AtJsPlugin} from './plugins/op-atjs-plugin/atjs-plugin';
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -58,6 +60,9 @@ const config = {
 		OPMacroEmbeddedTable,
 		OPMacroWpButtonPlugin,
 		OPWikiIncludePagePlugin,
+
+		AtJsPlugin,
+		OPLinkingWpPlugin,
 
 		CommonMark,
 		Table,
