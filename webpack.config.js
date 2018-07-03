@@ -15,7 +15,7 @@ const BabiliPlugin = require( 'babel-minify-webpack-plugin' );
 const buildConfig = require( './build-config' );
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-module.exports = {
+let config = {
 	entry: path.resolve( __dirname, 'src', 'op-ckeditor.js' ),
 
 	output: {
@@ -31,13 +31,6 @@ module.exports = {
 			language: buildConfig.config.language,
 			additionalLanguages: ['de']
 		} ),
-		new BabiliPlugin( null, {
-			comments: false
-		} ),
-		new webpack.BannerPlugin( {
-			banner: bundler.getLicenseBanner(),
-			raw: true
-		} ),
 
 		// new BundleAnalyzerPlugin(),
 
@@ -45,7 +38,7 @@ module.exports = {
 
 	],
 
-	devtool: 'source-map',
+	devtool: 'cheap-source-map',
 
 	module: {
 		rules: [
@@ -76,3 +69,19 @@ module.exports = {
 		]
 	}
 };
+
+if (process.env.NODE_ENV === 'production') {
+	console.log('Adding production plugins');
+	config.plugins.push(
+		new BabiliPlugin( null, {
+			comments: false
+		} ),
+		new webpack.BannerPlugin( {
+			banner: bundler.getLicenseBanner(),
+			raw: true
+		} )
+	)
+}
+
+
+module.exports = config;

@@ -3,7 +3,7 @@
 echo "Building 'build/op-ckeditor.js'..."
 echo ""
 
-webpack
+NODE_ENV=production webpack
 
 echo ""
 echo "Done."
