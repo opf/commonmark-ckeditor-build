@@ -9,6 +9,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
 import { toWidget } from '@ckeditor/ckeditor5-widget/src/utils';
 import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
+import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 
 export default class OPMacroTocPlugin extends Plugin {
 
@@ -81,13 +82,11 @@ export default class OPMacroTocPlugin extends Plugin {
 	}
 
 	createTocViewElement(writer) {
-		const that = this;
-		return writer.createUIElement( 'div', { class: 'macro -toc' }, function(containerDocument) {
-			const containerElement = this.toDomElement(containerDocument);
-			containerElement.innerHTML = imageIcon + '<div class="macro--description">' + that.label + '</div>';
+		const placeholder = writer.createText( this.label );
+		const container = writer.createContainerElement( 'div', { class: 'macro -toc' } );
 
-			return containerElement;
-		} );
+		writer.insert( ViewPosition.createAt( container ), placeholder );
+		return container;
 	}
 
 	createTocDataElement(writer) {
