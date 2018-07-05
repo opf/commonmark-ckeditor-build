@@ -12,7 +12,7 @@ export function isWpButtonMacroWidget( viewElement ) {
 }
 
 
-export function isWpButtonMacroWidgetselected( selection ) {
+export function isWpButtonMacroWidgetSelected( selection ) {
 	const viewElement = selection.getSelectedElement();
 
 	return !!( viewElement && isWpButtonMacroWidget( viewElement ) );

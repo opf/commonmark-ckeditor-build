@@ -23,6 +23,7 @@ import OpUploadPlugin from './plugins/op-upload-plugin';
 import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
 import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-table-plugin';
 import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
+import OPWikiIncludePagePlugin from './plugins/op-macro-wiki-include/op-macro-wiki-include-plugin';
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -54,6 +55,7 @@ const config = {
 		OPMacroTocPlugin,
 		OPMacroEmbeddedTable,
 		OPMacroWpButtonPlugin,
+		OPWikiIncludePagePlugin,
 
 		CommonMark,
 		Table,
@@ -61,6 +63,16 @@ const config = {
 		OpUploadPlugin
 	],
 	config: {
+		heading: {
+            options: [
+                { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
+                { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
+                { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' }
+            ]
+        },
 		toolbar: {
 			items: [
 				'heading',
@@ -78,6 +90,7 @@ const config = {
 				'insertToc',
 				'insertWorkPackageButton',
 				'insertEmbeddedTable',
+				'insertWikiPageInclude',
 				'|',
 				'undo',
 				'redo'
@@ -91,6 +104,11 @@ const config = {
 		OPMacroWpButton: {
 			toolbar: [
 				'opEditWpMacroButton',
+			]
+		},
+		OPWikiIncludePage: {
+			toolbar: [
+				'opEditWikiIncludeMacroButton',
 			]
 		},
 		image: {
