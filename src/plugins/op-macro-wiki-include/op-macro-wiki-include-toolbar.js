@@ -1,20 +1,20 @@
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import ContextualBalloon from '@ckeditor/ckeditor5-ui/src/panel/balloon/contextualballoon';
 
-import {isEmbeddedTableWidgetSelected} from './utils';
+import {isWikiIncludeMacroWidgetSelected} from './utils';
 import {createToolbarEditButton} from '../../helpers/create-toolbar-edit-button';
 import {createEditToolbar} from '../../helpers/create-toolbar';
 
 
 const balloonClassName = 'ck-toolbar-container';
 
-export default class EmbeddedTableToolbar extends Plugin {
+export default class OPWikiIncludePageToolbar extends Plugin {
 	static get requires() {
 		return [ ContextualBalloon ];
 	}
 
 	static get pluginName() {
-		return 'EmbeddedTableToolbar';
+		return 'OPWikiIncludePageToolbar';
 	}
 
 	init() {
@@ -23,14 +23,14 @@ export default class EmbeddedTableToolbar extends Plugin {
 		const pluginContext = editor.config.get('openProject.pluginContext');
 
 		// Add editing button
-		createToolbarEditButton( editor, 'opEditEmbeddedTableQuery', widget => {
-			const externalQueryConfiguration = pluginContext.services.externalQueryConfiguration;
-			const currentQuery = widget.getAttribute('opEmbeddedTableQuery') || {};
+		createToolbarEditButton( editor, 'opEditWikiIncludeMacroButton', widget => {
+			const macroService = pluginContext.services.macros;
+			const page = widget.getAttribute('page');
 
-			externalQueryConfiguration.show(
-				currentQuery,
-				(newQuery) => model.change(writer => {
-					writer.setAttribute( 'opEmbeddedTableQuery', newQuery, widget );
+			macroService
+				.configureWikiPageInclude(page)
+				.then((newPage) => editor.model.change(writer => {
+					writer.setAttribute( 'page', newPage, widget );
 				})
 			);
 		} );
@@ -41,8 +41,8 @@ export default class EmbeddedTableToolbar extends Plugin {
 		createEditToolbar(
 			this,
 			this.editor,
-			'opEmbeddedTable',
-			isEmbeddedTableWidgetSelected
+			'OPWikiIncludePage',
+			isWikiIncludeMacroWidgetSelected
 		);
 	}
 }
