@@ -22,6 +22,7 @@ import CommonMark from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
 import OpUploadPlugin from './plugins/op-upload-plugin';
 import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
 import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-table-plugin';
+import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -52,6 +53,7 @@ const config = {
 
 		OPMacroTocPlugin,
 		OPMacroEmbeddedTable,
+		OPMacroWpButtonPlugin,
 
 		CommonMark,
 		Table,
@@ -74,6 +76,7 @@ const config = {
 				'insertTable',
 				'|',
 				'insertToc',
+				'insertWorkPackageButton',
 				'insertEmbeddedTable',
 				'|',
 				'undo',
@@ -83,6 +86,11 @@ const config = {
 		opEmbeddedTable: {
 			toolbar: [
 				'opEditEmbeddedTableQuery',
+			]
+		},
+		OPMacroWpButton: {
+			toolbar: [
+				'opEditWpMacroButton',
 			]
 		},
 		image: {

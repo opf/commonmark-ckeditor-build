@@ -18,7 +18,6 @@ export default class EmbeddedTableEditing extends Plugin {
 		return 'EmbeddedTableEditing';
 	}
 
-
 	init() {
 		const editor = this.editor;
 		const model = editor.model;

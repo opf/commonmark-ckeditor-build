@@ -3,20 +3,20 @@ import ToolbarView from '@ckeditor/ckeditor5-ui/src/toolbar/toolbarview';
 import ContextualBalloon from '@ckeditor/ckeditor5-ui/src/panel/balloon/contextualballoon';
 
 import imageIcon from '../../icons/edit.svg';
-import {isEmbeddedTableWidgetSelected, isEmbeddedTableWidget} from './utils';
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
-import {getBalloonPositionData, repositionContextualBalloon} from '../toolbar-utils';
+import {repositionContextualBalloon, getBalloonPositionData} from '../toolbar-utils';
+import {isWpButtonMacroWidgetselected} from './utils';
 
 
 const balloonClassName = 'ck-toolbar-container';
 
-export default class EmbeddedTableToolbar extends Plugin {
+export default class OPMacroWpButtonToolbar extends Plugin {
 	static get requires() {
 		return [ ContextualBalloon ];
 	}
 
 	static get pluginName() {
-		return 'EmbeddedTableToolbar';
+		return 'OPMacroWpButtonToolbar';
 	}
 
 	init() {
@@ -24,19 +24,8 @@ export default class EmbeddedTableToolbar extends Plugin {
 		const model = this.editor.model;
 		const pluginContext = editor.config.get('openProject.pluginContext');
 
-		// If the `BalloonToolbar` plugin is loaded, it should be disabled for images
-		// which have their own toolbar to avoid duplication.
-		const balloonToolbar = editor.plugins.get( 'BalloonToolbar' );
-		if ( balloonToolbar ) {
-			this.listenTo( balloonToolbar, 'show', evt => {
-				if ( isEmbeddedTableWidgetSelected( editor.editing.view.document.selection ) ) {
-					evt.stop();
-				}
-			}, { priority: 'high' } );
-		}
-
 		// Add editing button
-		editor.ui.componentFactory.add( 'opEditEmbeddedTableQuery', locale => {
+		editor.ui.componentFactory.add( 'opEditWpMacroButton', locale => {
 			const view = new ButtonView( locale );
 
 			view.set( {
@@ -48,19 +37,21 @@ export default class EmbeddedTableToolbar extends Plugin {
 			// Callback executed once the widget is clicked.
 			view.on( 'execute', () => {
 
-				const tableWidget = model.document.selection.getSelectedElement();
+				const buttonWidget = model.document.selection.getSelectedElement();
 
-				if (!tableWidget) {
+				if (!buttonWidget) {
 					return;
 				}
 
-				const externalQueryConfiguration = pluginContext.services.externalQueryConfiguration;
-				const currentQuery = tableWidget.getAttribute('opEmbeddedTableQuery') || {};
+				const macroService = pluginContext.services.macros;
+				const type = buttonWidget.getAttribute('type');
+				const classes = buttonWidget.getAttribute('classes');
 
-				externalQueryConfiguration.show(
-					currentQuery,
-					(newQuery) => model.change(writer => {
-						writer.setAttribute( 'opEmbeddedTableQuery', newQuery, tableWidget );
+				macroService
+					.configureWorkPackageButton(type, classes)
+					.then((result) => editor.model.change(writer => {
+						writer.setAttribute( 'classes', result.classes, buttonWidget );
+						writer.setAttribute( 'type', result.type, buttonWidget );
 					})
 				);
 			} );
@@ -72,7 +63,7 @@ export default class EmbeddedTableToolbar extends Plugin {
 
 	afterInit() {
 		const editor = this.editor;
-		const toolbarConfig = editor.config.get( 'opEmbeddedTable.toolbar' );
+		const toolbarConfig = editor.config.get( 'OPMacroWpButton.toolbar' );
 
 		// Don't add the toolbar if there is no configuration.
 		if ( !toolbarConfig || !toolbarConfig.length ) {
@@ -85,7 +76,7 @@ export default class EmbeddedTableToolbar extends Plugin {
 		// Add buttons to the toolbar.
 		this._toolbar.fillFromConfig( toolbarConfig, editor.ui.componentFactory );
 
-		// Show balloon panel each time table widget is selected.
+		// Show balloon panel each time the widget is selected.
 		// TODO: This has changed in master with https://github.com/ckeditor/ckeditor5-image/pull/215
 		this.listenTo( editor.editing.view, 'render', () => {
 			this._checkIsVisible();
@@ -102,7 +93,7 @@ export default class EmbeddedTableToolbar extends Plugin {
 		if ( !editor.ui.focusTracker.isFocused ) {
 			this._hideToolbar();
 		} else {
-			if ( isEmbeddedTableWidgetSelected(editor.editing.view.document.selection ) ) {
+			if ( isWpButtonMacroWidgetselected(editor.editing.view.document.selection ) ) {
 				this._showToolbar();
 			} else {
 				this._hideToolbar();
@@ -114,7 +105,7 @@ export default class EmbeddedTableToolbar extends Plugin {
 		const editor = this.editor;
 
 		if ( this._isVisible ) {
-			repositionContextualBalloon( editor, isEmbeddedTableWidgetSelected );
+			repositionContextualBalloon( editor, isWpButtonMacroWidgetselected );
 		} else if ( !this._balloon.hasView( this._toolbar ) ) {
 			this._balloon.add( {
 				view: this._toolbar,
