@@ -4,6 +4,7 @@ import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
 import UploadadapterPlugin from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter';
 import AutoformatPlugin from '@ckeditor/ckeditor5-autoformat/src/autoformat';
 import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
+import CodePlugin from '@ckeditor/ckeditor5-basic-styles/src/code';
 import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import BlockquotePlugin from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import EasyimagePlugin from '@ckeditor/ckeditor5-easy-image/src/easyimage';
@@ -39,6 +40,7 @@ const config = {
 		UploadadapterPlugin,
 		AutoformatPlugin,
 		BoldPlugin,
+		CodePlugin,
 		ItalicPlugin,
 		BlockquotePlugin,
 		EasyimagePlugin,
@@ -79,6 +81,7 @@ const config = {
 				'|',
 				'bold',
 				'italic',
+				'code',
 				'link',
 				'bulletedList',
 				'numberedList',
