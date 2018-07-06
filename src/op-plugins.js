@@ -7,6 +7,7 @@ import {AtJsPlugin} from './plugins/op-atjs-plugin/atjs-plugin';
 import OPLinkingWpPlugin from './plugins/op-linking-wp-plugin';
 import OPMentioningPlugin from './plugins/op-mentioning-plugin';
 import OpUploadPlugin from './plugins/op-upload-plugin';
+import OPChildPagesPlugin from "./plugins/op-macro-child-pages/op-macro-child-pages-plugin";
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -15,6 +16,7 @@ export const opMacroPlugins = [
 	OPMacroEmbeddedTable,
 	OPMacroWpButtonPlugin,
 	OPWikiIncludePagePlugin,
+	OPChildPagesPlugin,
 ];
 
 export const opMentioningPlugins = [
