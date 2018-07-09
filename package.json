@@ -37,6 +37,7 @@
     "@ckeditor/ckeditor5-ui": "^10.1.0",
     "@ckeditor/ckeditor5-engine": "^10.1.0",
     "@ckeditor/ckeditor5-widget": "^10.1.0",
+    "@ckeditor/ckeditor5-enter": "^10.1.0",
     "babel-minify-webpack-plugin": "^0.3.0",
     "postcss-loader": "^2.0.10",
     "raw-loader": "^0.5.1",
