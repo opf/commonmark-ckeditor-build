@@ -28,6 +28,7 @@ import OPWikiIncludePagePlugin from './plugins/op-macro-wiki-include/op-macro-wi
 import OPLinkingWpPlugin from './plugins/op-linking-wp-plugin';
 import {AtJsPlugin} from './plugins/op-atjs-plugin/atjs-plugin';
 import OPMentioningPlugin from './plugins/op-mentioning-plugin';
+import CodeBlockPlugin from "./plugins/code-block/code-block-plugin";
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -57,6 +58,7 @@ const config = {
 		ListPlugin,
 		ParagraphPlugin,
 
+		CodeBlockPlugin,
 		OPMacroTocPlugin,
 		OPMacroEmbeddedTable,
 		OPMacroWpButtonPlugin,
