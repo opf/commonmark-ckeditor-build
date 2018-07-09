@@ -38,7 +38,7 @@ let config = {
 
 	],
 
-	devtool: 'cheap-source-map',
+	devtool: 'source-map',
 
 	module: {
 		rules: [
