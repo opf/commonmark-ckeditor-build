@@ -5,6 +5,8 @@ import ModelPosition from '@ckeditor/ckeditor5-engine/src/model/position';
 import ModelRange from '@ckeditor/ckeditor5-engine/src/model/range';
 import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
+import ViewElement from '@ckeditor/ckeditor5-engine/src/view/element';
+import Text from '@ckeditor/ckeditor5-engine/src/view/text';
 
 export default class CodeBlockPlugin extends Plugin {
 	static get pluginName() {
@@ -31,17 +33,25 @@ export default class CodeBlockPlugin extends Plugin {
 		conversion.for( 'upcast' )
 			.add(viewCodeBlockToModel());
 
+		conversion
+			.for('editingDowncast')
+			.add(modelCodeBlockToView());
 
-		conversion.for('dataDowncast').add(downcastElementToElement({
-			model: 'codeblock',
-			view: (modelElement, viewWriter) => toCodeBlock(modelElement, viewWriter)
-		}));
-
-		conversion.for('editingDowncast').add(downcastElementToElement({
-			model: 'codeblock',
-			view: (modelElement, viewWriter) => toCodeBlock(modelElement, viewWriter)
-		}));
+		conversion
+			.for('dataDowncast')
+			.add(modelCodeBlockToView());
 	}
+
+
+		// conversion.for('dataDowncast').add(downcastElementToElement({
+		// 	model: 'codeblock',
+		// 	view: (modelElement, viewWriter) => toCodeBlock(modelElement, viewWriter)
+		// }));
+
+		// conversion.for('editingDowncast').add(downcastElementToElement({
+		// 	model: 'codeblock',
+		// 	view: (modelElement, viewWriter) => toCodeBlock(modelElement, viewWriter)
+		// }));
 }
 
 export function toCodeBlock(modelElement, viewWriter) {
@@ -51,6 +61,39 @@ export function toCodeBlock(modelElement, viewWriter) {
 	viewWriter.insert( ViewPosition.createAt( figure ), emptyElement );
 
 	return figure;
+}
+
+export function modelCodeBlockToView() {
+	return dispatcher => {
+		dispatcher.on( 'insert:codeblock', converter, { priority: 'high' } );
+	};
+
+	function converter( evt, data, conversionApi ) {
+		// We require the codeblock to have a single text node.
+		if ( data.item.childCount === 0 ) {
+			return;
+		}
+
+		const codeBlock = data.item;
+
+		// Consume the codeblock and text
+		conversionApi.consumable.consume( codeBlock, 'insert' );
+
+		// Wrap the element in a <pre> <code> block
+		const viewWriter = conversionApi.writer;
+		const preElement = viewWriter.createContainerElement( 'pre', { class: 'language-TODO' } );
+		const codeElement = viewWriter.createContainerElement( 'code' );
+
+		viewWriter.insert( ViewPosition.createAt( preElement ), codeElement );
+
+		conversionApi.mapper.bindElements( codeBlock, codeElement );
+
+		// Insert at matching position
+		const insertPosition = conversionApi.mapper.toViewPosition( data.range.start );
+		viewWriter.insert( insertPosition, preElement );
+
+		evt.stop();
+	}
 }
 
 export function viewCodeBlockToModel() {
