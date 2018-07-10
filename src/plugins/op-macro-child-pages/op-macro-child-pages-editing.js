@@ -39,11 +39,13 @@ export default class OPChildPagesEditing extends Plugin {
 				},
 				model: ( viewElement, modelWriter ) => {
 					const page = viewElement.getAttribute( 'data-page' ) || '';
+					const includeParent = viewElement.getAttribute( 'data-include-parent' ) == 'true';
 
 					return modelWriter.createElement(
 						'op-macro-child-pages',
 						{
-							page: page
+							page: page,
+							includeParent: includeParent
 						}
 					);
 				}
@@ -65,6 +67,7 @@ export default class OPChildPagesEditing extends Plugin {
 					{
 						'class': 'child_pages',
 						'data-page': modelElement.getAttribute('page') || '',
+						'data-include-parent': modelElement.getAttribute('includeParent').toString(),
 					}
 				);
 
@@ -83,19 +86,12 @@ export default class OPChildPagesEditing extends Plugin {
 
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
-				const macroService = pluginContext.services.macros;
+				editor.model.change(writer => {
+					const element = writer.createElement( 'op-macro-child-pages', {});
 
-				macroService
-					.configureChildPages()
-					.then((page) => editor.model.change(writer => {
-							const element = writer.createElement( 'op-macro-child-pages', {});
-							writer.setAttribute( 'page', page, element );
-
-							editor.model.insertContent( element, editor.model.document.selection );
-						})
-					);
-
-
+					editor.model.insertContent( element, editor.model.document.selection );
+				});
+				// TODO: Clarification for why this empty call?
 				editor.model.change( writer => {
 				} );
 			} );
@@ -108,14 +104,36 @@ export default class OPChildPagesEditing extends Plugin {
 		return window.I18n.t('js.editor.macro.child_pages.text');
 	}
 
+	pageLabel(page) {
+		if (page && page.length > 0) {
+			return page
+		} else {
+			return window.I18n.t('js.editor.macro.child_pages.this_page');
+		}
+	}
+
+	includeParentText(includeParent) {
+		if (includeParent) {
+			return ` (${window.I18n.t('js.editor.macro.child_pages.include_parent')})`;
+		} else {
+			return '';
+		}
+	}
+
 	createMacroViewElement(modelElement, writer) {
 		// TODO: Pass page, it is not updated on coming back from the modal..
-		// const page = modelElement.getAttribute('page');
-		const label = this.macroLabel();
-		const placeholder = writer.createText( label );
-		const container = writer.createContainerElement( 'div', { class: 'macro -child_page' } );
+		const page = modelElement.getAttribute('page');
+		const includeParent = modelElement.getAttribute('includeParent');
+		const macroLabel = this.macroLabel();
+		const pageLabel = this.pageLabel(page);
+		const pageLabelContainer = writer.createContainerElement( 'span', { class: 'macro-value' } );
+		const placeholderContainer = writer.createContainerElement( 'div', { class: 'macro -child_page' } );
 
-		writer.insert( ViewPosition.createAt( container ), placeholder );
-		return toChildPagesMacroWidget(container, writer, { label: label } )
+		let placeholderContent = [ writer.createText( `${macroLabel} ` ) ];
+		writer.insert( ViewPosition.createAt( pageLabelContainer ), writer.createText( `${pageLabel}` ) )
+		placeholderContent.push( pageLabelContainer );
+		placeholderContent.push( writer.createText( this.includeParentText(includeParent) ));
+		writer.insert( ViewPosition.createAt( placeholderContainer ), placeholderContent );
+		return toChildPagesMacroWidget(placeholderContainer, writer, { label: macroLabel } )
 	}
 }

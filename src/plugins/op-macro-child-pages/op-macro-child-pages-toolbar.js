@@ -25,12 +25,14 @@ export default class OPChildPagesToolbar extends Plugin {
 		// Add editing button
 		createToolbarEditButton( editor, 'opEditChildPagesMacroButton', widget => {
 			const macroService = pluginContext.services.macros;
-			const page = widget.getAttribute('page');
-
+			const pageAttribute = widget.getAttribute('page');
+			const includeParent = widget.getAttribute('includeParent');
+			const page = (pageAttribute && pageAttribute.length > 0) ? pageAttribute : '';
 			macroService
-				.configureChildPages(page)
-				.then((newPage) => editor.model.change(writer => {
-						writer.setAttribute( 'page', newPage, widget );
+				.configureChildPages(page, includeParent)
+				.then((macroConf) => model.change(writer => {
+						writer.setAttribute( 'page', macroConf.page, widget );
+						writer.setAttribute( 'includeParent', macroConf.includeParent, widget );
 					})
 				);
 		} );
