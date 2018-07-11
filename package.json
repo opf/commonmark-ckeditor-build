@@ -32,7 +32,7 @@
     "@ckeditor/ckeditor5-paragraph": "^10.0.1",
     "@ckeditor/ckeditor5-theme-lark": "^10.1.0",
     "@ckeditor/ckeditor5-upload": "^10.0.1",
-    "@ckeditor/ckeditor5-markdown-gfm": "https://github.com/opf/ckeditor5-markdown-gfm.git#feature/makros",
+    "@ckeditor/ckeditor5-markdown-gfm": "https://github.com/opf/ckeditor5-markdown-gfm.git#feature/markdown-it-code",
     "@ckeditor/ckeditor5-table": "^10.0.0",
     "@ckeditor/ckeditor5-ui": "^10.1.0",
     "@ckeditor/ckeditor5-engine": "^10.1.0",
