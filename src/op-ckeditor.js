@@ -29,6 +29,7 @@ import OPLinkingWpPlugin from './plugins/op-linking-wp-plugin';
 import {AtJsPlugin} from './plugins/op-atjs-plugin/atjs-plugin';
 import OPMentioningPlugin from './plugins/op-mentioning-plugin';
 import OPHelpLinkPlugin from './plugins/op-help-link-plugin/op-help-link-plugin';
+import OPPreviewPlugin from './plugins/op-preview.plugin';
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -68,6 +69,8 @@ const config = {
 		OPLinkingWpPlugin,
 		OPMentioningPlugin,
 
+		OPPreviewPlugin,
+
 		CommonMark,
 		Table,
 		TableToolbar,
@@ -106,7 +109,9 @@ const config = {
 				'|',
 				'undo',
 				'redo',
-				'openProjectShowFormattingHelp'
+				'openProjectShowFormattingHelp',
+				'|',
+				'preview'
 			]
 		},
 		opEmbeddedTable: {

@@ -9,7 +9,7 @@ export default class OpUploadResourceAdapter {
         if (!(resource && resource.uploadAttachments)) {
 			const resourceContext = resource ? resource.name : 'Missing context';
             console.warn(`uploadAttachments not present on context: ${resourceContext}`);
-            return Promise.reject("You're not allowed to uplod attachments on this resource.");
+            return Promise.reject("You're not allowed to upload attachments on this resource.");
         }
 
 		return resource
