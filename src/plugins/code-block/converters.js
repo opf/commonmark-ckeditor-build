@@ -8,13 +8,9 @@ export function modelCodeBlockToView() {
 	};
 
 	function converter( evt, data, conversionApi ) {
-		// We require the codeblock to have a single text node.
-		if ( data.item.childCount === 0 ) {
-			return;
-		}
-
 		const codeBlock = data.item;
 		const language = codeBlock.getAttribute('language') || 'language-text';
+		const content = codeBlock.getAttribute('content');
 
 		// Consume the codeblock and text
 		conversionApi.consumable.consume( codeBlock, 'insert' );
@@ -23,7 +19,9 @@ export function modelCodeBlockToView() {
 		const viewWriter = conversionApi.writer;
 		const preElement = viewWriter.createContainerElement( 'pre' );
 		const codeElement = viewWriter.createContainerElement( 'code', { class: language } );
+		const contentElement = viewWriter.createText( content );
 
+		viewWriter.insert( ViewPosition.createAt( codeElement ), contentElement );
 		viewWriter.insert( ViewPosition.createAt( preElement ), codeElement );
 
 		conversionApi.mapper.bindElements( codeBlock, codeElement );
@@ -69,13 +67,17 @@ export function viewCodeBlockToModel() {
 			conversionApi.writer.insert( modelCodeBlock, splitResult.position );
 
 			// Convert text child of codeblock
-			const { modelRange } = conversionApi.convertChildren( codeBlock, ModelPosition.createAt( modelCodeBlock ) );
+			// const { modelRange } = conversionApi.convertChildren( codeBlock, ModelPosition.createAt( modelCodeBlock ) );
+			const child = codeBlock.getChild(0);
+			conversionApi.consumable.consume( child, { name: true } );
+			const content = child.data;
+			conversionApi.writer.setAttribute( 'content',content, modelCodeBlock );
 
 			// Set as conversion result, attribute converters may use this property.
-			data.modelRange = new ModelRange( ModelPosition.createBefore( modelCodeBlock ), modelRange.end );
+			// data.modelRange = new ModelRange( ModelPosition.createBefore( modelCodeBlock ), data.modelRange.end );
 
 			// Convert after pre element
-			data.modelCursor = data.modelRange.end;
+			// data.modelCursor = data.modelRange.end;
 		}
 	}
 }

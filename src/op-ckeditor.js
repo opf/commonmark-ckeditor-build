@@ -129,6 +129,11 @@ const config = {
 				'opEditWikiIncludeMacroButton',
 			]
 		},
+		OPCodeBlock: {
+			toolbar: [
+				'opEditCodeBlock',
+			]
+		},
 		image: {
 			toolbar: [
 				'imageStyle:full',
