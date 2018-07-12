@@ -9,14 +9,8 @@ export default class OPMentioningPlugin extends Plugin {
 
 	init() {
 		const editor = this.editor;
-		const getOPService = function(name) {
-			return editor.config.openProject.pluginContext.services[name];
-		};
-		const getOPContext = function() {
-			const opConfig = editor.config.openProject;
-
-			return opConfig && opConfig.context;
-		}
+		const context = editor.config.get('openProject.context');
+		const opServices = editor.config.get('openProject.pluginContext').services;
 
 		let options = {
 			searchKey: 'id_principal',
@@ -29,7 +23,7 @@ export default class OPMentioningPlugin extends Plugin {
 			at: '@',
 			remoteDataPreparation: function(data) {
 				const principals = data["_embedded"]["elements"];
-				const sanitizer = getOPService('htmlSanitizeService');
+				const sanitizer = opServices.htmlSanitizeService;
 
 				for (let i = principals.length - 1; i >= 0; i--) {
 					principals[i]['id_principal'] = sanitizer.sanitize(principals[i]['id'].toString() + ' ' + principals[i]['name']);
@@ -39,12 +33,10 @@ export default class OPMentioningPlugin extends Plugin {
 				return principals;
 			},
 			isSupportedContext: function() {
-				const context = getOPContext();
-
 				return context && context._type === 'WorkPackage'
 			},
 			remoteUrl: function(query, func) {
-				const url = getOPService('pathHelperService').api.v3.principals(getOPContext().project.id, query);
+				const url = opServices.pathHelperService.api.v3.principals(context.project.id, query);
 
                 jQuery.getJSON(url, func);
 			}
