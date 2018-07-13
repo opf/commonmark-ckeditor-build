@@ -18,10 +18,14 @@ export function modelCodeBlockToView() {
 		// Wrap the element in a <pre> <code> block
 		const viewWriter = conversionApi.writer;
 		const preElement = viewWriter.createContainerElement( 'pre' );
+		const langElement = viewWriter.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
 		const codeElement = viewWriter.createContainerElement( 'code', { class: language } );
+		const langContent = viewWriter.createText( language );
 		const contentElement = viewWriter.createText( content );
 
 		viewWriter.insert( ViewPosition.createAt( codeElement ), contentElement );
+		viewWriter.insert( ViewPosition.createAt( langElement ), langContent );
+		viewWriter.insert( ViewPosition.createAt( preElement ), langElement );
 		viewWriter.insert( ViewPosition.createAt( preElement ), codeElement );
 
 		conversionApi.mapper.bindElements( codeBlock, codeElement );
@@ -74,10 +78,13 @@ export function viewCodeBlockToModel() {
 			conversionApi.writer.setAttribute( 'content',content, modelCodeBlock );
 
 			// Set as conversion result, attribute converters may use this property.
-			// data.modelRange = new ModelRange( ModelPosition.createBefore( modelCodeBlock ), data.modelRange.end );
+			data.modelRange = new ModelRange(
+				ModelPosition.createBefore( modelCodeBlock ),
+				ModelPosition.createAfter( modelCodeBlock )
+			);
 
 			// Convert after pre element
-			// data.modelCursor = data.modelRange.end;
+			data.modelCursor = data.modelRange.end;
 		}
 	}
 }

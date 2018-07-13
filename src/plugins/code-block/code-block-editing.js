@@ -3,12 +3,9 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import {modelCodeBlockToView, viewCodeBlockToModel} from './converters';
-import {registerEnterEditHandler, registerBackspaceHandler} from './keyboard-handlers';
-import ModelPosition from '@ckeditor/ckeditor5-engine/src/model/position';
-import ModelSelection from '@ckeditor/ckeditor5-engine/src/model/selection';
-import ModelRange from '@ckeditor/ckeditor5-engine/src/model/range';
 import {downcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import {createCodeBlockWidget} from './widget';
+import {createCodeBlockWidget, isCodeBlockWidget} from './widget';
+import ClickObserver from './click-observer';
 
 export default class CodeBlockEditing extends Plugin {
 
@@ -20,16 +17,9 @@ export default class CodeBlockEditing extends Plugin {
 		const editor = this.editor;
 		const schema = editor.model.schema;
 		const conversion = editor.conversion;
-
-		// Insert newlines manually when pressing enter
-		// within the code block
-		// registerEnterEditHandler(this, editor);
-
-		// Remove the codeblock on backspace when the codeblock
-		// is empty.
-		//registerBackspaceHandler(this, editor);
-
-		// Escape from the code block when
+		const view = editor.editing.view;
+		const viewDocument = view.document;
+		const pluginContext = editor.config.get('openProject.pluginContext');
 
 		// Configure schema.
 		schema.register('codeblock', {
@@ -57,6 +47,41 @@ export default class CodeBlockEditing extends Plugin {
 			.for('dataDowncast')
 			.add(modelCodeBlockToView());
 
+		// Register click handler to code block to edit it immediately
+		view.addObserver( ClickObserver );
+		this.listenTo( viewDocument, 'click', ( eventInfo, domEventData ) => {
+			let element = domEventData.target;
+
+			// If target is our widget
+			if ( !isCodeBlockWidget( element ) ) {
+				element = element.findAncestor( isCodeBlockWidget );
+
+				if ( !element ) {
+					return;
+				}
+			}
+
+			domEventData.preventDefault();
+			domEventData.stopPropagation();
+
+			// Create model selection over widget.
+			const modelElement = editor.editing.mapper.toModelElement( element );
+
+			const macroService = pluginContext.services.macros;
+			const language = modelElement.getAttribute('language');
+			const content = modelElement.getAttribute('content');
+
+			macroService
+				.editCodeBlock( content, language )
+				.then((update) => editor.model.change(writer => {
+					writer.setAttribute( 'language', update.languageClass, modelElement );
+					writer.setAttribute( 'content', update.content, modelElement );
+				})
+			);
+
+		} );
+
+		// Register toolbar button to create code block
 		editor.ui.componentFactory.add( 'insertCodeBlock', locale => {
 			const view = new ButtonView( locale );
 
@@ -68,11 +93,16 @@ export default class CodeBlockEditing extends Plugin {
 
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
-				 editor.model.change(writer => {
-					const element = writer.createElement( 'codeblock' );
-					writer.setAttribute('content', '', element);
-					editor.model.insertContent( element, editor.model.document.selection );
-				})
+				pluginContext.services.macros
+					.editCodeBlock()
+					.then((update) => editor.model.change(writer => {
+
+						const element = writer.createElement( 'codeblock' );
+						writer.setAttribute( 'language', update.languageClass, element );
+						writer.setAttribute( 'content', update.content, element );
+						editor.model.insertContent( element, editor.model.document.selection );
+					})
+				);
 			} );
 
 			return view;

@@ -21,19 +21,19 @@ export function isCodeBlockWidgetSelected( selection ) {
 }
 
 export function createCodeBlockWidget( modelElement, writer, label ) {
-	const content = modelElement.getAttribute('content')
-	const placeholder = writer.createText( content );
+	const content = modelElement.getAttribute( 'content' );
+	const languageClass = modelElement.getAttribute( 'language' ) || 'language-text';
+	const language = languageClass.replace(/^language-/, '');
+
+	const contentElement = writer.createText( content );
 	const container = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block' } );
 
-	writer.insert( ViewPosition.createAt( container ), placeholder );
+	const langElement = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
+	const langContent = writer.createText( language );
+
+	writer.insert( ViewPosition.createAt( langElement ), langContent );
+	writer.insert( ViewPosition.createAt( container ), langElement );
+	writer.insert( ViewPosition.createAt( container ), contentElement );
+
 	return toCodeBlockWidget( container, writer, label );
-
-	// The following doesnt work when removing the widget...
-	// let that = this;
-	// return writer.createUIElement( 'div', { class: 'macro -embedded-table' }, function(containerDocument) {
-	// 	const containerElement = this.toDomElement(containerDocument);
-	// 	containerElement.innerHTML = imageIcon + '<div class="macro--description">' + that.text.macro_text + '</div>';
-
-	// 	return containerElement;
-	// } );
 }
