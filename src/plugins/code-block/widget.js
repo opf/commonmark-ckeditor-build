@@ -1,5 +1,6 @@
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
+import {setContent} from './widget';
 
 const codeBlockSymbol = Symbol( 'isOPCodeBlock' );
 
@@ -21,19 +22,32 @@ export function isCodeBlockWidgetSelected( selection ) {
 }
 
 export function createCodeBlockWidget( modelElement, writer, label ) {
-	const content = modelElement.getAttribute( 'content' );
-	const languageClass = modelElement.getAttribute( 'language' ) || 'language-text';
-	const language = languageClass.replace(/^language-/, '');
-
-	const contentElement = writer.createText( content );
-	const container = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block' } );
-
-	const langElement = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
-	const langContent = writer.createText( language );
-
-	writer.insert( ViewPosition.createAt( langElement ), langContent );
-	writer.insert( ViewPosition.createAt( container ), langElement );
-	writer.insert( ViewPosition.createAt( container ), contentElement );
+	const container = writer.createContainerElement(
+		'div',
+		{
+			class: 'op-ckeditor--code-block',
+			title: window.I18n.t('js.editor.macro.code_block.widget_help')
+		}
+	);
+	renderCodeBlockContent( writer, modelElement, container );
 
 	return toCodeBlockWidget( container, writer, label );
+}
+
+export function renderCodeBlockContent( writer, modelElement, container ) {
+	// Append language element
+	const languageClass = modelElement.getAttribute( 'opCodeblockLanguage' ) || 'language-text';
+	const language = languageClass.replace(/^language-/, '');
+	const langElement = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
+	setTextNode( writer, language, langElement, 'text' );
+	writer.insert( ViewPosition.createAt( container ), langElement );
+
+	// Append code block content
+	const content = modelElement.getAttribute( 'opCodeblockContent' );
+	setTextNode( writer, content, container, '(empty)' );
+}
+
+export function setTextNode( writer, content, container, empty_text ) {
+    const placeholder = writer.createText( content || empty_text );
+    writer.insert( ViewPosition.createAt( container ), placeholder );
 }

@@ -2,7 +2,7 @@ import icon from '../../icons/code-block.svg';
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-import {modelCodeBlockToView, viewCodeBlockToModel} from './converters';
+import {modelCodeBlockToView, viewCodeBlockToModel, codeBlockContentToView} from './converters';
 import {downcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
 import {createCodeBlockWidget, isCodeBlockWidget} from './widget';
 import ClickObserver from './click-observer';
@@ -28,7 +28,7 @@ export default class CodeBlockEditing extends Plugin {
 			allowContentOf: '$block',
 			allowWhere: ['$root', '$block'],
 			allowIn: ['$root'],
-			allowAttributes: ['language', 'content']
+			allowAttributes: ['opCodeblockLanguage', 'opCodeblockContent']
 		});
 
 		conversion.for( 'upcast' )
@@ -40,8 +40,8 @@ export default class CodeBlockEditing extends Plugin {
 				view: (modelElement, viewWriter) => {
 					return createCodeBlockWidget( modelElement, viewWriter, 'Code block' );
 				}
-			} )
-		);
+			}) )
+			.add ( codeBlockContentToView() );
 
 		conversion
 			.for('dataDowncast')
@@ -51,6 +51,13 @@ export default class CodeBlockEditing extends Plugin {
 		view.addObserver( ClickObserver );
 		this.listenTo( viewDocument, 'click', ( eventInfo, domEventData ) => {
 			let element = domEventData.target;
+			let evt = domEventData.domEvent;
+
+			// Avoid opening the widget with modifiers selected to allow selecting the widget
+			if (evt.shiftKey || evt.altKey || evt.metaKey) {
+				return;
+			}
+
 
 			// If target is our widget
 			if ( !isCodeBlockWidget( element ) ) {
@@ -68,14 +75,14 @@ export default class CodeBlockEditing extends Plugin {
 			const modelElement = editor.editing.mapper.toModelElement( element );
 
 			const macroService = pluginContext.services.macros;
-			const language = modelElement.getAttribute('language');
-			const content = modelElement.getAttribute('content');
+			const language = modelElement.getAttribute( 'opCodeblockLanguage' );
+			const content = modelElement.getAttribute( 'opCodeblockContent' );
 
 			macroService
 				.editCodeBlock( content, language )
 				.then((update) => editor.model.change(writer => {
-					writer.setAttribute( 'language', update.languageClass, modelElement );
-					writer.setAttribute( 'content', update.content, modelElement );
+					writer.setAttribute( 'opCodeblockLanguage', update.languageClass, modelElement );
+					writer.setAttribute( 'opCodeblockContent', update.content, modelElement );
 				})
 			);
 
@@ -86,7 +93,7 @@ export default class CodeBlockEditing extends Plugin {
 			const view = new ButtonView( locale );
 
 			view.set( {
-				label: 'Insert code block', // TODO: Integration into t() ?
+				label: window.I18n.t('js.editor.macro.code_block.button'),
 				icon: icon,
 				tooltip: true
 			} );
@@ -98,8 +105,8 @@ export default class CodeBlockEditing extends Plugin {
 					.then((update) => editor.model.change(writer => {
 
 						const element = writer.createElement( 'codeblock' );
-						writer.setAttribute( 'language', update.languageClass, element );
-						writer.setAttribute( 'content', update.content, element );
+						writer.setAttribute( 'opCodeblockLanguage', update.languageClass, element );
+						writer.setAttribute( 'opCodeblockContent', update.content, element );
 						editor.model.insertContent( element, editor.model.document.selection );
 					})
 				);

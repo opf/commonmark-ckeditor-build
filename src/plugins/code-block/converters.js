@@ -1,6 +1,9 @@
 import ModelPosition from '@ckeditor/ckeditor5-engine/src/model/position';
 import ModelRange from '@ckeditor/ckeditor5-engine/src/model/range';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
+import ViewRange from '@ckeditor/ckeditor5-engine/src/view/range';
+import {renderCodeBlockContent} from './widget';
+
 
 export function modelCodeBlockToView() {
 	return dispatcher => {
@@ -9,8 +12,8 @@ export function modelCodeBlockToView() {
 
 	function converter( evt, data, conversionApi ) {
 		const codeBlock = data.item;
-		const language = codeBlock.getAttribute('language') || 'language-text';
-		const content = codeBlock.getAttribute('content');
+		const language = codeBlock.getAttribute('opCodeblockLanguage') || 'language-text';
+		const content = codeBlock.getAttribute('opCodeblockContent');
 
 		// Consume the codeblock and text
 		conversionApi.consumable.consume( codeBlock, 'insert' );
@@ -59,7 +62,7 @@ export function viewCodeBlockToModel() {
 
 		// Create the model element
 		const modelCodeBlock = conversionApi.writer.createElement( 'codeblock' );
-		conversionApi.writer.setAttribute( 'language', codeBlock.getAttribute('class'), modelCodeBlock );
+		conversionApi.writer.setAttribute( 'opCodeblockLanguage', codeBlock.getAttribute('class'), modelCodeBlock );
 
 		// Find allowed parent for paragraph that we are going to insert. If current parent does not allow
 		// to insert paragraph but one of the ancestors does then split nodes to allowed parent.
@@ -75,7 +78,7 @@ export function viewCodeBlockToModel() {
 			const child = codeBlock.getChild(0);
 			conversionApi.consumable.consume( child, { name: true } );
 			const content = child.data;
-			conversionApi.writer.setAttribute( 'content',content, modelCodeBlock );
+			conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
 
 			// Set as conversion result, attribute converters may use this property.
 			data.modelRange = new ModelRange(
@@ -86,5 +89,30 @@ export function viewCodeBlockToModel() {
 			// Convert after pre element
 			data.modelCursor = data.modelRange.end;
 		}
+	}
+}
+
+
+export function codeBlockContentToView() {
+	return dispatcher => {
+		dispatcher.on( 'attribute:opCodeblockContent', converter );
+		dispatcher.on( 'attribute:opCodeblockLanguage', converter );
+	};
+
+	function converter( evt, data, conversionApi ) {
+        const modelElement = data.item;
+
+        // Mark element as consumed by conversion.
+        conversionApi.consumable.consume( data.item, evt.name );
+
+        // Get mapped view element to update.
+        const viewElement = conversionApi.mapper.toViewElement( modelElement );
+
+        // Remove current <div> element contents.
+        conversionApi.writer.remove( ViewRange.createOn( viewElement.getChild( 1 ) ) );
+        conversionApi.writer.remove( ViewRange.createOn( viewElement.getChild( 0 ) ) );
+
+		// Set current content
+		renderCodeBlockContent( conversionApi.writer, modelElement, viewElement );
 	}
 }
