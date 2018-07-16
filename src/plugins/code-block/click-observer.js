@@ -1,10 +1,10 @@
 import DomEventObserver from "@ckeditor/ckeditor5-engine/src/view/observer/domeventobserver";
 
-export default class ClickObserver extends DomEventObserver {
+export default class DoubleClickObserver extends DomEventObserver {
 	constructor( view ) {
 		super( view );
 
-		this.domEventType = 'click';
+		this.domEventType = 'dblclick';
 	}
 
 	onDomEvent( domEvent ) {

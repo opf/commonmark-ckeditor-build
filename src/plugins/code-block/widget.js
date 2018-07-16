@@ -26,7 +26,7 @@ export function createCodeBlockWidget( modelElement, writer, label ) {
 		'div',
 		{
 			class: 'op-ckeditor--code-block',
-			title: window.I18n.t('js.editor.macro.code_block.widget_help')
+			title: window.I18n.t('js.editor.macro.toolbar_help')
 		}
 	);
 	renderCodeBlockContent( writer, modelElement, container );

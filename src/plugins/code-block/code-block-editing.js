@@ -5,7 +5,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import {modelCodeBlockToView, viewCodeBlockToModel, codeBlockContentToView} from './converters';
 import {downcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
 import {createCodeBlockWidget, isCodeBlockWidget} from './widget';
-import ClickObserver from './click-observer';
+import DoubleClickObserver from './click-observer';
 
 export default class CodeBlockEditing extends Plugin {
 
@@ -48,8 +48,8 @@ export default class CodeBlockEditing extends Plugin {
 			.add(modelCodeBlockToView());
 
 		// Register click handler to code block to edit it immediately
-		view.addObserver( ClickObserver );
-		this.listenTo( viewDocument, 'click', ( eventInfo, domEventData ) => {
+		view.addObserver( DoubleClickObserver );
+		this.listenTo( viewDocument, 'dblclick', ( eventInfo, domEventData ) => {
 			let element = domEventData.target;
 			let evt = domEventData.domEvent;
 
