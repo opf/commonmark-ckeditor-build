@@ -94,10 +94,6 @@ export default class OPWikiIncludePageEditing extends Plugin {
 						editor.model.insertContent( element, editor.model.document.selection );
 					})
 				);
-
-
-				editor.model.change( writer => {
-				} );
 			} );
 
 			return view;

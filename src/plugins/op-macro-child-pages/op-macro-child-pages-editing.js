@@ -67,7 +67,7 @@ export default class OPChildPagesEditing extends Plugin {
 					{
 						'class': 'child_pages',
 						'data-page': modelElement.getAttribute('page') || '',
-						'data-include-parent': modelElement.getAttribute('includeParent').toString(),
+						'data-include-parent': modelElement.getAttribute('includeParent') || ''
 					}
 				);
 
@@ -91,9 +91,6 @@ export default class OPChildPagesEditing extends Plugin {
 
 					editor.model.insertContent( element, editor.model.document.selection );
 				});
-				// TODO: Clarification for why this empty call?
-				editor.model.change( writer => {
-				} );
 			} );
 
 			return view;
