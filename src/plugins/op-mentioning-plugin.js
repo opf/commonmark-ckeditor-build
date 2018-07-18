@@ -9,7 +9,7 @@ export default class OPMentioningPlugin extends Plugin {
 
 	init() {
 		const editor = this.editor;
-		const context = editor.config.get('openProject.context');
+		const resource = editor.config.get('openProject.context.resource');
 		const opServices = editor.config.get('openProject.pluginContext').services;
 
 		let options = {
