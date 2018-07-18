@@ -7,7 +7,7 @@ export function getOPService(editor, name) {
 }
 
 export function getOPContext(editor) {
-	return editor.config.get('openProject.context');
+	return editor.config.get('openProject.context.resource');
 }
 
 export function getOPPath(editor, pathName) {
