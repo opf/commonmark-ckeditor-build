@@ -1,5 +1,6 @@
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import {setupAtJs} from './op-atjs-plugin/atjs-setup';
+import {getOPService, getOPContext, getOPPath} from './op-context/op-context';
 
 export default class OPMentioningPlugin extends Plugin {
 
@@ -9,8 +10,6 @@ export default class OPMentioningPlugin extends Plugin {
 
 	init() {
 		const editor = this.editor;
-		const resource = editor.config.get('openProject.context.resource');
-		const opServices = editor.config.get('openProject.pluginContext').services;
 
 		let options = {
 			searchKey: 'id_principal',
@@ -23,7 +22,7 @@ export default class OPMentioningPlugin extends Plugin {
 			at: '@',
 			remoteDataPreparation: function(data) {
 				const principals = data["_embedded"]["elements"];
-				const sanitizer = opServices.htmlSanitizeService;
+				const sanitizer = getOPService(editor, 'htmlSanitizeService');
 
 				for (let i = principals.length - 1; i >= 0; i--) {
 					principals[i]['id_principal'] = sanitizer.sanitize(principals[i]['id'].toString() + ' ' + principals[i]['name']);
@@ -33,10 +32,11 @@ export default class OPMentioningPlugin extends Plugin {
 				return principals;
 			},
 			isSupportedContext: function() {
+				let context = getOPContext(editor);
 				return context && context._type === 'WorkPackage'
 			},
 			remoteUrl: function(query, func) {
-				const url = opServices.pathHelperService.api.v3.principals(context.project.id, query);
+				const url = getOPPath(editor).api.v3.principals(getOPContext(editor).project.id, query);
 
                 jQuery.getJSON(url, func);
 			}

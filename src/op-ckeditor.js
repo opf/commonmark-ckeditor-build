@@ -31,6 +31,7 @@ import OPMentioningPlugin from './plugins/op-mentioning-plugin';
 import OPHelpLinkPlugin from './plugins/op-help-link-plugin/op-help-link-plugin';
 import Typing from '@ckeditor/ckeditor5-typing/src/typing';
 import CodeBlockPlugin from './plugins/code-block/code-block';
+import OPPreviewPlugin from './plugins/op-preview.plugin';
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -72,6 +73,8 @@ const config = {
 		OPLinkingWpPlugin,
 		OPMentioningPlugin,
 
+		OPPreviewPlugin,
+
 		CommonMark,
 		Table,
 		TableToolbar,
@@ -111,7 +114,9 @@ const config = {
 				'|',
 				'undo',
 				'redo',
-				'openProjectShowFormattingHelp'
+				'openProjectShowFormattingHelp',
+				'|',
+				'preview'
 			]
 		},
 		opEmbeddedTable: {
