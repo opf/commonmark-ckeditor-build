@@ -7,7 +7,6 @@ import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import CodePlugin from '@ckeditor/ckeditor5-basic-styles/src/code';
 import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import BlockquotePlugin from '@ckeditor/ckeditor5-block-quote/src/blockquote';
-import EasyimagePlugin from '@ckeditor/ckeditor5-easy-image/src/easyimage';
 import HeadingPlugin from '@ckeditor/ckeditor5-heading/src/heading';
 import ImagePlugin from '@ckeditor/ckeditor5-image/src/image';
 import ImagecaptionPlugin from '@ckeditor/ckeditor5-image/src/imagecaption';
@@ -18,20 +17,14 @@ import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
-import ImageuploadPlugin from '@ckeditor/ckeditor5-image/src/imageupload';
 import CommonMark from '@ckeditor/ckeditor5-markdown-gfm/src/commonmark';
-import OpUploadPlugin from './plugins/op-upload-plugin';
-import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
-import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-table-plugin';
-import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
-import OPWikiIncludePagePlugin from './plugins/op-macro-wiki-include/op-macro-wiki-include-plugin';
-import OPLinkingWpPlugin from './plugins/op-linking-wp-plugin';
-import {AtJsPlugin} from './plugins/op-atjs-plugin/atjs-plugin';
-import OPMentioningPlugin from './plugins/op-mentioning-plugin';
 import OPHelpLinkPlugin from './plugins/op-help-link-plugin/op-help-link-plugin';
 import Typing from '@ckeditor/ckeditor5-typing/src/typing';
 import CodeBlockPlugin from './plugins/code-block/code-block';
 import OPPreviewPlugin from './plugins/op-preview.plugin';
+import {configurationCustomizer} from './op-config-customizer';
+import {opMacroPlugins, opMentioningPlugins, opImageUploadPlugins} from './op-plugins';
+import {BalloonEditor} from './op-ckeditor';
 
 
 export class BalloonEditor extends BalloonEditorBase {}
@@ -50,13 +43,11 @@ const config = {
 		CodePlugin,
 		ItalicPlugin,
 		BlockquotePlugin,
-		EasyimagePlugin,
 		HeadingPlugin,
 		ImagePlugin,
 		ImagecaptionPlugin,
 		ImagestylePlugin,
 		ImagetoolbarPlugin,
-		ImageuploadPlugin,
 		LinkPlugin,
 		ListPlugin,
 		ParagraphPlugin,
@@ -64,22 +55,22 @@ const config = {
 
 		OPHelpLinkPlugin,
 		CodeBlockPlugin,
-		OPMacroTocPlugin,
-		OPMacroEmbeddedTable,
-		OPMacroWpButtonPlugin,
-		OPWikiIncludePagePlugin,
-
-		AtJsPlugin,
-		OPLinkingWpPlugin,
-		OPMentioningPlugin,
-
 		OPPreviewPlugin,
 
 		CommonMark,
 		Table,
 		TableToolbar,
-		OpUploadPlugin
-	],
+
+	].concat(
+		// OpenProject Macro plugin group
+		opMacroPlugins,
+
+		// OpenProject mentioning plugins
+		opMentioningPlugins,
+
+		// OpenProject image upload plugins
+		opImageUploadPlugins,
+	),
 	config: {
 		heading: {
             options: [
@@ -119,7 +110,7 @@ const config = {
 				'preview'
 			]
 		},
-		opEmbeddedTable: {
+		OPMacroEmbeddedTable: {
 			toolbar: [
 				'opEditEmbeddedTableQuery',
 			]
@@ -155,3 +146,6 @@ const config = {
 
 ClassicEditor.build = config;
 BalloonEditor.build = config;
+
+ClassicEditor.createCustomized = configurationCustomizer(ClassicEditor);
+BalloonEditor.createCustomized = configurationCustomizer(BalloonEditor);
