@@ -26,7 +26,6 @@ import {configurationCustomizer} from './op-config-customizer';
 import {opMacroPlugins, opMentioningPlugins, opImageUploadPlugins} from './op-plugins';
 import {BalloonEditor} from './op-ckeditor';
 
-
 export class BalloonEditor extends BalloonEditorBase {}
 export class ClassicEditor extends ClassicEditorBase {}
 
@@ -100,6 +99,7 @@ const config = {
 				'|',
 				'insertToc',
 				'insertWorkPackageButton',
+				'insertChildPages',
 				'insertEmbeddedTable',
 				'insertWikiPageInclude',
 				'|',
@@ -128,6 +128,11 @@ const config = {
 		OPCodeBlock: {
 			toolbar: [
 				'opEditCodeBlock',
+			]
+		},
+		OPChildPages: {
+			toolbar: [
+				'opEditChildPagesMacroButton',
 			]
 		},
 		image: {
