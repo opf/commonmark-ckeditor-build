@@ -10,6 +10,7 @@ import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/convers
 import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import {toWikiIncludeMacroWidget} from './utils';
+import ViewRange from "@ckeditor/ckeditor5-engine/src/view/range";
 
 export default class OPWikiIncludePageEditing extends Plugin {
 
@@ -50,12 +51,14 @@ export default class OPWikiIncludePageEditing extends Plugin {
 			} ) );
 
 
-		conversion.for( 'editingDowncast' ).add( downcastElementToElement({
-			model: 'op-macro-wiki-page-include',
-			view: (modelElement, writer) => {
-				return this.createMacroViewElement(modelElement, writer);
-			}
-	    } ));
+		conversion.for( 'editingDowncast' )
+			.add( downcastElementToElement({
+				model: 'op-macro-wiki-page-include',
+				view: (modelElement, writer) => {
+					return this.createMacroViewElement(modelElement, writer);
+				}
+			}))
+			.add(dispatcher => dispatcher.on( 'attribute:page', this.modelAttributeToView.bind(this)));
 
 		conversion.for('dataDowncast').add(downcastElementToElement({
 			model: 'op-macro-wiki-page-include',
@@ -100,18 +103,54 @@ export default class OPWikiIncludePageEditing extends Plugin {
 		} );
 	}
 
+	modelAttributeToView( evt, data, conversionApi ) {
+		const modelElement = data.item;
+		if (!modelElement.is('op-macro-wiki-page-include')) {
+			return;
+		}
+
+		// Mark element as consumed by conversion.
+		conversionApi.consumable.consume(data.item, evt.name);
+
+		// Get mapped view element to update.
+		const viewElement = conversionApi.mapper.toViewElement(modelElement);
+
+		// Remove current <div> element contents.
+		conversionApi.writer.remove(ViewRange.createIn(viewElement));
+
+		// Set current content
+		this.setPlaceholderContent(conversionApi.writer, modelElement, viewElement);
+	}
+
 	macroLabel() {
 		return window.I18n.t('js.editor.macro.wiki_page_include.text');
 	}
 
-	createMacroViewElement(modelElement, writer) {
-		// TODO: Pass page, it is not updated on coming back from the modal..
-		// const page = modelElement.getAttribute('page');
-		const label = this.macroLabel();
-		const placeholder = writer.createText( label );
-		const container = writer.createContainerElement( 'div', { class: 'macro -wiki_page_include' } );
+	pageLabel(page) {
+		if (page && page.length > 0) {
+			return page
+		} else {
+			return window.I18n.t('js.editor.macro.wiki_page_include.this_page');
+		}
+	}
 
-		writer.insert( ViewPosition.createAt( container ), placeholder );
-		return toWikiIncludeMacroWidget(container, writer, { label: label } )
+	createMacroViewElement(modelElement, writer) {
+		const placeholderContainer = writer.createContainerElement( 'div', { class: 'macro -wiki_page_include' } );
+
+		this.setPlaceholderContent( writer, modelElement, placeholderContainer );
+
+		return toWikiIncludeMacroWidget(placeholderContainer, writer, { label: this.macroLabel() } )
+	}
+
+	setPlaceholderContent(writer, modelElement, placeholderContainer ) {
+		const page = modelElement.getAttribute('page');
+		const macroLabel = this.macroLabel();
+		const pageLabel = this.pageLabel(page);
+		const pageLabelContainer = writer.createContainerElement( 'span', { class: 'macro-value' } );
+		let placeholderContent = [ writer.createText( `${macroLabel} ` ) ];
+		writer.insert( ViewPosition.createAt( pageLabelContainer ), writer.createText( `${pageLabel}` ) )
+		placeholderContent.push( pageLabelContainer );
+
+		writer.insert( ViewPosition.createAt( placeholderContainer ), placeholderContent );
 	}
 }
