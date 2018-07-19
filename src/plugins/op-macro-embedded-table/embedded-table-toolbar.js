@@ -41,7 +41,7 @@ export default class EmbeddedTableToolbar extends Plugin {
 		createEditToolbar(
 			this,
 			this.editor,
-			'opEmbeddedTable',
+			'OPMacroEmbeddedTable',
 			isEmbeddedTableWidgetSelected
 		);
 	}
