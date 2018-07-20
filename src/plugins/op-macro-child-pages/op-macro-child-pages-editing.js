@@ -1,7 +1,3 @@
-// This SVG file import will be handled by webpack's raw-text loader.
-// This means that imageIcon will hold the source SVG.
-import imageIcon from './../../icons/hierarchy.svg';
-
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
@@ -18,6 +14,11 @@ export default class OPChildPagesEditing extends Plugin {
 	static get pluginName() {
 		return 'OPChildPagesEditing';
 	}
+
+	static get buttonName(){
+		return "insertChildPages";
+	}
+
 
 	init() {
 		const editor = this.editor;
@@ -79,13 +80,12 @@ export default class OPChildPagesEditing extends Plugin {
 			}
 		}));
 
-		editor.ui.componentFactory.add( 'insertChildPages', locale => {
+		editor.ui.componentFactory.add( OPChildPagesEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
 
 			view.set( {
 				label: window.I18n.t('js.editor.macro.child_pages.button'),
-				icon: imageIcon,
-				tooltip: true
+				withText: true
 			} );
 
 			// Callback executed once the image is clicked.

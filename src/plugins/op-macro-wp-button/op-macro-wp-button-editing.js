@@ -1,13 +1,8 @@
-// This SVG file import will be handled by webpack's raw-text loader.
-// This means that imageIcon will hold the source SVG.
-import imageIcon from './../../icons/work-package-button.svg';
-
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
 import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import { toWidget } from '@ckeditor/ckeditor5-widget/src/utils';
 import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import {toWpButtonMacroWidget} from './utils';
@@ -16,6 +11,10 @@ export default class OPMacroWpButtonEditing extends Plugin {
 
 	static get pluginName() {
 		return 'OPMacroWpButtonEditing';
+	}
+
+	static get buttonName() {
+		return 'insertWorkPackageButton';
 	}
 
 	init() {
@@ -76,13 +75,12 @@ export default class OPMacroWpButtonEditing extends Plugin {
 			}
 		}));
 
-		editor.ui.componentFactory.add( 'insertWorkPackageButton', locale => {
+		editor.ui.componentFactory.add( OPMacroWpButtonEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
 
 			view.set( {
 				label: window.I18n.t('js.editor.macro.work_package_button.button'),
-				icon: imageIcon,
-				tooltip: true
+				withText: true
 			} );
 
 			// Callback executed once the image is clicked.

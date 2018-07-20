@@ -11,4 +11,8 @@ export default class OPMacroEmbeddedTable extends Plugin {
 	static get pluginName() {
 		return 'OPMacroEmbeddedTable';
 	}
+
+	static get buttonName() {
+		return EmbeddedTableEditing.buttonName;
+	}
 }

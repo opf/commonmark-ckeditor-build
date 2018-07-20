@@ -1,7 +1,3 @@
-// This SVG file import will be handled by webpack's raw-text loader.
-// This means that imageIcon will hold the source SVG.
-import imageIcon from './../../icons/include_page.svg';
-
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
@@ -16,6 +12,10 @@ export default class OPWikiIncludePageEditing extends Plugin {
 
 	static get pluginName() {
 		return 'OPWikiIncludePageEditing';
+	}
+
+	static get buttonName() {
+		return 'insertWikiPageInclude';
 	}
 
 	init() {
@@ -75,13 +75,12 @@ export default class OPWikiIncludePageEditing extends Plugin {
 			}
 		}));
 
-		editor.ui.componentFactory.add( 'insertWikiPageInclude', locale => {
+		editor.ui.componentFactory.add( OPWikiIncludePageEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
 
 			view.set( {
 				label: window.I18n.t('js.editor.macro.wiki_page_include.button'),
-				icon: imageIcon,
-				tooltip: true
+				withText: true
 			} );
 
 			// Callback executed once the image is clicked.

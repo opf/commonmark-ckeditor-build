@@ -11,4 +11,8 @@ export default class OPChildPagesPlugin extends Plugin {
 	static get pluginName() {
 		return 'OPChildPages';
 	}
+
+	static get buttonName() {
+		return OPChildPagesEditing.buttonName;
+	}
 }
