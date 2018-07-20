@@ -6,7 +6,7 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import FileDialogButtonView from '@ckeditor/ckeditor5-upload/src/ui/filedialogbuttonview';
-import {getOPPath, getOP} from './op-context/op-context';
+import {getOPPath, getOPPreviewContext} from './op-context/op-context';
 
 export default class OPPreviewPlugin extends Plugin {
 
@@ -95,7 +95,7 @@ export default class OPPreviewPlugin extends Plugin {
 			};
 
 			let getAndShowPreview = function() {
-				let link = getOP(editor).previewContext;
+				let link = getOPPreviewContext(editor);
 				let url = getOPPath(editor).api.v3.previewMarkup(link);
 
 				jQuery
@@ -120,7 +120,7 @@ export default class OPPreviewPlugin extends Plugin {
 
 
 			// Callback executed once the image is clicked.
-			view.on( 'execute', () => {
+			view.on('execute', () => {
 				if (previewing) {
 					previewing = false;
 

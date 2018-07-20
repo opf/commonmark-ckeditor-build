@@ -1,6 +1,6 @@
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import {setupAtJs} from './op-atjs-plugin/atjs-setup';
-import {getOPService, getOPContext, getOPPath} from './op-context/op-context';
+import {getOPService, getOPResource, getOPPath} from './op-context/op-context';
 
 export default class OPMentioningPlugin extends Plugin {
 
@@ -32,11 +32,11 @@ export default class OPMentioningPlugin extends Plugin {
 				return principals;
 			},
 			isSupportedContext: function() {
-				let context = getOPContext(editor);
+				let context = getOPResource(editor);
 				return context && context._type === 'WorkPackage'
 			},
 			remoteUrl: function(query, func) {
-				const url = getOPPath(editor).api.v3.principals(getOPContext(editor).project.id, query);
+				const url = getOPPath(editor).api.v3.principals(getOPResource(editor).project.id, query);
 
                 jQuery.getJSON(url, func);
 			}
