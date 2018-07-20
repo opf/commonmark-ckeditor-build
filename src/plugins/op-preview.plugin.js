@@ -6,7 +6,7 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import FileDialogButtonView from '@ckeditor/ckeditor5-upload/src/ui/filedialogbuttonview';
-import {getOPPath, getOPPreviewContext} from './op-context/op-context';
+import {getOPPath, getOPPreviewContext, getOPService} from './op-context/op-context';
 
 export default class OPPreviewPlugin extends Plugin {
 
@@ -17,6 +17,7 @@ export default class OPPreviewPlugin extends Plugin {
 	init() {
 		const editor = this.editor;
 		let previewing = false;
+		let unregisterPreview = null;
 		let currentlyDisabled = [];
 
 		editor.ui.componentFactory.add( 'preview', locale => {
@@ -86,7 +87,8 @@ export default class OPPreviewPlugin extends Plugin {
 				let $previewWrapper = jQuery('<div class="ck-editor__preview"></div>');
 				$reference.siblings('.ck-editor__preview').remove();
 
-				$previewWrapper.append(preview);
+				const previewService = getOPService(editor, 'ckEditorPreview');
+				unregisterPreview = previewService.render($previewWrapper[0], preview);
 
 				$reference.hide();
 				$reference.after($previewWrapper);
@@ -112,6 +114,7 @@ export default class OPPreviewPlugin extends Plugin {
 				let $editable = jQuery(editor.element);
 				let $mainEditor = $editable.siblings('.ck-editor').find('.ck-editor__main');
 
+				unregisterPreview();
 				$mainEditor.siblings('.ck-editor__preview').remove();
 				$mainEditor.show();
 
