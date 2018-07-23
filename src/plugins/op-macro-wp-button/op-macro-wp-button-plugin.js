@@ -11,4 +11,8 @@ export default class OPMacroWpButtonPlugin extends Plugin {
 	static get pluginName() {
 		return 'OPMacroWpButton';
 	}
+
+	static get buttonName() {
+		return OPMacroWpButtonEditing.buttonName;
+	}
 }

@@ -1,7 +1,3 @@
-// This SVG file import will be handled by webpack's raw-text loader.
-// This means that imageIcon will hold the source SVG.
-import imageIcon from '../icons/toc.svg';
-
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
@@ -17,6 +13,9 @@ export default class OPMacroTocPlugin extends Plugin {
 		return 'OPMacroToc';
 	}
 
+	static get buttonName() {
+		return 'insertToc';
+	}
 
 	init() {
 		const editor = this.editor;
@@ -54,13 +53,12 @@ export default class OPMacroTocPlugin extends Plugin {
 			}
 		}));
 
-		editor.ui.componentFactory.add( 'insertToc', locale => {
+		editor.ui.componentFactory.add( OPMacroTocPlugin.buttonName, locale => {
 			const view = new ButtonView( locale );
 
 			view.set( {
 				label: this.label,
-				icon: imageIcon,
-				tooltip: true
+				withText: true,
 			} );
 
 			// Callback executed once the image is clicked.

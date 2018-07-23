@@ -11,4 +11,8 @@ export default class OPWikiIncludePagePlugin extends Plugin {
 	static get pluginName() {
 		return 'OPWikiIncludePage';
 	}
+
+	static get buttonName() {
+		return OPWikiIncludePageEditing.buttonName;
+	}
 }

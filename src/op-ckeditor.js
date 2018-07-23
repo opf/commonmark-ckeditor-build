@@ -25,6 +25,7 @@ import OPPreviewPlugin from './plugins/op-preview.plugin';
 import {configurationCustomizer} from './op-config-customizer';
 import {opMacroPlugins, opMentioningPlugins, opImageUploadPlugins} from './op-plugins';
 import {BalloonEditor} from './op-ckeditor';
+import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
 
 export class BalloonEditor extends BalloonEditorBase {}
 export class ClassicEditor extends ClassicEditorBase {}
@@ -59,6 +60,8 @@ const config = {
 		CommonMark,
 		Table,
 		TableToolbar,
+
+		OPMacroListPlugin,
 
 	].concat(
 		// OpenProject Macro plugin group
@@ -97,11 +100,7 @@ const config = {
 				'|',
 				'insertTable',
 				'|',
-				'insertToc',
-				'insertWorkPackageButton',
-				'insertChildPages',
-				'insertEmbeddedTable',
-				'insertWikiPageInclude',
+				'macroList',
 				'|',
 				'undo',
 				'redo',

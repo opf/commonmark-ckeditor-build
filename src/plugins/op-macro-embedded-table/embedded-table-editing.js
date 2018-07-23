@@ -1,13 +1,8 @@
-// This SVG file import will be handled by webpack's raw-text loader.
-// This means that imageIcon will hold the source SVG.
-import imageIcon from '../../icons/work-packages.svg';
-
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
 import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import { toWidget } from '@ckeditor/ckeditor5-widget/src/utils';
 import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import {toEmbeddedTableWidget} from './utils';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
@@ -16,6 +11,10 @@ export default class EmbeddedTableEditing extends Plugin {
 
 	static get pluginName() {
 		return 'EmbeddedTableEditing';
+	}
+
+	static get buttonName() {
+		return 'insertEmbeddedTable';
 	}
 
 	init() {
@@ -69,13 +68,12 @@ export default class EmbeddedTableEditing extends Plugin {
 			}
 		}));
 
-		editor.ui.componentFactory.add( 'insertEmbeddedTable', locale => {
+		editor.ui.componentFactory.add( EmbeddedTableEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
 
 			view.set( {
 				label: this.text.button,
-				icon: imageIcon,
-				tooltip: true
+				withText: true
 			} );
 
 			// Callback executed once the widget is clicked.
