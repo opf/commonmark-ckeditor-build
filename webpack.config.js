@@ -11,34 +11,47 @@ const path = require( 'path' );
 const webpack = require( 'webpack' );
 const { bundler, styles } = require( '@ckeditor/ckeditor5-dev-utils' );
 const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
-const BabiliPlugin = require( 'babel-minify-webpack-plugin' );
-const buildConfig = require( './build-config' );
+const UglifyJsWebpackPlugin = require( 'uglifyjs-webpack-plugin' );
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 let config = {
 	entry: path.resolve( __dirname, 'src', 'op-ckeditor.js' ),
 
 	output: {
+		library: 'OPEditor',
 		path: path.resolve( __dirname, 'build' ),
 		filename: 'ckeditor.js',
 		libraryTarget: 'umd',
 		libraryExport: 'default',
-		library: buildConfig.moduleName
+	},
+
+	optimization: {
+		minimizer: [
+			new UglifyJsWebpackPlugin( {
+					sourceMap: true,
+					uglifyOptions: {
+						output: {
+								// Preserve CKEditor 5 license comments.
+								comments: /^!/
+						}
+					}
+			} )
+		]
 	},
 
 	plugins: [
 		new CKEditorWebpackPlugin( {
-			language: buildConfig.config.language,
+			// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
+			// When changing the built-in language, remember to also change it in the editor's configuration (src/ckeditor.js).
+			language: 'en',
 			additionalLanguages: ['de']
 		} ),
 
 		// new BundleAnalyzerPlugin(),
-
-		new webpack.optimize.ModuleConcatenationPlugin()
-
 	],
 
 	devtool: 'source-map',
+	performance: { hints: false },
 
 	module: {
 		rules: [
