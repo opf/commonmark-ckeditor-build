@@ -89,9 +89,6 @@ let config = {
 if (process.env.NODE_ENV === 'production') {
 	console.log('Adding production plugins');
 	config.plugins.push(
-		new BabiliPlugin( null, {
-			comments: false
-		} ),
 		new webpack.BannerPlugin( {
 			banner: bundler.getLicenseBanner(),
 			raw: true
