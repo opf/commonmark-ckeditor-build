@@ -61,7 +61,7 @@
     "url": "https://github.com/ckeditor/ckeditor5-build-balloon.git"
   },
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "NODE_ENV=production ./node_modules/.bin/webpack --mode production",
     "postbuild": "sh bin/dist.sh",
     "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi",
     "prewatch-and-link": "ln -sf `pwd`/build/ckeditor.js `echo $OPENPROJECT_CORE`/app/assets/javascripts/vendor/ckeditor/ckeditor.js && ln -sf `pwd`/build/ckeditor.js.map `echo $OPENPROJECT_CORE`/app/assets/javascripts/vendor/ckeditor/ckeditor.js.map",
