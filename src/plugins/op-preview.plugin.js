@@ -75,7 +75,7 @@ export default class OPPreviewPlugin extends Plugin {
 
 			let showPreview = function(preview) {
 				let $editable = jQuery(editor.element);
-				let $mainEditor = $editable.siblings('.ck-editor').find('.ck-editor__main');
+				let $mainEditor = $editable.find('.ck-editor__main');
 				let $reference;
 
 				if ($mainEditor.length) {
@@ -112,7 +112,7 @@ export default class OPPreviewPlugin extends Plugin {
 
 			let disablePreviewing = function() {
 				let $editable = jQuery(editor.element);
-				let $mainEditor = $editable.siblings('.ck-editor').find('.ck-editor__main');
+				let $mainEditor = $editable.find('.ck-editor__main');
 
 				unregisterPreview();
 				$mainEditor.siblings('.ck-editor__preview').remove();
