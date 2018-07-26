@@ -24,7 +24,6 @@ import CodeBlockPlugin from './plugins/code-block/code-block';
 import OPPreviewPlugin from './plugins/op-preview.plugin';
 import {configurationCustomizer} from './op-config-customizer';
 import {opMacroPlugins, opMentioningPlugins, opImageUploadPlugins} from './op-plugins';
-import {BalloonEditor} from './op-ckeditor';
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
 
 export class BalloonEditor extends BalloonEditorBase {}
