@@ -33,15 +33,17 @@ export default class OPMentioningPlugin extends Plugin {
 			},
 			isSupportedContext: function() {
 				let context = getOPResource(editor);
-				return context && context._type === 'WorkPackage'
+				return context && context._type === 'WorkPackage';
 			},
 			remoteUrl: function(query, func) {
-				const url = getOPPath(editor).api.v3.principals(getOPResource(editor).project.id, query);
+				const resource = getOPResource(editor);
+				const project_id = resource.project.idFromLink;
+				const url = getOPPath(editor).api.v3.principals(project_id, query);
 
                 jQuery.getJSON(url, func);
 			}
 		};
-
+;
 		setupAtJs(editor, options);
 	}
 }
