@@ -30,6 +30,7 @@ import CommonMark from "@ckeditor/ckeditor5-markdown-gfm/src/commonmark";
 import Table from "@ckeditor/ckeditor5-table/src/table";
 import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar";
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
+import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -48,7 +49,8 @@ export const opMentioningPlugins = [
 ];
 
 export const opImageUploadPlugins = [
-	OpUploadPlugin
+	OpUploadPlugin,
+	OPAttachmentListenerPlugin
 ];
 
 export const builtinPlugins = [

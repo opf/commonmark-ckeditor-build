@@ -1,7 +1,8 @@
 export default class OpUploadResourceAdapter {
-    constructor(loader, resource) {
+    constructor(loader, resource, editor) {
         this.loader = loader;
         this.resource = resource;
+        this.editor = editor;
     }
 
     upload() {
@@ -14,7 +15,11 @@ export default class OpUploadResourceAdapter {
 
 		return resource
 			.uploadAttachments([this.loader.file])
-			.then((result) => this.buildResponse(result[0]));
+			.then((result) => {
+				this.editor.model.fire('op:attachment-added', result);
+
+				return this.buildResponse(result[0])
+			});
 	}
 
 	buildResponse(result) {
