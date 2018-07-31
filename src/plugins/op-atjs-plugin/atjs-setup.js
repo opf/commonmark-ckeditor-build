@@ -123,7 +123,7 @@ export function setupAtJs(editor, options) {
 		editable = jQuery(editor.element);
 
 		if (!editable.is('.ck-editor__editable')) {
-			editable = editable.closest('op-ckeditor-form').find('.ck-editor__editable');
+			editable = editable.closest('.op-ckeditor--wrapper').find('.ck-editor__editable');
 		}
 
 		editable.atwho(config);

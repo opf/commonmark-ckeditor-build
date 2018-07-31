@@ -21,7 +21,7 @@ export function configurationCustomizer(editorClass) {
 
 		// Enable selective macros
 		if (Array.isArray(context.macros)) {
-			const disabledMacros = opMacroPlugins.filter(plugin = context.macros.indexOf(el.pluginName) === -1);
+			const disabledMacros = opMacroPlugins.filter(plugin => context.macros.indexOf(el.pluginName) === -1);
 			configuration.removePlugins.push(...disabledMacros);
 		}
 
