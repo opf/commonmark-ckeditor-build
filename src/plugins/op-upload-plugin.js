@@ -17,7 +17,7 @@ export default class OpUploadPlugin extends Plugin {
     init() {
         this.editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
 			const resource = getOPResource(this.editor);
-			return new OpUploadResourceAdapter(loader, resource);
+			return new OpUploadResourceAdapter(loader, resource, this.editor);
 		}
     }
 }
