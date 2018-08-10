@@ -12,12 +12,17 @@ import {opMacroPlugins} from "../op-plugins";
 export default class OPMacroListPlugin extends Plugin {
 	init() {
 		const editor = this.editor;
+		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => p.pluginName)
 		const dropdownTooltip = window.I18n.t('js.editor.macro.dropdown.chose_macro');
 
 		// Register UI component.
 		editor.ui.componentFactory.add( 'macroList', locale => {
 			const dropdownItems = [];
 			for ( const macroPlugin of opMacroPlugins ) {
+				if (disabledPluginNames.indexOf(macroPlugin.pluginName) !== -1) {
+					continue;
+				}
+
 				const listItem = editor.ui.componentFactory.create(macroPlugin.buttonName);
 				dropdownItems.push(listItem);
 			}
