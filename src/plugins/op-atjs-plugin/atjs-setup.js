@@ -41,6 +41,15 @@ export function setupAtJs(editor, options) {
 		insertTpl: "${atwho-at}${id}",
 		limit: 10,
 		callbacks: {
+			matcher: function(flag, subtext, should_startWithSpace, acceptSpaceBar) {
+				if (options.ignorePrefix && subtext.match(options.ignorePrefix)) {
+					return null;
+				}
+
+				let defaultMatcher = jQuery.fn.atwho.default.callbacks.matcher;
+				return defaultMatcher.call(this, flag, subtext, should_startWithSpace, acceptSpaceBar);
+			},
+
 			/*
              Readd the 'span.atwho-query' used for positioning the dropdown.
              The ckeditor will have removed the span added by at.js.
