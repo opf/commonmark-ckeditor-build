@@ -12,6 +12,7 @@ export default class OPLinkingWpPlugin extends Plugin {
 
 
 		let options = {
+			ignorePrefix: /user\#/,
 			remoteUrl: function(query, func) {
 				let url = window.OpenProject.urlRoot + `/work_packages/auto_complete.json`;
 
