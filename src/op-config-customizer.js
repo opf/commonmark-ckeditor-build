@@ -16,6 +16,7 @@ export function configurationCustomizer(editorClass) {
 
 		// Disable macros entirely
 		if (context.macros === false) {
+			configuration.openProject.disableAllMacros = true;
 			configuration.removePlugins.push(...opMacroPlugins.map(el => el.pluginName))
 		}
 

@@ -15,6 +15,11 @@ export default class OPMacroListPlugin extends Plugin {
 		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => p.pluginName)
 		const dropdownTooltip = window.I18n.t('js.editor.macro.dropdown.chose_macro');
 
+		// Skip if we don't have any macros here
+		if (editor.config.get('openProject.disableAllMacros') === true) {
+			return;
+		}
+
 		// Register UI component.
 		editor.ui.componentFactory.add( 'macroList', locale => {
 			const dropdownItems = [];

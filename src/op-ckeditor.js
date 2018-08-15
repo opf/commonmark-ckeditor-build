@@ -28,7 +28,6 @@ FullEditor.defaultConfig.toolbar = {
 			'blockQuote',
 			'|',
 			'insertTable',
-			'|',
 			'macroList',
 			'|',
 			'undo',
