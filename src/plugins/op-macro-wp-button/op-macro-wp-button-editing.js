@@ -28,7 +28,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 			allowWhere: ['$block'],
 			allowAttributes: ['type', 'classes'],
 			isBlock: true,
-		    isLimit: false
+		    isLimit: true
 		});
 
 		conversion.for( 'upcast' )
@@ -97,10 +97,6 @@ export default class OPMacroWpButtonEditing extends Plugin {
 						editor.model.insertContent( element, editor.model.document.selection );
 					})
 				);
-
-
-				editor.model.change( writer => {
-				} );
 			} );
 
 			return view;

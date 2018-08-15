@@ -25,8 +25,8 @@ export default class OPMacroTocPlugin extends Plugin {
 		// Schema.
 		model.schema.register( 'op-macro-toc', {
 			allowWhere: '$block',
-			isBlock: false,
-		    isLimit: false
+			isBlock: true,
+		    isLimit: true
 		});
 
 		conversion.for( 'upcast' )
