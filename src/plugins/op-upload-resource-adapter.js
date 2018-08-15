@@ -19,6 +19,8 @@ export default class OpUploadResourceAdapter {
 				this.editor.model.fire('op:attachment-added', result);
 
 				return this.buildResponse(result[0])
+			}).catch((error) => {
+				console.error("Failed upload %O", error);
 			});
 	}
 
