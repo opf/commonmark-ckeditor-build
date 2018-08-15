@@ -46,9 +46,13 @@ ConstrainedEditor.defaultConfig.toolbar = {
 		'bold',
 		'italic',
 		'code',
+		'insertCodeBlock',
 		'link',
 		'bulletedList',
 		'numberedList',
+		'imageUpload',
+		'blockQuote',
+		'|',
 		'openProjectShowFormattingHelp',
 		'preview'
 	]
