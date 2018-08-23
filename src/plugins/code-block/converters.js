@@ -32,6 +32,7 @@ export function modelCodeBlockToView() {
 		viewWriter.insert( ViewPosition.createAt( preElement ), codeElement );
 
 		conversionApi.mapper.bindElements( codeBlock, codeElement );
+		conversionApi.mapper.bindElements( codeBlock, preElement );
 
 		// Insert at matching position
 		const insertPosition = conversionApi.mapper.toViewPosition( data.range.start );
