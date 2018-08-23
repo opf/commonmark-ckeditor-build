@@ -129,7 +129,7 @@ export default class OPWikiIncludePageEditing extends Plugin {
 		if (page && page.length > 0) {
 			return page
 		} else {
-			return window.I18n.t('js.editor.macro.wiki_page_include.this_page');
+			return window.I18n.t('js.editor.macro.wiki_page_include.not_set');
 		}
 	}
 
