@@ -26,11 +26,12 @@ import Typing from "@ckeditor/ckeditor5-typing/src/typing";
 import OPHelpLinkPlugin from "./plugins/op-help-link-plugin/op-help-link-plugin";
 import CodeBlockPlugin from "./plugins/code-block/code-block";
 import OPPreviewPlugin from "./plugins/op-preview.plugin";
-import CommonMark from "@ckeditor/ckeditor5-markdown-gfm/src/commonmark";
 import Table from "@ckeditor/ckeditor5-table/src/table";
 import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar";
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
 import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin';
+import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
+import CommonMark from './commonmark/commonmark';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -66,6 +67,7 @@ export const builtinPlugins = [
 	ImageCaption,
 	ImageStyle,
 	ImageToolbar,
+	OpImageAttachmentLookup,
 	Link,
 	List,
 	Paragraph,
@@ -74,6 +76,7 @@ export const builtinPlugins = [
 	OPHelpLinkPlugin,
 	CodeBlockPlugin,
 	OPPreviewPlugin,
+
 
 	CommonMark,
 	Table,
