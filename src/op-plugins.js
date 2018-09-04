@@ -12,6 +12,7 @@ import UploadAdapter from "@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapte
 import AutoFormat from "@ckeditor/ckeditor5-autoformat/src/autoformat";
 import Bold from "@ckeditor/ckeditor5-basic-styles/src/bold";
 import Code from "@ckeditor/ckeditor5-basic-styles/src/code";
+import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough"
 import Italic from "@ckeditor/ckeditor5-basic-styles/src/italic";
 import BlockQuote from "@ckeditor/ckeditor5-block-quote/src/blockquote";
 import Heading from "@ckeditor/ckeditor5-heading/src/heading";
@@ -61,6 +62,7 @@ export const builtinPlugins = [
 	Bold,
 	Code,
 	Italic,
+	Strikethrough,
 	BlockQuote,
 	Heading,
 	Image,

@@ -11,7 +11,7 @@
 
 import HtmlDataProcessor from '@ckeditor/ckeditor5-engine/src/dataprocessor/htmldataprocessor';
 import DomConverter from '@ckeditor/ckeditor5-engine/src/view/domconverter';
-import {highlightedCodeBlock, strikethrough, taskListItems} from 'turndown-plugin-gfm';
+import {highlightedCodeBlock, taskListItems} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {replaceWhitespaceWithin} from './utils/whitespace';
 
@@ -69,7 +69,6 @@ export default class CommonMarkDataProcessor {
 
 		turndownService.use([
 			highlightedCodeBlock,
-			strikethrough,
 			taskListItems,
 		]);
 
@@ -97,6 +96,13 @@ export default class CommonMarkDataProcessor {
 					.forEach((node) => node.remove());
 
 				return node.outerHTML;
+			}
+		});
+
+		turndownService.addRule('strikethrough', {
+			filter: ['del', 's', 'strike'],
+			replacement: function (content) {
+			  return '~~' + content + '~~'
 			}
 		});
 

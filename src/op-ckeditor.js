@@ -19,6 +19,7 @@ FullEditor.defaultConfig.toolbar = {
 			'|',
 			'bold',
 			'italic',
+			'strikethrough',
 			'code',
 			'insertCodeBlock',
 			'link',
@@ -45,6 +46,7 @@ ConstrainedEditor.defaultConfig.toolbar = {
 	items: [
 		'bold',
 		'italic',
+		'strikethrough',
 		'code',
 		'insertCodeBlock',
 		'link',
