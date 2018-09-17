@@ -5,8 +5,8 @@ import imageIcon from '../icons/preview.svg';
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-import FileDialogButtonView from '@ckeditor/ckeditor5-upload/src/ui/filedialogbuttonview';
 import {getOPPath, getOPPreviewContext, getOPService} from './op-context/op-context';
+import {enableItems, disableItems} from '../helpers/button-disabler';
 
 export default class OPPreviewPlugin extends Plugin {
 
@@ -18,7 +18,6 @@ export default class OPPreviewPlugin extends Plugin {
 		const editor = this.editor;
 		let previewing = false;
 		let unregisterPreview = null;
-		let currentlyDisabled = [];
 
 		editor.ui.componentFactory.add( 'preview', locale => {
 			const view = new ButtonView( locale );
@@ -29,49 +28,6 @@ export default class OPPreviewPlugin extends Plugin {
 				tooltip: true,
 			} );
 
-			let toolbarItems = function() {
-				if (!editor.ui.view.toolbar) {
-					return [];
-				}
-
-				return editor.ui.view.toolbar.items._items;
-			};
-
-			let disableItems = function() {
-				jQuery.each(toolbarItems(), function(index, item) {
-					let toDisable = item;
-
-					if (item instanceof FileDialogButtonView) {
-						toDisable = item.buttonView;
-					} else if (item === view || !item.hasOwnProperty('isEnabled')) {
-						toDisable = null;
-					}
-
-					if (!toDisable) {
-						// do nothing
-					} else if (toDisable.isEnabled) {
-						toDisable.isEnabled = false;
-					} else {
-						currentlyDisabled.push(toDisable);
-					}
-				});
-			};
-
-			let enableItems = function() {
-				jQuery.each(toolbarItems(), function(index, item) {
-					let toEnable = item;
-
-					if (item instanceof FileDialogButtonView) {
-						toEnable = item.buttonView;
-					}
-
-					if (currentlyDisabled.indexOf(toEnable) < 0) {
-						toEnable.isEnabled = true
-					}
-				});
-
-				currentlyDisabled.length = 0;
-			};
 
 			let showPreview = function(preview) {
 				let $editable = jQuery(editor.element);
@@ -93,7 +49,7 @@ export default class OPPreviewPlugin extends Plugin {
 				$reference.hide();
 				$reference.after($previewWrapper);
 
-				disableItems();
+				disableItems(editor, view);
 			};
 
 			let getAndShowPreview = function() {
@@ -118,7 +74,7 @@ export default class OPPreviewPlugin extends Plugin {
 				$mainEditor.siblings('.ck-editor__preview').remove();
 				$mainEditor.show();
 
-				enableItems();
+				enableItems(editor);
 			};
 
 

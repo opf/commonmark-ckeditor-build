@@ -33,6 +33,7 @@ import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
 import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin';
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
 import CommonMark from './commonmark/commonmark';
+import OPSourceCodePlugin from './plugins/op-source-code.plugin';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -78,6 +79,7 @@ export const builtinPlugins = [
 	OPHelpLinkPlugin,
 	CodeBlockPlugin,
 	OPPreviewPlugin,
+	OPSourceCodePlugin,
 
 
 	CommonMark,

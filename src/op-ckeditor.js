@@ -35,7 +35,8 @@ FullEditor.defaultConfig.toolbar = {
 			'redo',
 			'openProjectShowFormattingHelp',
 			'|',
-			'preview'
+			'preview',
+			'opShowSource'
 		]
 };
 
@@ -56,6 +57,7 @@ ConstrainedEditor.defaultConfig.toolbar = {
 		'blockQuote',
 		'|',
 		'openProjectShowFormattingHelp',
-		'preview'
+		'preview',
+		'opShowSource'
 	]
 };
