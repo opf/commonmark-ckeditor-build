@@ -10,7 +10,7 @@ export function configurationCustomizer(editorClass) {
 
 		// Disable uploading if there is no resource with uploadAttachment
 		const resource = context.resource;
-		if (!(resource && resource.uploadAttachments)) {
+		if (!(resource && resource.canAddAttachments)) {
 			configuration.removePlugins.push(...opImageUploadPlugins.map(el => el.pluginName))
 		}
 
