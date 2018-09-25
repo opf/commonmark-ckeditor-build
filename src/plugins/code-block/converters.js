@@ -78,7 +78,9 @@ export function viewCodeBlockToModel() {
 			// const { modelRange } = conversionApi.convertChildren( codeBlock, ModelPosition.createAt( modelCodeBlock ) );
 			const child = codeBlock.getChild(0);
 			conversionApi.consumable.consume( child, { name: true } );
-			const content = child.data;
+			// Replace last newline since that text is incorrectly mapped
+			// Regression OP#28609
+			const content = child.data.replace(/\n$/, "");
 			conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
 
 			// Set as conversion result, attribute converters may use this property.
