@@ -12,7 +12,7 @@ import {opMacroPlugins} from "../op-plugins";
 export default class OPMacroListPlugin extends Plugin {
 	init() {
 		const editor = this.editor;
-		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => p.pluginName)
+		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => p.pluginName);
 		const dropdownTooltip = window.I18n.t('js.editor.macro.dropdown.chose_macro');
 
 		// Skip if we don't have any macros here
@@ -41,7 +41,7 @@ export default class OPMacroListPlugin extends Plugin {
 				label: window.I18n.t('js.editor.macro.dropdown.macros')
 			} );
 			dropdownView.toolbarView.isVertical = true;
-			dropdownView.toolbarView.className = 'op-macro-list-button'
+			dropdownView.toolbarView.className = 'op-macro-list-button';
 
 			return dropdownView;
 		} );
