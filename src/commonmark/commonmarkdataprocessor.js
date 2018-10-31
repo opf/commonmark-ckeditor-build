@@ -110,7 +110,8 @@ export default class CommonMarkDataProcessor {
 			filter: [ 'macro' ],
 			replacement: ( _content, node ) => {
 				node.innerHTML = '';
-				return node.outerHTML;
+				var outer = node.outerHTML;
+				return outer.replace("</macro>", "\n</macro>")
 			}
 		});
 
