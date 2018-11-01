@@ -14,6 +14,7 @@ import DomConverter from '@ckeditor/ckeditor5-engine/src/view/domconverter';
 import {highlightedCodeBlock, taskListItems} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {replaceWhitespaceWithin} from './utils/whitespace';
+import {removeParagraphsInLists} from './utils/paragraph-in-lists';
 
 export const originalSrcAttribute = 'data-original-src';
 
@@ -43,7 +44,15 @@ export default class CommonMarkDataProcessor {
 		} );
 		const html = md.render( data );
 
-		return this._htmlDP.toView( html );
+		// Convert input HTML data to DOM DocumentFragment.
+		const domFragment = this._htmlDP._toDom( html );
+
+		// Fix some CommonMark specifics
+		// Paragraphs within list elements (https://community.openproject.com/work_packages/28765)
+		removeParagraphsInLists( domFragment );
+
+		// Convert DOM DocumentFragment to view DocumentFragment.
+		return this._domConverter.domToView( domFragment );
 	}
 
 	/**
