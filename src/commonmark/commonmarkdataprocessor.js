@@ -13,7 +13,7 @@ import HtmlDataProcessor from '@ckeditor/ckeditor5-engine/src/dataprocessor/html
 import DomConverter from '@ckeditor/ckeditor5-engine/src/view/domconverter';
 import {highlightedCodeBlock, taskListItems} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import {replaceWhitespaceWithin} from './utils/whitespace';
+import {textNodesPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
 
 export const originalSrcAttribute = 'data-original-src';
@@ -68,7 +68,7 @@ export default class CommonMarkDataProcessor {
 
 		// Replace leading and trailing nbsp at the end of strong and em tags
 		// with single spaces
-		replaceWhitespaceWithin(domFragment, ['strong', 'em']);
+		textNodesPreprocessor(domFragment, ['strong', 'em']);
 
 		// Use Turndown to convert DOM fragment to markdown
 		const turndownService = new TurndownService( {
