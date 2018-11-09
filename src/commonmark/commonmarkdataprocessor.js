@@ -68,7 +68,11 @@ export default class CommonMarkDataProcessor {
 
 		// Replace leading and trailing nbsp at the end of strong and em tags
 		// with single spaces
-		textNodesPreprocessor(domFragment, ['strong', 'em']);
+		textNodesPreprocessor(
+			domFragment,
+			['strong', 'em'],
+			['pre', 'code']
+			);
 
 		// Use Turndown to convert DOM fragment to markdown
 		const turndownService = new TurndownService( {
