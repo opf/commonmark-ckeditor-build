@@ -115,7 +115,7 @@ export default class OPWikiIncludePageEditing extends Plugin {
 		const viewElement = conversionApi.mapper.toViewElement(modelElement);
 
 		// Remove current <div> element contents.
-		conversionApi.writer.remove(ViewRange.createIn(viewElement));
+		conversionApi.writer.remove(conversionApi.writer.createRangeIn(viewElement));
 
 		// Set current content
 		this.setPlaceholderContent(conversionApi.writer, modelElement, viewElement);
@@ -147,9 +147,9 @@ export default class OPWikiIncludePageEditing extends Plugin {
 		const pageLabel = this.pageLabel(page);
 		const pageLabelContainer = writer.createContainerElement( 'span', { class: 'macro-value' } );
 		let placeholderContent = [ writer.createText( `${macroLabel} ` ) ];
-		writer.insert( ViewPosition.createAt( pageLabelContainer ), writer.createText( `${pageLabel}` ) )
+		writer.insert( writer.createPositionAt( pageLabelContainer, 0 ), writer.createText( `${pageLabel}` ) )
 		placeholderContent.push( pageLabelContainer );
 
-		writer.insert( ViewPosition.createAt( placeholderContainer ), placeholderContent );
+		writer.insert( writer.createPositionAt( placeholderContainer, 0 ), placeholderContent );
 	}
 }

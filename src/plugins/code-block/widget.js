@@ -40,7 +40,7 @@ export function renderCodeBlockContent( writer, modelElement, container ) {
 	const language = languageClass.replace(/^language-/, '');
 	const langElement = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
 	setTextNode( writer, language, langElement, 'text' );
-	writer.insert( ViewPosition.createAt( container ), langElement );
+	writer.insert( writer.createPositionAt( container, 0 ), langElement );
 
 	// Append code block content
 	const content = modelElement.getAttribute( 'opCodeblockContent' );
@@ -49,5 +49,5 @@ export function renderCodeBlockContent( writer, modelElement, container ) {
 
 export function setTextNode( writer, content, container, empty_text ) {
     const placeholder = writer.createText( content || empty_text );
-    writer.insert( ViewPosition.createAt( container ), placeholder );
+    writer.insert( writer.createPositionAt( container, 0 ), placeholder );
 }

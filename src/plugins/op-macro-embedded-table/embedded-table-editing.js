@@ -100,7 +100,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		const placeholder = writer.createText( this.text.macro_text );
 		const container = writer.createContainerElement( 'div', { class: 'macro -embedded-table' } );
 
-		writer.insert( ViewPosition.createAt( container ), placeholder );
+		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
 		return container;
 
 		// The following doesnt work when removing the widget...

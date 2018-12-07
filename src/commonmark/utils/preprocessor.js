@@ -36,7 +36,6 @@ export function hasParentOfType(node, tagNames) {
 	let parent = node.parentElement;
 
 	while (parent) {
-		console.log(parent.tagName);
 		if (tagNames.indexOf(parent.tagName) >= 0) {
 			return true;
 		}
