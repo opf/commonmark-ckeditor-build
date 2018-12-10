@@ -118,7 +118,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		const placeholder = writer.createText( label );
 		const container = writer.createContainerElement( 'span', { class: 'macro -create_work_package_link ' + classes } );
 
-		writer.insert( ViewPosition.createAt( container ), placeholder );
+		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
 		return toWpButtonMacroWidget(container, writer, { label: label } )
 	}
 }

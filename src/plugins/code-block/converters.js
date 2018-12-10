@@ -26,10 +26,10 @@ export function modelCodeBlockToView() {
 		const langContent = viewWriter.createText( language );
 		const contentElement = viewWriter.createText( content );
 
-		viewWriter.insert( ViewPosition.createAt( codeElement ), contentElement );
-		viewWriter.insert( ViewPosition.createAt( langElement ), langContent );
-		viewWriter.insert( ViewPosition.createAt( preElement ), langElement );
-		viewWriter.insert( ViewPosition.createAt( preElement ), codeElement );
+		viewWriter.insert( viewWriter.createPositionAt( codeElement, 0 ), contentElement );
+		viewWriter.insert( viewWriter.createPositionAt( langElement, 0 ), langContent );
+		viewWriter.insert( viewWriter.createPositionAt( preElement, 0 ), langElement );
+		viewWriter.insert( viewWriter.createPositionAt( preElement, 0 ), codeElement );
 
 		conversionApi.mapper.bindElements( codeBlock, codeElement );
 		conversionApi.mapper.bindElements( codeBlock, preElement );
@@ -75,7 +75,6 @@ export function viewCodeBlockToModel() {
 			conversionApi.writer.insert( modelCodeBlock, splitResult.position );
 
 			// Convert text child of codeblock
-			// const { modelRange } = conversionApi.convertChildren( codeBlock, ModelPosition.createAt( modelCodeBlock ) );
 			const child = codeBlock.getChild(0);
 			conversionApi.consumable.consume( child, { name: true } );
 			// Replace last newline since that text is incorrectly mapped
@@ -85,8 +84,8 @@ export function viewCodeBlockToModel() {
 
 			// Set as conversion result, attribute converters may use this property.
 			data.modelRange = new ModelRange(
-				ModelPosition.createBefore( modelCodeBlock ),
-				ModelPosition.createAfter( modelCodeBlock )
+				conversionApi.writer.createPositionBefore( modelCodeBlock ),
+				conversionApi.writer.createPositionAfter( modelCodeBlock )
 			);
 
 			// Convert after pre element
@@ -112,8 +111,8 @@ export function codeBlockContentToView() {
         const viewElement = conversionApi.mapper.toViewElement( modelElement );
 
         // Remove current <div> element contents.
-        conversionApi.writer.remove( ViewRange.createOn( viewElement.getChild( 1 ) ) );
-        conversionApi.writer.remove( ViewRange.createOn( viewElement.getChild( 0 ) ) );
+        conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 1 ) ) );
+        conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 0 ) ) );
 
 		// Set current content
 		renderCodeBlockContent( conversionApi.writer, modelElement, viewElement );
