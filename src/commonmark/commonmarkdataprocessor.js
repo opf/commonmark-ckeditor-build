@@ -71,7 +71,9 @@ export default class CommonMarkDataProcessor {
 		textNodesPreprocessor(
 			domFragment,
 			['strong', 'em'],
-			['pre', 'code']
+			// Ensure tables are allowed to have HTML contents
+			// OP#29457
+			['pre', 'code', 'table']
 			);
 
 		// Use Turndown to convert DOM fragment to markdown
