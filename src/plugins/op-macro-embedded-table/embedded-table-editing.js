@@ -3,7 +3,6 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
 import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import {toEmbeddedTableWidget} from './utils';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 
@@ -37,7 +36,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		});
 
 		conversion.for( 'upcast' )
-			.add( upcastElementToElement( {
+			.elementToElement( {
 				view: {
 					name: 'macro',
 					classes: 'embedded-table',
@@ -51,7 +50,7 @@ export default class EmbeddedTableEditing extends Plugin {
 						}
 					);
 				}
-			} ) );
+			} );
 
 
 		conversion.for( 'editingDowncast' ).add( downcastElementToElement({

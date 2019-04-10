@@ -3,7 +3,6 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
 import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import {toWikiIncludeMacroWidget} from './utils';
 import ViewRange from "@ckeditor/ckeditor5-engine/src/view/range";
@@ -33,7 +32,7 @@ export default class OPWikiIncludePageEditing extends Plugin {
 		});
 
 		conversion.for( 'upcast' )
-			.add( upcastElementToElement( {
+			.elementToElement( {
 				view: {
 					name: 'macro',
 					classes: 'include_wiki_page'
@@ -48,7 +47,7 @@ export default class OPWikiIncludePageEditing extends Plugin {
 						}
 					);
 				}
-			} ) );
+			} );
 
 
 		conversion.for( 'editingDowncast' )

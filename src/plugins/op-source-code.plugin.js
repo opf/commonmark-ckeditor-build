@@ -36,7 +36,7 @@ export default class OPSourceCodePlugin extends Plugin {
 
 
 			let showSource = function(preview) {
-				let $editable = jQuery(editor.element);
+				let $editable = jQuery(editor.ui.element);
 				let $mainEditor = $editable.find('.ck-editor__main');
 				let $reference;
 
@@ -66,7 +66,7 @@ export default class OPSourceCodePlugin extends Plugin {
 			};
 
 			let hideSource = function() {
-				let $editable = jQuery(editor.element);
+				let $editable = jQuery(editor.ui.element);
 				let $mainEditor = $editable.find('.ck-editor__main');
 
 				editor.fire('op:source-code-disabled');
