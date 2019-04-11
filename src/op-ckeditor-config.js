@@ -1,3 +1,7 @@
+import { userMentions } from "./mentions/user-mentions";
+import { workPackageMentions } from "./mentions/work-package-mentions";
+import {customItemRenderer} from './mentions/mentions-item-renderer';
+
 export const defaultConfig = {
 	heading: {
 		options: [
@@ -47,5 +51,23 @@ export const defaultConfig = {
 	table: {
 		toolbar: [ 'tableColumn', 'tableRow' ]
 	},
+
+	mention: {
+		feeds: [
+			{
+				marker: '@',
+				feed: userMentions,
+				itemRenderer: customItemRenderer,
+				minimumCharacters: 1
+			},
+			{
+				marker: '#',
+				feed: workPackageMentions,
+				itemRenderer: customItemRenderer,
+				minimumCharacters: 1
+			}
+		]
+	},
+
 	language: 'en'
 };
