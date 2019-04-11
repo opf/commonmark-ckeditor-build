@@ -5,6 +5,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import {modelCodeBlockToView, viewCodeBlockToModel, codeBlockContentToView} from './converters';
 import {createCodeBlockWidget, isCodeBlockWidget} from './widget';
 import DoubleClickObserver from './click-observer';
+import { getPluginContext } from '../op-context/op-context';
 
 export default class CodeBlockEditing extends Plugin {
 
@@ -18,7 +19,7 @@ export default class CodeBlockEditing extends Plugin {
 		const conversion = editor.conversion;
 		const view = editor.editing.view;
 		const viewDocument = view.document;
-		const pluginContext = editor.config.get('openProject.pluginContext');
+		const pluginContext = getPluginContext(editor);
 
 		// Configure schema.
 		schema.register('codeblock', {

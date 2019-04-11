@@ -2,9 +2,8 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
-import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import {toWpButtonMacroWidget} from './utils';
+import {getPluginContext} from '../op-context/op-context';
 
 export default class OPMacroWpButtonEditing extends Plugin {
 
@@ -20,7 +19,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		const editor = this.editor;
 		const model = editor.model;
 		const conversion = editor.conversion;
-		const pluginContext = editor.config.get('openProject.pluginContext');
+		const pluginContext = getPluginContext(editor);
 
 		// Schema.
 		model.schema.register( 'op-macro-wp-button', {
@@ -51,14 +50,14 @@ export default class OPMacroWpButtonEditing extends Plugin {
 			} );
 
 
-		conversion.for( 'editingDowncast' ).add( downcastElementToElement({
+		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-wp-button',
 			view: (modelElement, writer) => {
 				return this.createMacroViewElement(modelElement, writer);
 			}
-	    } ));
+	    } );
 
-		conversion.for('dataDowncast').add(downcastElementToElement({
+		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-wp-button',
 			view: (modelElement, writer) => {
 				const element = writer.createContainerElement(
@@ -72,7 +71,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 
 				return element;
 			}
-		}));
+		});
 
 		editor.ui.componentFactory.add( OPMacroWpButtonEditing.buttonName, locale => {
 			const view = new ButtonView( locale );

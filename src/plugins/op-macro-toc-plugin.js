@@ -2,7 +2,6 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
-import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
 import { toWidget } from '@ckeditor/ckeditor5-widget/src/utils';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 
@@ -38,19 +37,19 @@ export default class OPMacroTocPlugin extends Plugin {
 			} );
 
 
-		conversion.for( 'editingDowncast' ).add( downcastElementToElement({
+		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-toc',
 			view: (modelElement, viewWriter) => {
 				return toWidget(this.createTocViewElement(viewWriter), viewWriter, { label: this.label } )
 			}
-	    } ));
+	    } );
 
-		conversion.for('dataDowncast').add(downcastElementToElement({
+		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-toc',
 			view: (modelElement, viewWriter) => {
 				return this.createTocDataElement(viewWriter)
 			}
-		}));
+		});
 
 		editor.ui.componentFactory.add( OPMacroTocPlugin.buttonName, locale => {
 			const view = new ButtonView( locale );

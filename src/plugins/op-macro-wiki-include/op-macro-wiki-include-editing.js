@@ -2,10 +2,10 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
-import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import {toWikiIncludeMacroWidget} from './utils';
 import ViewRange from "@ckeditor/ckeditor5-engine/src/view/range";
+import { getPluginContext } from '../op-context/op-context';
 
 export default class OPWikiIncludePageEditing extends Plugin {
 
@@ -21,7 +21,7 @@ export default class OPWikiIncludePageEditing extends Plugin {
 		const editor = this.editor;
 		const model = editor.model;
 		const conversion = editor.conversion;
-		const pluginContext = editor.config.get('openProject.pluginContext');
+		const pluginContext = getPluginContext(editor);
 
 		// Schema.
 		model.schema.register( 'op-macro-wiki-page-include', {
@@ -51,15 +51,15 @@ export default class OPWikiIncludePageEditing extends Plugin {
 
 
 		conversion.for( 'editingDowncast' )
-			.add( downcastElementToElement({
+			.elementToElement( {
 				model: 'op-macro-wiki-page-include',
 				view: (modelElement, writer) => {
 					return this.createMacroViewElement(modelElement, writer);
 				}
-			}))
+			})
 			.add(dispatcher => dispatcher.on( 'attribute:page', this.modelAttributeToView.bind(this)));
 
-		conversion.for('dataDowncast').add(downcastElementToElement({
+		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-wiki-page-include',
 			view: (modelElement, writer) => {
 				const element = writer.createContainerElement(
@@ -72,7 +72,7 @@ export default class OPWikiIncludePageEditing extends Plugin {
 
 				return element;
 			}
-		}));
+		});
 
 		editor.ui.componentFactory.add( OPWikiIncludePageEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
