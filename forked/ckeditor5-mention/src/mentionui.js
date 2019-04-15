@@ -106,6 +106,7 @@ export default class MentionUI extends Plugin {
 		} );
 
 		const feeds = this.editor.config.get( 'mention.feeds' );
+		this.feeds = {};
 
 		for ( const mentionDescription of feeds ) {
 			const feed = mentionDescription.feed;
@@ -128,11 +129,12 @@ export default class MentionUI extends Plugin {
 			}
 
 			const minimumCharacters = mentionDescription.minimumCharacters || 0;
+			const allowedPrefixes = mentionDescription.allowedPrefixes || [];
 			const feedCallback = typeof feed == 'function' ? feed.bind(this) : createFeedCallback( feed );
-			const watcher = this._setupTextWatcherForFeed( marker, minimumCharacters );
+			const watcher = this._setupTextWatcherForFeed( marker, allowedPrefixes, minimumCharacters );
 			const itemRenderer = mentionDescription.itemRenderer;
 
-			const definition = { watcher, marker, feedCallback, itemRenderer };
+			const definition = { watcher, marker, feedCallback, allowedPrefixes, itemRenderer };
 
 			this._mentionsConfigurations.set( marker, definition );
 		}
@@ -213,20 +215,26 @@ export default class MentionUI extends Plugin {
 
 			const text = watcher.last;
 
-			const textMatcher = createTextMatcher( marker );
+			const config = this._mentionsConfigurations.get(marker);
+
+			const textMatcher = createTextMatcher( marker, config.allowedPrefixes );
 			const matched = textMatcher( text );
-			const matchedTextLength = matched.marker.length + matched.feedText.length;
+
+			// Determine the text we want to insert
+			const insert = matched.prefix + item.text;
+			// Determine length of text to remove
+			const totalLength = matched.total.length;
 
 			// Create a range on matched text.
 			const end = model.createPositionAt( model.document.selection.focus );
-			const start = end.getShiftedBy( -matchedTextLength );
+			const start = end.getShiftedBy( -totalLength );
 			const range = model.createRange( start, end );
 
 			this._hidePanelAndRemoveMarker();
 
 			editor.execute( 'mention', {
 				mention: item,
-				text: item.text,
+				text: insert,
 				marker,
 				range
 			} );
@@ -272,10 +280,10 @@ export default class MentionUI extends Plugin {
 	 * @param {Number} minimumCharacters
 	 * @returns {module:mention/textwatcher~TextWatcher}
 	 */
-	_setupTextWatcherForFeed( marker, minimumCharacters ) {
+	_setupTextWatcherForFeed( marker, allowedPrefixes, minimumCharacters ) {
 		const editor = this.editor;
 
-		const watcher = new TextWatcher( editor, createTestCallback( marker, minimumCharacters ), createTextMatcher( marker ) );
+		const watcher = new TextWatcher( editor, createTestCallback( marker, allowedPrefixes, minimumCharacters ), createTextMatcher( marker, allowedPrefixes ) );
 
 		watcher.on( 'matched', ( evt, data ) => {
 			const matched = data.matched;
@@ -515,10 +523,15 @@ function getBalloonPanelPositions( positionName ) {
 // @param {String} marker
 // @param {Number} minimumCharacters
 // @returns {String}
-function createPattern( marker, minimumCharacters ) {
+function createPattern( marker, allowedPrefixes, minimumCharacters ) {
+	allowedPrefixes = allowedPrefixes || []
+	allowedPrefixes.push('^');
+	allowedPrefixes.push(' ');
+	const prefixes  = (allowedPrefixes || []).join('|');
+
 	const numberOfCharacters = minimumCharacters == 0 ? '*' : `{${ minimumCharacters },}`;
 
-	return `(^| )(\\${ marker })([_a-zA-Z0-9À-ž]${ numberOfCharacters }?)$`;
+	return `(${prefixes})(\\${ marker })([_a-zA-Z0-9À-ž]${ numberOfCharacters }?)$`;
 }
 
 // Creates a test callback for marker to be used in text watcher instance.
@@ -526,8 +539,8 @@ function createPattern( marker, minimumCharacters ) {
 // @param {String} marker
 // @param {Number} minimumCharacters
 // @returns {Function}
-function createTestCallback( marker, minimumCharacters ) {
-	const regExp = new RegExp( createPattern( marker, minimumCharacters ) );
+function createTestCallback( marker, allowedPrefixes, minimumCharacters ) {
+	const regExp = new RegExp( createPattern( marker, allowedPrefixes, minimumCharacters ) );
 
 	return text => regExp.test( text );
 }
@@ -536,16 +549,18 @@ function createTestCallback( marker, minimumCharacters ) {
 //
 // @param {String} marker
 // @returns {Function}
-function createTextMatcher( marker ) {
-	const regExp = new RegExp( createPattern( marker, 0 ) );
+function createTextMatcher( marker, allowedPrefixes ) {
+	const regExp = new RegExp( createPattern( marker, allowedPrefixes, 0 ) );
 
 	return text => {
 		const match = text.match( regExp );
 
 		const marker = match[ 2 ];
 		const feedText = match[ 3 ];
+		const total = match[0];
+		const prefix = match[1];
 
-		return { marker, feedText };
+		return { marker, feedText, total, prefix };
 	};
 }
 

@@ -62,10 +62,12 @@ export const defaultConfig = {
 			},
 			{
 				marker: '#',
+				// Allow multi-hash WP references
+				allowedPrefixes: ['#', '##'],
 				feed: workPackageMentions,
 				itemRenderer: customItemRenderer,
 				minimumCharacters: 1
-			}
+			},
 		]
 	},
 
