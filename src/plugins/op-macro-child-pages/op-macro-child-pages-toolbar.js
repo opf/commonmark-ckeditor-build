@@ -4,6 +4,7 @@ import ContextualBalloon from '@ckeditor/ckeditor5-ui/src/panel/balloon/contextu
 import {isChildPagesMacroWidgetSelected} from './utils';
 import {createToolbarEditButton} from '../../helpers/create-toolbar-edit-button';
 import {createEditToolbar} from '../../helpers/create-toolbar';
+import {getPluginContext} from '../op-context/op-context';
 
 
 const balloonClassName = 'ck-toolbar-container';
@@ -20,7 +21,7 @@ export default class OPChildPagesToolbar extends Plugin {
 	init() {
 		const editor = this.editor;
 		const model = this.editor.model;
-		const pluginContext = editor.config.get('openProject.pluginContext');
+		const pluginContext = getPluginContext(editor);
 
 		// Add editing button
 		createToolbarEditButton( editor, 'opEditChildPagesMacroButton', widget => {

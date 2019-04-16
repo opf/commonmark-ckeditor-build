@@ -129,7 +129,7 @@ export function setupAtJs(editor, options) {
 			return;
 		}
 
-		editable = jQuery(editor.element);
+		editable = jQuery(editor.ui.element);
 
 		if (!editable.is('.ck-editor__editable')) {
 			editable = editable.closest('.op-ckeditor--wrapper').find('.ck-editor__editable');

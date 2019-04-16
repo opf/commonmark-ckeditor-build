@@ -2,10 +2,9 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
-import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import {toEmbeddedTableWidget} from './utils';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
+import {getPluginContext} from '../op-context/op-context';
 
 export default class EmbeddedTableEditing extends Plugin {
 
@@ -21,7 +20,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		const editor = this.editor;
 		const model = editor.model;
 		const conversion = editor.conversion;
-		const pluginContext = editor.config.get('openProject.pluginContext');
+		const pluginContext = getPluginContext(editor);
 
 		this.text = {
 			button: window.I18n.t('js.editor.macro.embedded_table.button'),
@@ -37,7 +36,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		});
 
 		conversion.for( 'upcast' )
-			.add( upcastElementToElement( {
+			.elementToElement( {
 				view: {
 					name: 'macro',
 					classes: 'embedded-table',
@@ -51,22 +50,22 @@ export default class EmbeddedTableEditing extends Plugin {
 						}
 					);
 				}
-			} ) );
+			} );
 
 
-		conversion.for( 'editingDowncast' ).add( downcastElementToElement({
+		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-embedded-table',
 			view: (modelElement, viewWriter) => {
 				return toEmbeddedTableWidget(this.createEmbeddedTableView(viewWriter), viewWriter, { label: this.label } )
 			}
-	    } ));
+	    } );
 
-		conversion.for('dataDowncast').add(downcastElementToElement({
+		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-embedded-table',
 			view: (modelElement, viewWriter) => {
 				return this.createEmbeddedTableDataElement(modelElement, viewWriter)
 			}
-		}));
+		});
 
 		editor.ui.componentFactory.add( EmbeddedTableEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
@@ -77,7 +76,7 @@ export default class EmbeddedTableEditing extends Plugin {
 			} );
 
 			// Callback executed once the widget is clicked.
-			view.on( 'execute', () => {
+			view.on( 'execute', () => pluginContext.runInZone(() => {
 				const externalQueryConfiguration = pluginContext.services.externalQueryConfiguration;
 				const currentQuery = {}; // Initial query currently empty, we may want to provide context here.
 
@@ -90,7 +89,7 @@ export default class EmbeddedTableEditing extends Plugin {
 						editor.model.insertContent( element, editor.model.document.selection );
 					})
 				);
-			} );
+			} ) );
 
 			return view;
 		} );

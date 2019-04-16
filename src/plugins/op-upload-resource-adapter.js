@@ -11,17 +11,21 @@ export default class OpUploadResourceAdapter {
 			const resourceContext = resource ? resource.name : 'Missing context';
             console.warn(`uploadAttachments not present on context: ${resourceContext}`);
             return Promise.reject("You're not allowed to upload attachments on this resource.");
-        }
+		}
 
-		return resource
-			.uploadAttachments([this.loader.file])
-			.then((result) => {
-				this.editor.model.fire('op:attachment-added', result);
+		return this.loader.file
+			.then(file => {
+			return resource
+				.uploadAttachments([file])
+				.then((result) => {
+					this.editor.model.fire('op:attachment-added', result);
 
-				return this.buildResponse(result[0])
-			}).catch((error) => {
-				console.error("Failed upload %O", error);
-			});
+					return this.buildResponse(result[0])
+				}).catch((error) => {
+					console.error("Failed upload %O", error);
+				});
+		})
+
 	}
 
 	buildResponse(result) {

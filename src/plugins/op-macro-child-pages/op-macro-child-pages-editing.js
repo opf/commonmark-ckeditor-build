@@ -2,8 +2,6 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
-import { downcastElementToElement } from '@ckeditor/ckeditor5-engine/src/conversion/downcast-converters';
-import {upcastElementToElement} from '@ckeditor/ckeditor5-engine/src/conversion/upcast-converters';
 import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
 import ViewRange from '@ckeditor/ckeditor5-engine/src/view/range';
 
@@ -34,7 +32,7 @@ export default class OPChildPagesEditing extends Plugin {
 		});
 
 		conversion.for( 'upcast' )
-			.add( upcastElementToElement( {
+			.elementToElement( {
 				view: {
 					name: 'macro',
 					classes: 'child_pages'
@@ -51,20 +49,20 @@ export default class OPChildPagesEditing extends Plugin {
 						}
 					);
 				}
-			} ) );
+			} );
 
 
 		conversion.for( 'editingDowncast' )
-			.add(downcastElementToElement({
+			.elementToElement({
 				model: 'op-macro-child-pages',
 				view: (modelElement, writer) => {
 					return this.createMacroViewElement(modelElement, writer);
 				}
-			}))
+			})
 			.add(dispatcher => dispatcher.on( 'attribute:page', this.modelAttributeToView.bind(this)))
 			.add(dispatcher => dispatcher.on( 'attribute:includeParent', this.modelAttributeToView.bind(this)));
 
-		conversion.for('dataDowncast').add(downcastElementToElement({
+		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-child-pages',
 			view: (modelElement, writer) => {
 				const element = writer.createContainerElement(
@@ -78,7 +76,7 @@ export default class OPChildPagesEditing extends Plugin {
 
 				return element;
 			}
-		}));
+		});
 
 		editor.ui.componentFactory.add( OPChildPagesEditing.buttonName, locale => {
 			const view = new ButtonView( locale );
