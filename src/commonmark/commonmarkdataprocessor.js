@@ -13,7 +13,7 @@ import HtmlDataProcessor from '@ckeditor/ckeditor5-engine/src/dataprocessor/html
 import DomConverter from '@ckeditor/ckeditor5-engine/src/view/domconverter';
 import {highlightedCodeBlock, taskListItems} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import {textNodesPreprocessor} from './utils/preprocessor';
+import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
 
 export const originalSrcAttribute = 'data-original-src';
@@ -74,7 +74,10 @@ export default class CommonMarkDataProcessor {
 			// Ensure tables are allowed to have HTML contents
 			// OP#29457
 			['pre', 'code', 'table']
-			);
+		);
+
+		// Replace link attributes with their computed href attribute
+		linkPreprocessor(domFragment);
 
 		// Use Turndown to convert DOM fragment to markdown
 		const turndownService = new TurndownService( {

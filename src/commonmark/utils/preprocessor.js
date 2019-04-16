@@ -32,6 +32,33 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
 	}
 }
 
+/**
+ * Replace links of A elements with their computed .href attribute
+ * https://community.ooject.com/wp/29742
+ * @param {} root
+ * @param {*} allowed_whitespace_nodes
+ * @param {*} allowed_raw_nodes
+ */
+export function linkPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nodes) {
+	let walker = document.createNodeIterator(
+		root,
+		// Only consider element nodes
+		NodeFilter.SHOW_ELEMENT,
+		// Accept only A tags
+		function(node) {
+			return node.nodeName.toLowerCase() === 'a' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+		}
+	  );
+
+	let node;
+	while(node = walker.nextNode()) {
+		// node.href is properly escaped, while the attribute is not
+		// and turndown uses the getAttribute version
+		node.setAttribute('href', node.href);
+	}
+}
+
+
 export function hasParentOfType(node, tagNames) {
 	let parent = node.parentElement;
 
