@@ -58,7 +58,7 @@ export const defaultConfig = {
 				marker: '@',
 				feed: userMentions,
 				itemRenderer: customItemRenderer,
-				minimumCharacters: 1
+				minimumCharacters: 0
 			},
 			{
 				marker: '#',
