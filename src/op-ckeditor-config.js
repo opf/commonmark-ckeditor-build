@@ -49,7 +49,7 @@ export const defaultConfig = {
 		]
 	},
 	table: {
-		toolbar: [ 'tableColumn', 'tableRow' ]
+		contentToolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells' ]
 	},
 
 	mention: {
@@ -62,8 +62,6 @@ export const defaultConfig = {
 			},
 			{
 				marker: '#',
-				// Allow multi-hash WP references
-				allowedPrefixes: ['#', '##'],
 				feed: workPackageMentions,
 				itemRenderer: customItemRenderer,
 				minimumCharacters: 1
