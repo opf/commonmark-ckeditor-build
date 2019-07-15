@@ -1,13 +1,14 @@
 /**
  * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md.
+ * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
 import ModelTestEditor from '@ckeditor/ckeditor5-core/tests/_utils/modeltesteditor';
 import { setData } from '@ckeditor/ckeditor5-engine/src/dev-utils/model';
 
 import MentionCommand from '../src/mentioncommand';
-import CKEditorError from '@ckeditor/ckeditor5-utils/src/ckeditorerror';
+
+import { expectToThrowCKEditorError } from '@ckeditor/ckeditor5-utils/tests/_utils/utils';
 
 describe( 'MentionCommand', () => {
 	let editor, command, model, doc, selection;
@@ -145,7 +146,7 @@ describe( 'MentionCommand', () => {
 			];
 
 			for ( const options of testCases ) {
-				expect( () => command.execute( options ) ).to.throw( CKEditorError, /mentioncommand-incorrect-marker/ );
+				expectToThrowCKEditorError( () => command.execute( options ), /mentioncommand-incorrect-marker/, editor );
 			}
 		} );
 
@@ -159,7 +160,7 @@ describe( 'MentionCommand', () => {
 			];
 
 			for ( const options of testCases ) {
-				expect( () => command.execute( options ) ).to.throw( CKEditorError, /mentioncommand-incorrect-id/ );
+				expectToThrowCKEditorError( () => command.execute( options ), /mentioncommand-incorrect-id/, editor );
 			}
 		} );
 	} );

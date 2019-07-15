@@ -1,6 +1,6 @@
 /**
  * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md.
+ * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
 /* global window, document, setTimeout, Event */
@@ -8,18 +8,20 @@
 import ClassicTestEditor from '@ckeditor/ckeditor5-core/tests/_utils/classictesteditor';
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
-import BalloonPanelView from '@ckeditor/ckeditor5-ui/src/panel/balloon/balloonpanelview';
 import { keyCodes } from '@ckeditor/ckeditor5-utils/src/keyboard';
 import testUtils from '@ckeditor/ckeditor5-core/tests/_utils/utils';
 import global from '@ckeditor/ckeditor5-utils/src/dom/global';
 import { setData } from '@ckeditor/ckeditor5-engine/src/dev-utils/model';
 import DomEventData from '@ckeditor/ckeditor5-engine/src/view/observer/domeventdata';
 import EventInfo from '@ckeditor/ckeditor5-utils/src/eventinfo';
+import ContextualBalloon from '@ckeditor/ckeditor5-ui/src/panel/balloon/contextualballoon';
+import env from '@ckeditor/ckeditor5-utils/src/env';
 
-import MentionUI from '../src/mentionui';
+import MentionUI, { createRegExp } from '../src/mentionui';
+import featureDetection from '../src/featuredetection';
 import MentionEditing from '../src/mentionediting';
 import MentionsView from '../src/ui/mentionsview';
-import CKEditorError from '@ckeditor/ckeditor5-utils/src/ckeditorerror';
+import { assertCKEditorError } from '@ckeditor/ckeditor5-utils/tests/_utils/utils';
 
 describe( 'MentionUI', () => {
 	let editor, model, doc, editingView, mentionUI, editorElement, mentionsView, panelView;
@@ -56,25 +58,28 @@ describe( 'MentionUI', () => {
 		} );
 	} );
 
+	it( 'should load ContextualBalloon plugin', () => {
+		return createClassicTestEditor().then( () => {
+			expect( editor.plugins.get( ContextualBalloon ) ).to.be.instanceOf( ContextualBalloon );
+		} );
+	} );
+
 	describe( 'init()', () => {
 		it( 'should throw if marker was not provided for feed', () => {
 			return createClassicTestEditor( { feeds: [ { feed: [ 'a' ] } ] } ).catch( error => {
-				expect( error ).to.be.instanceOf( CKEditorError );
-				expect( error.message ).to.match( /mentionconfig-incorrect-marker/ );
+				assertCKEditorError( error, /mentionconfig-incorrect-marker/, null );
 			} );
 		} );
 
 		it( 'should throw if marker is empty string', () => {
 			return createClassicTestEditor( { feeds: [ { marker: '', feed: [ 'a' ] } ] } ).catch( error => {
-				expect( error ).to.be.instanceOf( CKEditorError );
-				expect( error.message ).to.match( /mentionconfig-incorrect-marker/ );
+				assertCKEditorError( error, /mentionconfig-incorrect-marker/, null );
 			} );
 		} );
 
 		it( 'should throw if marker is longer then 1 character', () => {
 			return createClassicTestEditor( { feeds: [ { marker: '$$', feed: [ 'a' ] } ] } ).catch( error => {
-				expect( error ).to.be.instanceOf( CKEditorError );
-				expect( error.message ).to.match( /mentionconfig-incorrect-marker/ );
+				assertCKEditorError( error, /mentionconfig-incorrect-marker/, null );
 			} );
 		} );
 	} );
@@ -87,25 +92,33 @@ describe( 'MentionUI', () => {
 		} );
 	} );
 
-	describe( 'child views', () => {
-		beforeEach( () => createClassicTestEditor() );
+	describe( 'contextual balloon', () => {
+		let balloonAddSpy;
 
-		describe( 'panelView', () => {
-			it( 'should create a view instance', () => {
-				expect( panelView ).to.instanceof( BalloonPanelView );
-			} );
+		beforeEach( () => {
+			return createClassicTestEditor( staticConfig )
+				.then( () => {
+					setData( model, '<paragraph>foo []</paragraph>' );
+					const contextualBalloon = editor.plugins.get( ContextualBalloon );
 
-			it( 'should be added to the ui.view.body collection', () => {
-				expect( Array.from( editor.ui.view.body ) ).to.include( panelView );
-			} );
+					balloonAddSpy = sinon.spy( contextualBalloon, 'add' );
 
-			it( 'should have disabled arrow', () => {
-				expect( panelView.withArrow ).to.be.false;
-			} );
+					model.change( writer => {
+						writer.insertText( '@', doc.selection.getFirstPosition() );
+					} );
+				} )
+				.then( waitForDebounce );
+		} );
 
-			it( 'should have added MentionView as a child', () => {
-				expect( panelView.content.get( 0 ) ).to.be.instanceof( MentionsView );
-			} );
+		it( 'should disable arrow', () => {
+			sinon.assert.calledOnce( balloonAddSpy );
+			sinon.assert.calledWithExactly( balloonAddSpy, sinon.match( data => data.singleViewMode ) );
+			expect( panelView.isVisible ).to.be.true;
+			expect( panelView.withArrow ).to.be.false;
+		} );
+
+		it( 'should add MentionView to a panel', () => {
+			expect( editor.plugins.get( ContextualBalloon ).visibleView ).to.be.instanceof( MentionsView );
 		} );
 	} );
 
@@ -153,11 +166,11 @@ describe( 'MentionUI', () => {
 					const pinArgument = pinSpy.firstCall.args[ 0 ];
 					const { target, positions, limiter, fitInViewport } = pinArgument;
 
-					expect( fitInViewport ).to.be.true;
 					expect( positions ).to.have.length( 4 );
 
 					// Mention UI should set limiter to the editable area.
 					expect( limiter() ).to.equal( editingView.domConverter.mapViewToDom( editableElement ) );
+					expect( fitInViewport ).to.be.undefined;
 
 					expect( editor.model.markers.has( 'mention' ) ).to.be.true;
 					const mentionMarker = editor.model.markers.get( 'mention' );
@@ -177,8 +190,8 @@ describe( 'MentionUI', () => {
 					expect( mentionMarker.getRange().isEqual( range ), 'Should position to mention marker.' );
 
 					const caretSouthEast = positions[ 0 ];
-					const caretNorthEast = positions[ 1 ];
-					const caretSouthWest = positions[ 2 ];
+					const caretSouthWest = positions[ 1 ];
+					const caretNorthEast = positions[ 2 ];
 					const caretNorthWest = positions[ 3 ];
 
 					expect( caretSouthEast( caretRect, balloonRect ) ).to.deep.equal( {
@@ -187,16 +200,16 @@ describe( 'MentionUI', () => {
 						top: 121
 					} );
 
-					expect( caretNorthEast( caretRect, balloonRect ) ).to.deep.equal( {
-						left: 501,
-						name: 'caret_ne',
-						top: -53
-					} );
-
 					expect( caretSouthWest( caretRect, balloonRect ) ).to.deep.equal( {
 						left: 301,
 						name: 'caret_sw',
 						top: 121
+					} );
+
+					expect( caretNorthEast( caretRect, balloonRect ) ).to.deep.equal( {
+						left: 501,
+						name: 'caret_ne',
+						top: -53
 					} );
 
 					expect( caretNorthWest( caretRect, balloonRect ) ).to.deep.equal( {
@@ -226,7 +239,7 @@ describe( 'MentionUI', () => {
 
 					expect( positions ).to.have.length( 4 );
 
-					positionAfterFirstShow = panelView.position;
+					positionAfterFirstShow = mentionsView.position;
 
 					model.change( writer => {
 						writer.insertText( 't', doc.selection.getFirstPosition() );
@@ -344,39 +357,129 @@ describe( 'MentionUI', () => {
 					writer.insertText( '@', doc.selection.getFirstPosition() );
 				} );
 
+				const arrowDownEvtData = {
+					keyCode: keyCodes.arrowdown,
+					preventDefault: sinon.spy(),
+					stopPropagation: sinon.spy()
+				};
+
+				const arrowUpEvtData = {
+					keyCode: keyCodes.arrowup,
+					preventDefault: sinon.spy(),
+					stopPropagation: sinon.spy()
+				};
+
 				return waitForDebounce()
 					.then( () => {
-						expect( panelView.isVisible ).to.be.true;
+						// The scroll test highly depends on browser styles.
+						// Some CI test environments might not load theme which will result that tests will not render on CI as locally.
+						// To make this test repeatable across different environments it enforces mentions view size to 100px...
+						const reset = 'padding:0px;margin:0px;border:0 none;line-height: 1em;';
 
+						const mentionElementSpy = testUtils.sinon.spy( mentionsView.element, 'scrollTop', [ 'set' ] );
+						mentionsView.element.style = `min-height:100px;height:100px;max-height:100px;${ reset };`;
+
+						// ...and each list view item size to 25px...
+						Array.from( mentionsView.items ).forEach( item => {
+							const listItemElement = item.children.get( 0 ).element;
+
+							listItemElement.style = `min-height:unset;height:25px;max-height:25px;${ reset };min-width:12em;`;
+						} );
+
+						// ...so after those changes it is safe to assume that:
+						// - base offset is 0
+						// - only 4 items are visible at once
+						// - if scrolled to the last element scrollTop will be set to 150px. The 150px is the offset of the 7th item in the
+						//   list as last four (7, 8, 9 & 10) will be visible.
+						expect( panelView.isVisible ).to.be.true;
 						expectChildViewsIsOnState( [ true, false, false, false, false, false, false, false, false, false ] );
 
-						const arrowDownEvtData = {
-							keyCode: keyCodes.arrowdown,
-							preventDefault: sinon.spy(),
-							stopPropagation: sinon.spy()
-						};
-
-						const arrowUpEvtData = {
-							keyCode: keyCodes.arrowup,
-							preventDefault: sinon.spy(),
-							stopPropagation: sinon.spy()
-						};
+						// Edge browser always tries to scroll in tests environment: See ckeditor5-utils#282.
+						if ( !env.isEdge ) {
+							sinon.assert.callCount( mentionElementSpy.set, 0 );
+						}
 
 						fireKeyDownEvent( arrowDownEvtData );
-						expect( mentionsView.element.scrollTop ).to.equal( 0 );
 
 						expectChildViewsIsOnState( [ false, true, false, false, false, false, false, false, false, false ] );
+						// Edge browser always tries to scroll in tests environment: See ckeditor5-utils#282.
+						if ( !env.isEdge ) {
+							expect( mentionsView.element.scrollTop ).to.equal( 0 );
+							sinon.assert.callCount( mentionElementSpy.set, 0 );
+						}
 
 						fireKeyDownEvent( arrowUpEvtData );
+
+						expectChildViewsIsOnState( [ true, false, false, false, false, false, false, false, false, false ] );
+						expect( mentionsView.element.scrollTop ).to.equal( 0 );
+
+						// Edge browser always tries to scroll in tests environment: See ckeditor5-utils#282.
+						if ( !env.isEdge ) {
+							sinon.assert.callCount( mentionElementSpy.set, 0 );
+						}
+
 						fireKeyDownEvent( arrowUpEvtData );
 
 						expectChildViewsIsOnState( [ false, false, false, false, false, false, false, false, false, true ] );
-						expect( mentionsView.element.scrollTop ).to.be.not.equal( 0 );
+
+						// We want 150, but sometimes we get e.g. 151.
+						expect( mentionsView.element.scrollTop ).to.be.within( 140, 160, 'last item highlighted' );
+
+						// Edge browser always tries to scroll in tests environment: See ckeditor5-utils#282.
+						if ( !env.isEdge ) {
+							sinon.assert.callCount( mentionElementSpy.set, 1 );
+						}
 
 						fireKeyDownEvent( arrowDownEvtData );
+
 						expectChildViewsIsOnState( [ true, false, false, false, false, false, false, false, false, false ] );
-						expect( mentionsView.element.scrollTop ).to.equal( 0 );
+
+						// We want 0, but sometimes we get e.g. 1. (Firefox)
+						expect( mentionsView.element.scrollTop ).to.be.within( 0, 10 );
+
+						// Edge browser always tries to scroll in tests environment: See ckeditor5-utils#282.
+						if ( !env.isEdge ) {
+							sinon.assert.callCount( mentionElementSpy.set, 2 );
+						}
 					} );
+			} );
+		} );
+
+		describe( 'ES2018 RegExp Unicode property escapes fallback', () => {
+			let regExpStub;
+
+			// Cache the original value to restore it after the tests.
+			const originalGroupSupport = featureDetection.isUnicodeGroupSupported;
+
+			before( () => {
+				featureDetection.isUnicodeGroupSupported = false;
+			} );
+
+			beforeEach( () => {
+				return createClassicTestEditor( staticConfig )
+					.then( editor => {
+						regExpStub = sinon.stub( window, 'RegExp' );
+
+						return editor;
+					} );
+			} );
+
+			after( () => {
+				featureDetection.isUnicodeGroupSupported = originalGroupSupport;
+			} );
+
+			it( 'returns a simplified RegExp for browsers not supporting Unicode punctuation groups', () => {
+				featureDetection.isUnicodeGroupSupported = false;
+				createRegExp( '@', 2 );
+				sinon.assert.calledOnce( regExpStub );
+				sinon.assert.calledWithExactly( regExpStub, '(?:^|[ \\(\\[{"\'])([@])([_a-zA-ZÀ-ž0-9]{2,})$', 'u' );
+			} );
+
+			it( 'returns a ES2018 RegExp for browsers supporting Unicode punctuation groups', () => {
+				featureDetection.isUnicodeGroupSupported = true;
+				createRegExp( '@', 2 );
+				sinon.assert.calledOnce( regExpStub );
+				sinon.assert.calledWithExactly( regExpStub, '(?:^|[ \\p{Ps}\\p{Pi}"\'])([@])([_\\p{L}\\p{N}]{2,})$', 'u' );
 			} );
 		} );
 
@@ -417,6 +520,53 @@ describe( 'MentionUI', () => {
 					} );
 			} );
 
+			it( 'should show panel for matched marker after a <softBreak>', () => {
+				model.schema.register( 'softBreak', {
+					allowWhere: '$text',
+					isInline: true
+				} );
+
+				editor.conversion.for( 'upcast' )
+					.elementToElement( {
+						model: 'softBreak',
+						view: 'br'
+					} );
+
+				editor.conversion.for( 'downcast' )
+					.elementToElement( {
+						model: 'softBreak',
+						view: ( modelElement, viewWriter ) => viewWriter.createEmptyElement( 'br' )
+					} );
+
+				setData( model, '<paragraph>abc<softBreak></softBreak>[] foo</paragraph>' );
+
+				model.change( writer => {
+					writer.insertText( '@', doc.selection.getFirstPosition() );
+				} );
+
+				return waitForDebounce()
+					.then( () => {
+						expect( panelView.isVisible ).to.be.true;
+						expect( editor.model.markers.has( 'mention' ) ).to.be.true;
+						expect( mentionsView.items ).to.have.length( 5 );
+					} );
+			} );
+
+			// Opening parenthesis type characters that should be supported on all environments.
+			for ( const character of [ '(', '\'', '"', '[', '{' ] ) {
+				testOpeningPunctuationCharacter( character );
+			}
+
+			// Excerpt of opening parenthesis type characters that tests ES2018 Unicode property escapes on supported environment.
+			for ( const character of [
+				// Belongs to Ps (Punctuation, Open) group:
+				'〈', '„', '﹛', '｟', '｛',
+				// Belongs to Pi (Punctuation, Initial quote) group:
+				'«', '‹', '⸌', ' ⸂', '⸠'
+			] ) {
+				testOpeningPunctuationCharacter( character, !featureDetection.isUnicodeGroupSupported );
+			}
+
 			it( 'should not show panel for marker in the middle of other word', () => {
 				setData( model, '<paragraph>foo[]</paragraph>' );
 
@@ -432,16 +582,29 @@ describe( 'MentionUI', () => {
 			} );
 
 			it( 'should not show panel when selection is inside a mention', () => {
-				setData( model, '<paragraph>foo [@John] bar</paragraph>' );
-				model.change( writer => {
-					writer.setAttribute( 'mention', { id: '@John', _uid: 1234 }, doc.selection.getFirstRange() );
-				} );
+				setData( model, '<paragraph>foo @Lily bar[]</paragraph>' );
 
 				model.change( writer => {
-					writer.setSelection( doc.getRoot().getChild( 0 ), 7 );
+					const range = writer.createRange(
+						writer.createPositionAt( doc.getRoot().getChild( 0 ), 4 ),
+						writer.createPositionAt( doc.getRoot().getChild( 0 ), 9 )
+					);
+
+					writer.setAttribute( 'mention', { id: '@Lily', _uid: 1234 }, range );
 				} );
 
 				return waitForDebounce()
+					.then( () => {
+						model.change( writer => {
+							writer.setSelection( doc.getRoot().getChild( 0 ), 0 );
+						} );
+
+						expect( panelView.isVisible ).to.be.false;
+
+						model.change( writer => {
+							writer.setSelection( doc.getRoot().getChild( 0 ), 7 );
+						} );
+					} )
 					.then( () => {
 						expect( panelView.isVisible ).to.be.false;
 						expect( editor.model.markers.has( 'mention' ) ).to.be.false;
@@ -449,16 +612,23 @@ describe( 'MentionUI', () => {
 			} );
 
 			it( 'should not show panel when selection is at the end of a mention', () => {
-				setData( model, '<paragraph>foo [@John] bar</paragraph>' );
-				model.change( writer => {
-					writer.setAttribute( 'mention', { id: '@John', _uid: 1234 }, doc.selection.getFirstRange() );
-				} );
+				setData( model, '<paragraph>foo @Lily bar[]</paragraph>' );
 
 				model.change( writer => {
-					writer.setSelection( doc.getRoot().getChild( 0 ), 9 );
+					const range = writer.createRange(
+						writer.createPositionAt( doc.getRoot().getChild( 0 ), 4 ),
+						writer.createPositionAt( doc.getRoot().getChild( 0 ), 9 )
+					);
+
+					writer.setAttribute( 'mention', { id: '@Lily', _uid: 1234 }, range );
 				} );
 
 				return waitForDebounce()
+					.then( () => {
+						model.change( writer => {
+							writer.setSelection( doc.getRoot().getChild( 0 ), 9 );
+						} );
+					} )
 					.then( () => {
 						expect( panelView.isVisible ).to.be.false;
 						expect( editor.model.markers.has( 'mention' ) ).to.be.false;
@@ -522,12 +692,43 @@ describe( 'MentionUI', () => {
 			} );
 
 			it( 'should not show panel when selection is after existing mention', () => {
-				setData( model, '<paragraph>foo [@John] bar[]</paragraph>' );
+				setData( model, '<paragraph>foo [@Lily] bar[]</paragraph>' );
 				model.change( writer => {
-					writer.setAttribute( 'mention', { id: '@John', _uid: 1234 }, doc.selection.getFirstRange() );
+					writer.setAttribute( 'mention', { id: '@Lily', _uid: 1234 }, doc.selection.getFirstRange() );
 				} );
 
 				return waitForDebounce()
+					.then( () => {
+						expect( panelView.isVisible ).to.be.false;
+
+						model.change( writer => {
+							writer.setSelection( doc.getRoot().getChild( 0 ), 8 );
+						} );
+					} )
+					.then( waitForDebounce )
+					.then( () => {
+						expect( panelView.isVisible ).to.be.false;
+					} );
+			} );
+
+			it( 'should not show panel when selection moves inside existing mention', () => {
+				setData( model, '<paragraph>foo @Lily bar[]</paragraph>' );
+
+				model.change( writer => {
+					const range = writer.createRange(
+						writer.createPositionAt( doc.getRoot().getChild( 0 ), 4 ),
+						writer.createPositionAt( doc.getRoot().getChild( 0 ), 9 )
+					);
+					writer.setAttribute( 'mention', { id: '@Lily', _uid: 1234 }, range );
+				} );
+
+				return waitForDebounce()
+					.then( () => {
+						model.change( writer => {
+							writer.setSelection( doc.getRoot().getChild( 0 ), 9 );
+						} );
+					} )
+					.then( waitForDebounce )
 					.then( () => {
 						expect( panelView.isVisible ).to.be.false;
 
@@ -616,6 +817,39 @@ describe( 'MentionUI', () => {
 					} )
 					.then( waitForDebounce )
 					.then( () => expect( panelView.isVisible ).to.be.false );
+			} );
+		} );
+
+		describe( 'unicode', () => {
+			beforeEach( () => {
+				return createClassicTestEditor( {
+					feeds: [
+						{
+							// Always return 5 items
+							feed: [ '@תַפּוּחַ', '@אַגָס', '@apple', '@pear' ],
+							marker: '@'
+						}
+					]
+				} );
+			} );
+
+			it( 'should open panel for unicode character ב', function() {
+				if ( !featureDetection.isUnicodeGroupSupported ) {
+					this.skip();
+				}
+
+				setData( model, '<paragraph>foo []</paragraph>' );
+
+				model.change( writer => {
+					writer.insertText( '@ס', doc.selection.getFirstPosition() );
+				} );
+
+				return waitForDebounce()
+					.then( () => {
+						expect( panelView.isVisible, 'panel is visible' ).to.be.true;
+						expect( editor.model.markers.has( 'mention' ), 'marker is inserted' ).to.be.true;
+						expect( mentionsView.items ).to.have.length( 1 );
+					} );
 			} );
 		} );
 
@@ -716,6 +950,31 @@ describe( 'MentionUI', () => {
 					.then( () => expect( panelView.isVisible ).to.be.false );
 			} );
 		} );
+
+		function testOpeningPunctuationCharacter( character, skip = false ) {
+			it( `should show panel for matched marker after a "${ character }" character`, function() {
+				if ( skip ) {
+					this.skip();
+				}
+
+				setData( model, '<paragraph>[] foo</paragraph>' );
+
+				model.change( writer => {
+					writer.insertText( character, doc.selection.getFirstPosition() );
+				} );
+
+				model.change( writer => {
+					writer.insertText( '@', doc.selection.getFirstPosition() );
+				} );
+
+				return waitForDebounce()
+					.then( () => {
+						expect( panelView.isVisible, 'panel is visible' ).to.be.true;
+						expect( editor.model.markers.has( 'mention' ), 'marker is inserted' ).to.be.true;
+						expect( mentionsView.items ).to.have.length( 5 );
+					} );
+			} );
+		}
 	} );
 
 	describe( 'panel behavior', () => {
@@ -785,7 +1044,7 @@ describe( 'MentionUI', () => {
 					} );
 
 					expect( panelView.isVisible ).to.be.false;
-					expect( panelView.position ).to.be.undefined;
+					expect( mentionsView.position ).to.be.undefined;
 					expect( editor.model.markers.has( 'mention' ) ).to.be.false;
 				} );
 		} );
@@ -816,7 +1075,7 @@ describe( 'MentionUI', () => {
 					} );
 
 					expect( panelView.isVisible ).to.be.false;
-					expect( panelView.position ).to.be.undefined;
+					expect( mentionsView.position ).to.be.undefined;
 					expect( editor.model.markers.has( 'mention' ) ).to.be.false;
 				} );
 		} );
@@ -895,6 +1154,39 @@ describe( 'MentionUI', () => {
 
 							fireKeyDownEvent( keyEvtData );
 							expectChildViewsIsOnState( [ true, false, false, false, false ] );
+						} );
+				} );
+
+				it( 'should not cycle with only one item in the list', () => {
+					setData( model, '<paragraph>foo []</paragraph>' );
+
+					const keyDownEvtData = {
+						keyCode: keyCodes.arrowdown,
+						preventDefault: sinon.spy(),
+						stopPropagation: sinon.spy()
+					};
+
+					const keyUpEvtData = {
+						keyCode: keyCodes.arrowdown,
+						preventDefault: sinon.spy(),
+						stopPropagation: sinon.spy()
+					};
+
+					model.change( writer => {
+						writer.insertText( '@T', doc.selection.getFirstPosition() );
+					} );
+
+					return waitForDebounce()
+						.then( () => {
+							expectChildViewsIsOnState( [ true ] );
+
+							fireKeyDownEvent( keyDownEvtData );
+
+							expectChildViewsIsOnState( [ true ] );
+
+							fireKeyDownEvent( keyUpEvtData );
+
+							expectChildViewsIsOnState( [ true ] );
 						} );
 				} );
 			} );
@@ -1444,17 +1736,8 @@ describe( 'MentionUI', () => {
 				doc = model.document;
 				editingView = editor.editing.view;
 				mentionUI = editor.plugins.get( MentionUI );
-				panelView = mentionUI.panelView;
+				panelView = editor.plugins.get( ContextualBalloon ).view;
 				mentionsView = mentionUI._mentionsView;
-
-				editingView.attachDomRoot( editorElement );
-
-				// Focus the engine.
-				editingView.document.isFocused = true;
-				editingView.getDomRoot().focus();
-
-				// Remove all selection ranges from DOM before testing.
-				window.getSelection().removeAllRanges();
 			} );
 	}
 
