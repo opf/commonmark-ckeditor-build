@@ -1,7 +1,6 @@
 import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
 import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-table-plugin';
 import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
-import OPWikiIncludePagePlugin from './plugins/op-macro-wiki-include/op-macro-wiki-include-plugin';
 import OpUploadPlugin from './plugins/op-upload-plugin';
 import OPChildPagesPlugin from "./plugins/op-macro-child-pages/op-macro-child-pages-plugin";
 import Essentials from "@ckeditor/ckeditor5-essentials/src/essentials";
@@ -40,7 +39,6 @@ export const opMacroPlugins = [
 	OPMacroTocPlugin,
 	OPMacroEmbeddedTable,
 	OPMacroWpButtonPlugin,
-	OPWikiIncludePagePlugin,
 	OPChildPagesPlugin,
 ];
 
