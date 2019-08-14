@@ -29,6 +29,7 @@
     "@ckeditor/ckeditor5-image": "^13.1.2",
     "@ckeditor/ckeditor5-link": "^11.1.1",
     "@ckeditor/ckeditor5-list": "^12.0.4",
+    "@ckeditor/ckeditor5-highlight": "^11.0.4",
     "@ckeditor/ckeditor5-media-embed": "^11.1.3",
     "@ckeditor/ckeditor5-mention": "^12.0.1",
     "@ckeditor/ckeditor5-paragraph": "^11.0.4",
@@ -73,5 +74,8 @@
     "prewatch-and-link": "ln -sf `pwd`/build/ckeditor.js `echo $OPENPROJECT_CORE`/app/assets/javascripts/vendor/ckeditor/ckeditor.js && ln -sf `pwd`/build/ckeditor.js.map `echo $OPENPROJECT_CORE`/app/assets/javascripts/vendor/ckeditor/ckeditor.js.map",
     "watch": "npm run watch-and-link",
     "watch-and-link": "NODE_ENV=development ./node_modules/.bin/webpack --display-error-details --watch --colors --cache --debug"
+  },
+  "dependencies": {
+    "markdown-it-task-lists": "^2.1.1"
   }
 }

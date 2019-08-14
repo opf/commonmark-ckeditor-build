@@ -17,7 +17,6 @@ import ImageCaption from "@ckeditor/ckeditor5-image/src/imagecaption";
 import ImageStyle from "@ckeditor/ckeditor5-image/src/imagestyle";
 import ImageToolbar from "@ckeditor/ckeditor5-image/src/imagetoolbar";
 import Link from "@ckeditor/ckeditor5-link/src/link";
-import List from "@ckeditor/ckeditor5-list/src/list";
 import Paragraph from "@ckeditor/ckeditor5-paragraph/src/paragraph";
 import Typing from "@ckeditor/ckeditor5-typing/src/typing";
 import OPHelpLinkPlugin from "./plugins/op-help-link-plugin/op-help-link-plugin";
@@ -31,6 +30,9 @@ import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-ima
 import CommonMark from './commonmark/commonmark';
 import OPSourceCodePlugin from './plugins/op-source-code.plugin';
 import Mention from "../forked/ckeditor5-mention/src/mention";
+import List from "../forked/ckeditor5-list/src/list";
+import TodoList from "../forked/ckeditor5-list/src/todolist";
+//import List from "@ckeditor/ckeditor5-list/src/list";
 import {MentionCaster} from './mentions/mentions-caster';
 
 // We divide our plugins into separate concerns here
@@ -64,6 +66,7 @@ export const builtinPlugins = [
 	OpImageAttachmentLookup,
 	Link,
 	List,
+	TodoList,
 	Paragraph,
 	Typing,
 
