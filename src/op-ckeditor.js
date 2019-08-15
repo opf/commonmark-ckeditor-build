@@ -1,10 +1,10 @@
-import ClassicEditorBase from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
-import {configurationCustomizer} from './op-config-customizer';
+import DecoupledEditorBase from '@ckeditor/ckeditor5-editor-decoupled/src/decouplededitor';
 import {builtinPlugins} from './op-plugins';
 import {defaultConfig} from "./op-ckeditor-config";
+import {configurationCustomizer} from './op-config-customizer';
 
-export class ConstrainedEditor extends ClassicEditorBase {}
-export class FullEditor extends ClassicEditorBase {}
+export class ConstrainedEditor extends DecoupledEditorBase {}
+export class FullEditor extends DecoupledEditorBase {}
 
 // Export the two common interfaces
 window.OPConstrainedEditor = ConstrainedEditor;
