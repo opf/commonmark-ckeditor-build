@@ -25,6 +25,8 @@ import CodeBlockPlugin from "./plugins/code-block/code-block";
 import OPPreviewPlugin from "./plugins/op-preview.plugin";
 import Table from "@ckeditor/ckeditor5-table/src/table";
 import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar";
+import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
+import TodoList from "@ckeditor/ckeditor5-list/src/todolist";
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
 import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin';
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
@@ -64,12 +66,14 @@ export const builtinPlugins = [
 	OpImageAttachmentLookup,
 	Link,
 	List,
+	TodoList,
 	Paragraph,
 	Typing,
 
 	// Built-in mentions
 	Mention,
 	MentionCaster,
+	PasteFromOffice,
 
 	OPHelpLinkPlugin,
 	CodeBlockPlugin,
