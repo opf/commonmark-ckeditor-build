@@ -42,7 +42,12 @@ export default class CommonMarkDataProcessor {
 			// Use GFM language fence prefix
 			langPrefix: 'language-',
 		} );
-		const html = md.render( data );
+
+		// Use tasklist plugin
+		let taskLists = require('markdown-it-task-lists');
+		let parser = md.use(taskLists, {label: true});
+
+		const html = parser.render( data );
 
 		// Convert input HTML data to DOM DocumentFragment.
 		const domFragment = this._htmlDP._toDom( html );
@@ -87,8 +92,21 @@ export default class CommonMarkDataProcessor {
 
 		turndownService.use([
 			highlightedCodeBlock,
-			taskListItems,
 		]);
+
+		// Replace todolist with markdown representation
+		turndownService.addRule('todolist', {
+			filter: function (node) {
+				let parent = node.parentNode;
+				let grandparent = parent && parent.parentNode;
+
+				return node.type === 'checkbox' &&
+					grandparent && grandparent.nodeName === 'LI';
+			  },
+			  replacement: function (content, node) {
+				return (node.checked ? '[x]' : '[ ]') + ' '
+			  }
+		});
 
 		// Replace images with appropriate source URLs derived from an attachment,
 		// if any. Otherwise use the original src
@@ -133,6 +151,8 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
-		return turndownService.turndown( domFragment );
+		const output = turndownService.turndown( domFragment );
+		console.debug(output);
+		return output
 	}
 }

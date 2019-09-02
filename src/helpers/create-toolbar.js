@@ -22,7 +22,7 @@ export function createEditToolbar(
 	}
 
 	const _balloon = editor.plugins.get( 'ContextualBalloon' );
-	const _toolbar = new ToolbarView();
+	const _toolbar = new ToolbarView( editor.locale );
 
 	function _checkIsVisible() {
 		if ( !editor.ui.focusTracker.isFocused ) {
