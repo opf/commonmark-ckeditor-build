@@ -151,8 +151,6 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
-		const output = turndownService.turndown( domFragment );
-		console.debug(output);
-		return output
+		return turndownService.turndown( domFragment );
 	}
 }
