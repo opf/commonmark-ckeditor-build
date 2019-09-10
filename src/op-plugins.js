@@ -32,7 +32,8 @@ import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin'
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
 import CommonMark from './commonmark/commonmark';
 import OPSourceCodePlugin from './plugins/op-source-code.plugin';
-import Mention from "../forked/ckeditor5-mention/src/mention";
+// import Mention from "../forked/ckeditor5-mention/src/mention";
+import Mention from "@ckeditor/ckeditor5-mention/src/mention";
 import {MentionCaster} from './mentions/mentions-caster';
 
 // We divide our plugins into separate concerns here
