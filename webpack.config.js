@@ -13,6 +13,8 @@ const { bundler, styles } = require( '@ckeditor/ckeditor5-dev-utils' );
 const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 const UglifyJsWebpackPlugin = require( 'uglifyjs-webpack-plugin' );
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const TerserPlugin = require('terser-webpack-plugin');
+
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 let config = {
@@ -29,17 +31,8 @@ let config = {
 	},
 
 	optimization: {
-		minimizer: [
-			new UglifyJsWebpackPlugin( {
-					sourceMap: true,
-					uglifyOptions: {
-						output: {
-								// Preserve CKEditor 5 license comments.
-								comments: /^!/
-						}
-					}
-			} )
-		]
+		// minimize: true,
+		// minimizer: [new TerserPlugin()],
 	},
 
 	plugins: [
@@ -68,8 +61,8 @@ let config = {
 					{
 						loader: 'style-loader',
 						options: {
-							singleton: true
-						}
+                            injectType: 'singletonStyleTag'
+                        }
 					},
 					{
 						loader: 'postcss-loader',
