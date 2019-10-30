@@ -97,14 +97,19 @@ export default class CommonMarkDataProcessor {
 		// Replace todolist with markdown representation
 		turndownService.addRule('todolist', {
 			filter: function (node) {
-				let parent = node.parentNode;
-				let grandparent = parent && parent.parentNode;
-
-				return node.type === 'checkbox' &&
-					grandparent && grandparent.nodeName === 'LI';
+				// check if we're a todo list item
+				return node.nodeName === 'LI' && node.closest('ul.todo-list');
 			  },
-			  replacement: function (content, node) {
-				return (node.checked ? '[x]' : '[ ]') + ' '
+			  replacement: function (content, node, options) {
+				content = content
+					.replace(/^\n+/, '') // remove leading newlines
+					.replace(/\n+$/, '\n') // replace trailing newlines with just a single one
+					.replace(/\n/gm, '\n    ') // indent
+
+				var prefix = options.bulletListMarker + '   ';
+				var input = node.querySelector('input[type=checkbox]');
+				var tasklist = (input && input.checked) ? '[x] ' : '[ ] ';
+				return prefix + tasklist + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '');
 			  }
 		});
 
