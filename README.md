@@ -8,36 +8,49 @@ This repository acts as a separated source for the custom CKEditor5 builds refer
 [https://github.com/ckeditor/ckeditor5](https://github.com/ckeditor/ckeditor5)
 
 
-## Development
 
-1. Link the package
+1. Install the dependencies
 
 ```
 # In this repository's root (commonmark-ckeditor-build)
-npm link
+npm install
 ```
 
 2. Reference the link in OpenProject
 
 ```
-cd <path to OpenProject>/frontend
-npm link @openproject/commonmark-ckeditor-build
+export OPENPROJECT_CORE=/path/to/openproject/root
 ```
 
 
-If you also need to work on some of the packaged plugins, such as GFM:
 
-```
-cd <path to local @ckeditor/ckeditor5-gfm-markdown
-npm link
-
-cd <path to local @openproject/commonmark-ckeditor-build>
-npm link @ckeditor/ckeditor5-gfm-markdown
-```
+## Building
 
 
-## Build webpack dist
 
-```
-npm run webpack
-```
+Building into the core is easy, just run
+
+`npm run build`
+
+
+
+This will override the `app/assets/javascripts/vendor/ckeditor/*` contents with the newest webpack build. You need to run this before opening a pull request.
+
+Please also ensure you always create a pull request on this repository that gets merged whenever the core counterpart gets merged to ensure the master of this branch is always the latest built version in OpenProject
+
+
+
+### Updating CKEditor
+
+Whenever a new CKEditor release is made, there are a plethora of packages to be updated. The easiest is to use [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) to update all dependencies in the package.json and then rebuild + run openproject tests.
+
+
+
+## Development
+
+- Run `npm run watch-and-link`
+
+Now the webpack development mode is symlinking the latest builds into the openproject core. You can now seamlessly develop in this repository and browse/test in OpenProject core
+
+
+
