@@ -15,6 +15,7 @@ import {highlightedCodeBlock, taskListItems} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
+import {fixEmptyCodeBlocks} from "./utils/fix-empty-code-blocks";
 
 export const originalSrcAttribute = 'data-original-src';
 
@@ -55,6 +56,9 @@ export default class CommonMarkDataProcessor {
 		// Fix some CommonMark specifics
 		// Paragraphs within list elements (https://community.openproject.com/work_packages/28765)
 		removeParagraphsInLists( domFragment );
+
+		// Fix empty code blocks
+		fixEmptyCodeBlocks( domFragment );
 
 		// Convert DOM DocumentFragment to view DocumentFragment.
 		return this._domConverter.domToView( domFragment );
