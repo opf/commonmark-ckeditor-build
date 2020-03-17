@@ -108,7 +108,7 @@ export default class CommonMarkDataProcessor {
 				content = content
 					.replace(/^\n+/, '') // remove leading newlines
 					.replace(/\n+$/, '\n') // replace trailing newlines with just a single one
-					.replace(/\n/gm, '\n    ') // indent
+					.replace(/\n/gm, '\n    '); // indent
 
 				var prefix = options.bulletListMarker + '   ';
 				var input = node.querySelector('input[type=checkbox]');
