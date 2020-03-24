@@ -25,9 +25,9 @@ export const originalSrcAttribute = 'data-original-src';
  * @implements module:engine/dataprocessor/dataprocessor~DataProcessor
  */
 export default class CommonMarkDataProcessor {
-	constructor() {
-		this._htmlDP = new HtmlDataProcessor();
-		this._domConverter = new DomConverter();
+	constructor(document) {
+		this._htmlDP = new HtmlDataProcessor(document);
+		this._domConverter = new DomConverter(document);
 	}
 
 	/**
