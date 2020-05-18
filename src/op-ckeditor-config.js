@@ -49,7 +49,10 @@ export const defaultConfig = {
 		]
 	},
 	table: {
-		contentToolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells' ]
+		contentToolbar: [
+			'tableColumn', 'tableRow', 'mergeTableCells',
+			'tableProperties', 'tableCellProperties'
+		]
 	},
 
 	mention: {
