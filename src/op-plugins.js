@@ -25,6 +25,8 @@ import CodeBlockPlugin from "./plugins/code-block/code-block";
 import OPPreviewPlugin from "./plugins/op-preview.plugin";
 import Table from "@ckeditor/ckeditor5-table/src/table";
 import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar";
+import TableProperties from '@ckeditor/ckeditor5-table/src/tableproperties';
+import TableCellProperties from '@ckeditor/ckeditor5-table/src/tablecellproperties';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
 import TodoList from "@ckeditor/ckeditor5-list/src/todolist";
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
@@ -84,6 +86,8 @@ export const builtinPlugins = [
 	CommonMark,
 	Table,
 	TableToolbar,
+	TableProperties,
+	TableCellProperties,
 
 	OPMacroListPlugin,
 
