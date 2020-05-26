@@ -134,7 +134,10 @@ export default class CommonMarkDataProcessor {
 
 		// Keep HTML tables and remove filler elements
 		turndownService.addRule('htmlTables', {
-			filter: ['table'],
+			filter: function (node) {
+				// check if we're a todo list item
+				return node.nodeName === 'FIGURE' && node.classList.contains('table');
+			},
 			replacement: function (_content, node) {
 				// Remove filler nodes
 				node.querySelectorAll('td br[data-cke-filler]')
