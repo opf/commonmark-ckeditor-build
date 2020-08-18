@@ -54,7 +54,7 @@ export function viewCodeBlockToModel() {
 		}
 
 		// Find an code element inside the pre element.
-		const codeBlock = Array.from( data.viewItem.getChildren() ).find( viewChild => viewChild.is( 'code' ) );
+		const codeBlock = Array.from( data.viewItem.getChildren() ).find( viewChild => viewChild.is('element', 'code'));
 
 		// Do not convert if code block is absent
 		if ( !codeBlock || !conversionApi.consumable.consume( codeBlock, { name: true } ) ) {
