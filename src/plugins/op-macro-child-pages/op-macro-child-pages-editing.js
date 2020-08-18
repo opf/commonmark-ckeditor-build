@@ -101,7 +101,7 @@ export default class OPChildPagesEditing extends Plugin {
 
 	modelAttributeToView( evt, data, conversionApi ) {
 		const modelElement = data.item;
-		if (!modelElement.is('op-macro-child-pages')) {
+		if (!modelElement.is('element', 'op-macro-child-pages')) {
 			return;
 		}
 
