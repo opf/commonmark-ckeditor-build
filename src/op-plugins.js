@@ -37,6 +37,7 @@ import OPSourceCodePlugin from './plugins/op-source-code.plugin';
 // import Mention from "../forked/ckeditor5-mention/src/mention";
 import Mention from "@ckeditor/ckeditor5-mention/src/mention";
 import {MentionCaster} from './mentions/mentions-caster';
+import ImageResize from "@ckeditor/ckeditor5-image/src/imageresize";
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -65,6 +66,7 @@ export const builtinPlugins = [
 	Image,
 	ImageCaption,
 	ImageStyle,
+	ImageResize,
 	ImageToolbar,
 	OpImageAttachmentLookup,
 	Link,

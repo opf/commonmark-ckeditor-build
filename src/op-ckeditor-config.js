@@ -42,10 +42,31 @@ export const defaultConfig = {
 		]
 	},
 	image: {
+		resizeOptions: [
+			{
+				name: 'imageResize:original',
+				value: null,
+				icon: 'original'
+			},
+			{
+				name: 'imageResize:50',
+				value: '50',
+				icon: 'medium'
+			},
+			{
+				name: 'imageResize:75',
+				value: '75',
+				icon: 'large'
+			}
+		],
 		toolbar: [
 			'imageStyle:full',
 			'|',
-			'imageTextAlternative'
+			'imageTextAlternative',
+			'|',
+			'imageResize:50',
+			'imageResize:75',
+			'imageResize:original'
 		]
 	},
 	table: {
