@@ -123,12 +123,7 @@ export default class CommonMarkDataProcessor {
 			filter: 'img',
 
 			replacement: function (content, node) {
-			  var alt = node.alt || '';
-			  var src = node.getAttribute(originalSrcAttribute) || node.getAttribute('src') || '';
-			  var title = node.title || '';
-			  var titlePart = title ? ' "' + title + '"' : '';
-
-			  return src ? '![' + alt + ']' + '(' + src + titlePart + ')' : '';
+			  return node.parentElement.outerHTML;
 			}
 		});
 
