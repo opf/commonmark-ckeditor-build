@@ -80,15 +80,15 @@ export default class EmbeddedTableEditing extends Plugin {
 				const externalQueryConfiguration = pluginContext.services.externalQueryConfiguration;
 				const currentQuery = {}; // Initial query currently empty, we may want to provide context here.
 
-				externalQueryConfiguration.show(
-					currentQuery,
-					(newQuery) => editor.model.change(writer => {
-						const element = writer.createElement( 'op-macro-embedded-table', { opEmbeddedTableQuery: newQuery });
+				externalQueryConfiguration.show({
+					currentQuery: currentQuery,
+					callback: (newQuery) => editor.model.change(writer => {
+						const element = writer.createElement('op-macro-embedded-table', {opEmbeddedTableQuery: newQuery});
 
 						// Insert the widget in the current selection location.
-						editor.model.insertContent( element, editor.model.document.selection );
+						editor.model.insertContent(element, editor.model.document.selection);
 					})
-				);
+				});
 			} ) );
 
 			return view;

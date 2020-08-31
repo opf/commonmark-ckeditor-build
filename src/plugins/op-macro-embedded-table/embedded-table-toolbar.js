@@ -29,12 +29,12 @@ export default class EmbeddedTableToolbar extends Plugin {
 			const currentQuery = widget.getAttribute('opEmbeddedTableQuery') || {};
 
 			pluginContext.runInZone(() => {
-				externalQueryConfiguration.show(
-					currentQuery,
-					(newQuery) => model.change(writer => {
-						writer.setAttribute( 'opEmbeddedTableQuery', newQuery, widget );
+				externalQueryConfiguration.show({
+					currentQuery: currentQuery,
+					callback: (newQuery) => model.change(writer => {
+						writer.setAttribute('opEmbeddedTableQuery', newQuery, widget);
 					})
-				);
+				});
 			});
 		} );
 	}
