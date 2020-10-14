@@ -37,7 +37,7 @@ export default class OPChildPagesEditing extends Plugin {
 					name: 'macro',
 					classes: 'child_pages'
 				},
-				model: ( viewElement, modelWriter ) => {
+				model: ( viewElement, {writer:modelWriter} ) => {
 					const page = viewElement.getAttribute( 'data-page' ) || '';
 					const includeParent = viewElement.getAttribute( 'data-include-parent' ) == 'true';
 
@@ -55,7 +55,7 @@ export default class OPChildPagesEditing extends Plugin {
 		conversion.for( 'editingDowncast' )
 			.elementToElement({
 				model: 'op-macro-child-pages',
-				view: (modelElement, writer) => {
+				view: (modelElement, {writer}) => {
 					return this.createMacroViewElement(modelElement, writer);
 				}
 			})
@@ -64,7 +64,7 @@ export default class OPChildPagesEditing extends Plugin {
 
 		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-child-pages',
-			view: (modelElement, writer) => {
+			view: (modelElement, {writer}) => {
 				const element = writer.createContainerElement(
 					'macro',
 					{

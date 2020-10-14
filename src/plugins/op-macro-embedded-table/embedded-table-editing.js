@@ -41,7 +41,7 @@ export default class EmbeddedTableEditing extends Plugin {
 					name: 'macro',
 					classes: 'embedded-table',
 				},
-				model: ( viewElement, modelWriter ) => {
+				model: ( viewElement, {writer:modelWriter} ) => {
 					const queryProps = viewElement.getAttribute( 'data-query-props' );
 					return modelWriter.createElement(
 						'op-macro-embedded-table',
@@ -55,14 +55,14 @@ export default class EmbeddedTableEditing extends Plugin {
 
 		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-embedded-table',
-			view: (modelElement, viewWriter) => {
+			view: (modelElement, {writer:viewWriter}) => {
 				return toEmbeddedTableWidget(this.createEmbeddedTableView(viewWriter), viewWriter, { label: this.label } )
 			}
 	    } );
 
 		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-embedded-table',
-			view: (modelElement, viewWriter) => {
+			view: (modelElement, {writer:viewWriter}) => {
 				return this.createEmbeddedTableDataElement(modelElement, viewWriter)
 			}
 		});
