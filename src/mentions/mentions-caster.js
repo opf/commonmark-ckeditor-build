@@ -54,7 +54,7 @@ export function MentionCaster( editor ) {
 		.attributeToElement({
 			model: 'mention',
 			converterPriority: 'high',
-			view: (modelAttributeValue, writer) => {
+			view: (modelAttributeValue, {writer}) => {
 				// Do not convert empty attributes (lack of value means no mention).
 				if ( !modelAttributeValue ) {
 					return;

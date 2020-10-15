@@ -35,7 +35,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 					name: 'macro',
 					classes: 'create_work_package_link'
 				},
-				model: ( viewElement, modelWriter ) => {
+				model: ( viewElement, {writer:modelWriter} ) => {
 					const type = viewElement.getAttribute( 'data-type' ) || '';
 					const classes = viewElement.getAttribute( 'data-classes' ) || '';
 
@@ -52,14 +52,14 @@ export default class OPMacroWpButtonEditing extends Plugin {
 
 		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-wp-button',
-			view: (modelElement, writer) => {
+			view: (modelElement, {writer}) => {
 				return this.createMacroViewElement(modelElement, writer);
 			}
 	    } );
 
 		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-wp-button',
-			view: (modelElement, writer) => {
+			view: (modelElement, {writer}) => {
 				const element = writer.createContainerElement(
 					'macro',
 					{

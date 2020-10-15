@@ -37,7 +37,7 @@ export default class CodeBlockEditing extends Plugin {
 		conversion.for( 'editingDowncast' )
 			.elementToElement( {
 				model: 'codeblock',
-				view: (modelElement, viewWriter) => {
+				view: (modelElement, {writer:viewWriter}) => {
 					return createCodeBlockWidget( modelElement, viewWriter, 'Code block' );
 				}
 			} )
