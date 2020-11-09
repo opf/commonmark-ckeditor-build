@@ -27,6 +27,8 @@ export function configurationCustomizer(editorClass) {
 		}
 
 		// Return the original promise for instance creation
-		return editorClass.create(wrapper, configuration);
+		return editorClass.create(wrapper, configuration).then(editor => {
+			return editor;
+		});
 	};
 }

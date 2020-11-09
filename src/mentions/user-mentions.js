@@ -17,8 +17,7 @@ export function userMentions(queryText) {
 		jQuery
 			.getJSON(url, collection => {
 				resolve(collection._embedded.elements.map(user => {
-					const type = user._type.toLowerCase();
-					const displayText = `${type}#${user.id}`;
+					const displayText = `@${user.name}`;
 					const id = `@${user.id}`;
 					return { type: 'user', id: id, text: displayText, name: user.name, link: base + user.id };
 				}));

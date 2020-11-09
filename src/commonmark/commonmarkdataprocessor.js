@@ -11,7 +11,7 @@
 
 import HtmlDataProcessor from '@ckeditor/ckeditor5-engine/src/dataprocessor/htmldataprocessor';
 import DomConverter from '@ckeditor/ckeditor5-engine/src/view/domconverter';
-import {highlightedCodeBlock, taskListItems} from 'turndown-plugin-gfm';
+import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
@@ -156,6 +156,20 @@ export default class CommonMarkDataProcessor {
 				var outer = node.outerHTML;
 				return outer.replace("</macro>", "\n</macro>")
 			}
+		});
+
+		turndownService.addRule( 'mentions', {
+			filter: (node) => {
+				return (
+					node.nodeName === 'MENTION' &&
+					node.getAttribute('data-id') &&
+					node.getAttribute('data-type') &&
+					node.getAttribute('data-link') &&
+					node.getAttribute('data-text') &&
+					node.classList.contains('mention')
+				)
+			},
+			replacement: ( _content, node ) => node.outerHTML,
 		});
 
 		return turndownService.turndown( domFragment );
