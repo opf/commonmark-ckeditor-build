@@ -44,9 +44,9 @@ export function MentionCaster( editor ) {
 					'a',
 					{
 						'class': 'mention',
-						'href': modelAttributeValue.link || '',
-						'data-mention': modelAttributeValue.id || '',
-						'title': modelAttributeValue.text || '',
+						'href': modelAttributeValue,
+						'data-mention': modelAttributeValue.id,
+						'title': modelAttributeValue.text,
 					}
 				);
 
@@ -69,10 +69,10 @@ export function MentionCaster( editor ) {
 					'mention',
 					{
 						'class': 'mention',
-						'data-id': modelAttributeValue.id || '',
-						'data-type': modelAttributeValue.type || '',
-						'data-link': modelAttributeValue.link || '',
-						'data-text': modelAttributeValue.text || '',
+						'data-id': modelAttributeValue.id.replace('@', ''),
+						'data-type': modelAttributeValue.type,
+						'data-link': modelAttributeValue.link,
+						'data-text': modelAttributeValue.text,
 					}
 				);
 
