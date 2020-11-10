@@ -164,7 +164,6 @@ export default class CommonMarkDataProcessor {
 					node.nodeName === 'MENTION' &&
 					node.getAttribute('data-id') &&
 					node.getAttribute('data-type') &&
-					node.getAttribute('data-link') &&
 					node.getAttribute('data-text') &&
 					node.classList.contains('mention')
 				)

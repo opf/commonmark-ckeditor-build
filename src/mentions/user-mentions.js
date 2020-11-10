@@ -1,4 +1,4 @@
-import { getOPResource, getOPPath } from "../plugins/op-context/op-context";
+import {getOPResource, getOPPath, getPluginContext} from "../plugins/op-context/op-context";
 
 export function userMentions(queryText) {
 	 let editor = this;
@@ -11,7 +11,11 @@ export function userMentions(queryText) {
 
 	const project_id = resource.project.idFromLink;
 	const url = getOPPath(editor).api.v3.principals(project_id, queryText);
-	let base = window.OpenProject.urlRoot + `/users/`;
+	const pluginContext = getPluginContext(editor);
+	const base = window.OpenProject.urlRoot;
+	const typeSegment = pluginContext.services.apiV3Service.users.segment;
+	const linkBase = `${base}/${typeSegment}/`;
+
 
 	return new Promise((resolve, reject) => {
 		jQuery
@@ -19,7 +23,8 @@ export function userMentions(queryText) {
 				resolve(collection._embedded.elements.map(user => {
 					const displayText = `@${user.name}`;
 					const id = `@${user.id}`;
-					return { type: 'user', id: id, text: displayText, name: user.name, link: base + user.id };
+
+					return { type: 'user', id: id, text: displayText, name: user.name, link: linkBase + user.id };
 				}));
 			});
 		})
