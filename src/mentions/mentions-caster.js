@@ -1,7 +1,21 @@
 import {getPluginContext} from "../plugins/op-context/op-context";
+import ClickObserver from '@ckeditor/ckeditor5-engine/src/view/observer/clickobserver';
+
 
 export function MentionCaster( editor ) {
 	const pluginContext = getPluginContext(editor);
+	const view = editor.editing.view;
+	const viewDocument = view.document;
+
+	view.addObserver( ClickObserver );
+
+	editor.listenTo( viewDocument, 'click', ( evt, data ) => {
+		const modelElement = editor.editing.mapper.toModelElement( data.target);
+
+		if ( modelElement.name == 'mention' ) {
+			console.log( 'mention has been clicked.' );
+		}
+	} );
 
 	// The upcast converter will convert <mention data-id...></mention> elements
 	// on the input HTML data to the model 'mention' attribute.
