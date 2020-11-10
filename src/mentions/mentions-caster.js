@@ -44,8 +44,10 @@ export function MentionCaster( editor ) {
 					'a',
 					{
 						'class': 'mention',
-						'href': modelAttributeValue,
-						'data-mention': modelAttributeValue.id,
+						'href': modelAttributeValue.link,
+						'data-mention': modelAttributeValue.id.startsWith('@') ?
+											modelAttributeValue.id :
+											`@${modelAttributeValue.id}`,
 						'title': modelAttributeValue.text,
 					}
 				);
