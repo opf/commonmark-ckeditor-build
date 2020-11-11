@@ -162,9 +162,6 @@ export default class CommonMarkDataProcessor {
 			filter: (node) => {
 				return (
 					node.nodeName === 'MENTION' &&
-					node.getAttribute('data-id') &&
-					node.getAttribute('data-type') &&
-					node.getAttribute('data-text') &&
 					node.classList.contains('mention')
 				)
 			},
