@@ -7,13 +7,16 @@ export function MentionCaster( editor ) {
 	const view = editor.editing.view;
 	const viewDocument = view.document;
 
-	view.addObserver( ClickObserver );
+	view.addObserver(ClickObserver);
 
-	editor.listenTo( viewDocument, 'click', ( evt, data ) => {
-		const modelElement = editor.editing.mapper.toModelElement( data.target);
+	// Open mention links, in a new tab
+	editor.listenTo(viewDocument, 'click', (evt, data) => {
+		if (data.domTarget.nodeName === 'A' &&  data.domTarget.classList.contains('mention')) {
+			const link = document.createElement('a');
+			link.target = '_blank';
+			link.href = data.domTarget.attributes.href.value;
 
-		if ( modelElement.name == 'mention' ) {
-			console.log( 'mention has been clicked.' );
+			link.click();
 		}
 	} );
 
