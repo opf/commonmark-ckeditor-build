@@ -18,7 +18,7 @@ export function MentionCaster( editor ) {
 
 			link.click();
 		}
-	} );
+	});
 
 	// The upcast converter will convert <mention data-id...></mention> elements
 	// on the input HTML data to the model 'mention' attribute.
@@ -33,16 +33,15 @@ export function MentionCaster( editor ) {
 		model: {
 			key: 'mention',
 			value: viewItem => {
-				const typesPathMap = {
-					user: 'users',
-					group: 'groups',
-				}
 				const id = viewItem.getAttribute( 'data-id' );
-				const type = viewItem.getAttribute( 'data-type' );
-				const base = window.OpenProject.urlRoot;
-				const typeSegment = pluginContext.services.apiV3Service[typesPathMap[type]].segment;
-				const link = `${base}/${typeSegment}/${id}`;
 				const text = viewItem.getAttribute( 'data-text' );
+				const type = viewItem.getAttribute( 'data-type' );
+				const typesPathMap = {
+					user: pluginContext.services.apiV3Service[`${type}s`].segment,
+					group: `admin/${pluginContext.services.apiV3Service[`${type}s`].segment}`,
+				}
+				const base = window.OpenProject.urlRoot;
+				const link = `${base}/${typesPathMap[type]}/${id}`;
 				// The mention feature expects that the mention attribute value
 				// in the model is a plain object with a set of additional attributes.
 				// In order to create a proper object use the toMentionAttribute() helper method:
