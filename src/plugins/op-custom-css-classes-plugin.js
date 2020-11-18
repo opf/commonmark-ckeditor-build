@@ -45,8 +45,13 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	};
 
 	init() {
+		this._addCustomCSSClassesToTheEditorContainer(this.editor);
 		this._addCustomCSSClassesToElements(this.elementsWithCustomClassesMap);
 		this._addCustomCSSClassesToAttributes(this.attributesWithCustomClassesMap);
+	}
+
+	_addCustomCSSClassesToTheEditorContainer(editor) {
+		editor.sourceElement.parentElement.classList.add(`${this.preFix}container`);
 	}
 
 	_addCustomCSSClassesToElements(elementsWithCustomClassesMap) {
@@ -60,7 +65,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const viewElement = conversionApi.mapper.toViewElement(modelElement);
 					let viewElements = [viewElement];
 					// Images and tables are nested in a figure element, listItems are
-					// nested inside ul or ol elements
+					// nested inside ul or ol elements (only in the view, in the model are
+					// single elements).
 					const isNestedElement = elementName === 'image' || elementName === 'table' || elementName === 'listItem';
 
 					if (!elementsWithCustomClasses.includes(elementName) || !viewElement) {
