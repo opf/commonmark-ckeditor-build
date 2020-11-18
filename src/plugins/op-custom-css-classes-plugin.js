@@ -79,11 +79,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 							}
 
 							if (elementName === 'table') {
-								viewChildren.forEach(viewChild => {
-									if (elementsWithCustomClasses.includes(viewChild.name)) {
-										viewElements = [...viewElements, viewChild];
-									}
-								})
+								const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
+								viewElements = [...viewElements, ...childrenToAdd];
 							}
 						}
 					}
