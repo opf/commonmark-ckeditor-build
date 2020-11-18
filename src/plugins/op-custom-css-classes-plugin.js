@@ -14,14 +14,18 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'heading4': 'h4',
 			'heading5': 'h5',
 			'heading6': 'h6',
-			'listItem': 'list--item',
 			'blockQuote': 'blockquote',
 			'figure': 'figure',
 			'table': ['table', 'figure--content'],
 			'tr': 'table--row',
 			'td': 'table--cell',
 			'th': ['table--cell', 'table--cell_head'],
-			// The Image name in the view is 'img' while in the model's is 'image'
+			'ol': 'list',
+			'ul': 'list',
+			// The list item's name in the view is 'li' while in the model is 'listItem'
+			'listItem': 'list--item',
+			'li': 'list--item',
+			// The image's name in the view is 'img' while in the model is 'image'
 			'image': ['image', 'figure--content'],
 			'img': ['image', 'figure--content'],
 			'codeblock': 'code-block',
@@ -55,32 +59,37 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const modelElement = data.item;
 					const viewElement = conversionApi.mapper.toViewElement(modelElement);
 					let viewElements = [viewElement];
-					// Images and tables are nested in a figure element
-					const isFigureElement = elementName === 'image' || elementName === 'table';
+					// Images and tables are nested in a figure element, listItems are
+					// nested inside ul or ol elements
+					const isNestedElement = elementName === 'image' || elementName === 'table' || elementName === 'listItem';
 
 					if (!elementsWithCustomClasses.includes(elementName) || !viewElement) {
 						return;
 					}
 
-					if (isFigureElement) {
-						const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
+					if (isNestedElement) {
+						if (elementName === 'listItem') {
+							viewElements = [...viewElements, viewElement.parent];
+						} else {
+							const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
 
-						if (elementName === 'image') {
-							const image = viewChildren.find(item => item.is('element', 'img'));
-							viewElements = [...viewElements, image];
-						}
+							if (elementName === 'image') {
+								const image = viewChildren.find(item => item.is('element', 'img'));
+								viewElements = [...viewElements, image];
+							}
 
-						if (elementName === 'table') {
-							viewChildren.forEach(viewChild => {
-								if (elementsWithCustomClasses.includes(viewChild.name)) {
-									viewElements = [...viewElements, viewChild];
-								}
-							})
+							if (elementName === 'table') {
+								viewChildren.forEach(viewChild => {
+									if (elementsWithCustomClasses.includes(viewChild.name)) {
+										viewElements = [...viewElements, viewChild];
+									}
+								})
+							}
 						}
 					}
 
 					viewElements.forEach(viewElement => {
-						const elementKey = isFigureElement ? viewElement.name : elementName;
+						const elementKey = isNestedElement ? viewElement.name : elementName;
 						let elementClasses = Array.isArray(elementsWithCustomClassesMap[elementKey]) ?
 							elementsWithCustomClassesMap[elementKey].map(elementClass => `${this.preFix}${elementClass}`) :
 							`${this.preFix}${elementsWithCustomClassesMap[elementKey]}`;
