@@ -48,7 +48,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	_addCustomCSSClassesToElements(elementsWithCustomClassesMap) {
 		const elementsWithCustomClasses = Object.keys(elementsWithCustomClassesMap);
 
-		this.editor.conversion.for( 'editingDowncast' ).add(dispatcher => {
+		this.editor.conversion.for('editingDowncast').add(dispatcher => {
 			dispatcher.on(`insert`, (evt, data, conversionApi) => {
 					const elementName = data.item.name;
 					const viewWriter = conversionApi.writer;
@@ -95,8 +95,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	_addCustomCSSClassesToAttributes(attributesWithCustomClassesMap) {
 		const attributesWithCustomClasses = Object.keys(attributesWithCustomClassesMap);
 
-		this.editor.conversion.for( 'editingDowncast' ).add( dispatcher => {
-			dispatcher.on( 'attribute', ( evt, data, conversionApi ) => {
+		this.editor.conversion.for('editingDowncast').add(dispatcher => {
+			dispatcher.on('attribute', (evt, data, conversionApi) => {
 				const attributeName = data.attributeKey;
 				const viewWriter = conversionApi.writer;
 
@@ -105,24 +105,24 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 
 				if (attributeName === 'linkHref') {
-					const viewElement = viewWriter.createAttributeElement( 'a', {
+					const viewElement = viewWriter.createAttributeElement('a', {
 						class: `${this.preFix}${attributesWithCustomClassesMap[attributeName]}`,
 					}, {
 						priority: 5
-					} );
+					});
 
-					viewWriter.wrap( conversionApi.mapper.toViewRange( data.range ), viewElement );
+					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
 				} else {
 					const modelElement = data.item;
-					let viewElement = conversionApi.mapper.toViewElement( modelElement );
+					let viewElement = conversionApi.mapper.toViewElement(modelElement);
 
-					if ( !viewElement ) {
+					if (!viewElement) {
 						return;
 					}
 
-					viewWriter.addClass( `${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, viewElement);
+					viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, viewElement);
 				}
-			}, { priority: 'low' } );
-		} );
+			}, { priority: 'low' });
+		});
 	}
 }
