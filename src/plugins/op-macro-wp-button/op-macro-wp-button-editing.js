@@ -114,7 +114,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		const classes = modelElement.getAttribute('classes') || '';
 		const label = this.macroLabel(); // TODO: Pass type, it is not updated on coming back from the modal..
 		const placeholder = writer.createText( label );
-		const container = writer.createContainerElement( 'span', { class: 'macro -create_work_package_link ' + classes } );
+		const container = writer.createContainerElement( 'span', { class: classes } );
 
 		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
 		return toWpButtonMacroWidget(container, writer, { label: label } )

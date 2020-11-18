@@ -97,7 +97,7 @@ export default class EmbeddedTableEditing extends Plugin {
 
 	createEmbeddedTableView(writer) {
 		const placeholder = writer.createText( this.text.macro_text );
-		const container = writer.createContainerElement( 'div', { class: 'macro -embedded-table' } );
+		const container = writer.createContainerElement( 'div' );
 
 		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
 		return container;

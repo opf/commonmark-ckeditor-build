@@ -139,7 +139,7 @@ export default class OPChildPagesEditing extends Plugin {
 	}
 
 	createMacroViewElement(modelElement, writer) {
-		const placeholderContainer = writer.createContainerElement( 'div', { class: 'macro -child_pages' } );
+		const placeholderContainer = writer.createContainerElement( 'div' );
 
 		this.setPlaceholderContent( writer, modelElement, placeholderContainer );
 

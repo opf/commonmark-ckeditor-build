@@ -117,11 +117,11 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 
 				if (attributeName === 'linkHref') {
-					const viewElement = viewWriter.createAttributeElement('a', {
-						class: `${this.preFix}${attributesWithCustomClassesMap[attributeName]}`,
-					}, {
-						priority: 5
-					});
+					const viewElement = viewWriter.createAttributeElement(
+						'a',
+						{ class: `${this.preFix}${attributesWithCustomClassesMap[attributeName]}` },
+						{ priority: 5 }
+					);
 
 					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
 				}
