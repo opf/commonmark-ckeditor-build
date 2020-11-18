@@ -112,15 +112,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					});
 
 					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
-				} else {
+				}
+
+				if (attributeName === 'code') {
 					const modelElement = data.item;
-					let viewElement = conversionApi.mapper.toViewElement(modelElement);
+					const parentViewElement = conversionApi.mapper.toViewElement(modelElement.parent);
+					const viewChildren = Array.from(conversionApi.writer.createRangeIn(parentViewElement).getItems());
+					const codeElement = viewChildren.find(item => item.is('element', 'code'));
 
-					if (!viewElement) {
-						return;
-					}
-
-					viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, viewElement);
+					viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, codeElement);
 				}
 			}, { priority: 'low' });
 		});
