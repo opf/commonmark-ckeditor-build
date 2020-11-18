@@ -41,6 +41,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		return {
 			'code': 'code',
 			'linkHref': 'link',
+			'alignment':'figure_align-'
 		};
 	};
 
@@ -133,6 +134,32 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const codeElement = viewChildren.find(item => item.is('element', 'code'));
 
 					viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, codeElement);
+				}
+
+				if (attributeName === 'alignment') {
+					const modelElement = data.item;
+					const viewElement = conversionApi.mapper.toViewElement(modelElement);
+
+					if (modelElement.name === 'table') {
+						const alignmentValuesMap = {
+							'left': 'start',
+							'right': 'end',
+							'center': 'center'
+						};
+						// When the selected align is 'center', data.attributeNewValue is null
+						const alignmentToApply = alignmentValuesMap[data.attributeNewValue || 'center'];
+						const alignmentClasses = Object
+													.values(alignmentValuesMap)
+													.map(alignmentValue => `${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
+
+						alignmentClasses
+							.filter(alignmentClass => viewElement.hasClass(alignmentClass))
+							.forEach(alignmentClass => viewWriter.removeClass(alignmentClass, viewElement));
+
+						if (alignmentToApply) {
+							viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, viewElement);
+						}
+					}
 				}
 			}, { priority: 'low' });
 		});
