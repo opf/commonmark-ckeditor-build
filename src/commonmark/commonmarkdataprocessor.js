@@ -59,7 +59,6 @@ export default class CommonMarkDataProcessor {
 
 		// Fix empty code blocks
 		fixEmptyCodeBlocks( domFragment );
-
 		// Convert DOM DocumentFragment to view DocumentFragment.
 		return this._domConverter.domToView( domFragment );
 	}
@@ -130,8 +129,9 @@ export default class CommonMarkDataProcessor {
 		// Keep HTML tables and remove filler elements
 		turndownService.addRule('htmlTables', {
 			filter: function (node) {
+				const tables = node.getElementsByTagName('table');
 				// check if we're a todo list item
-				return node.nodeName === 'FIGURE' && node.classList.contains('table');
+				return node.nodeName === 'FIGURE' && tables.length;
 			},
 			replacement: function (_content, node) {
 				// Remove filler nodes
