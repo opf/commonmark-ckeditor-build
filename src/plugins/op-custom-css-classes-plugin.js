@@ -45,23 +45,37 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		};
 	};
 
+	get alignmentValuesMap() {
+		return {
+			'left': 'start',
+			'right': 'end',
+			'center': 'center',
+			'default': 'center',
+		}
+	};
+
+	get alignmentClassPrefix() {
+		return `${this.preFix}${this.attributesWithCustomClassesMap.alignment}`;
+	}
+
 	init() {
 		this._addCustomCSSClassesToTheEditorContainer(this.editor);
-		this._addCustomCSSClassesToElements(this.elementsWithCustomClassesMap);
-		this._addCustomCSSClassesToAttributes(this.attributesWithCustomClassesMap);
+		this._addCustomCSSClassesToElements(this.elementsWithCustomClassesMap, this.alignmentValuesMap);
+		this._addCustomCSSClassesToAttributes(this.attributesWithCustomClassesMap, this.alignmentValuesMap);
 	}
 
 	_addCustomCSSClassesToTheEditorContainer(editor) {
 		editor.sourceElement.parentElement.classList.add(`${this.preFix}container`);
 	}
 
-	_addCustomCSSClassesToElements(elementsWithCustomClassesMap) {
+	_addCustomCSSClassesToElements(elementsWithCustomClassesMap, alignmentValuesMap) {
 		const elementsWithCustomClasses = Object.keys(elementsWithCustomClassesMap);
 
 		this.editor.model.schema.extend('table', { allowAttributes: [ 'figureClasses' ] } );
 
 		this.editor.conversion.for('upcast').add(dispatcher => {
 			dispatcher.on(`element:table`, (evt, data, conversionApi) => {
+				const writer = conversionApi.writer;
 				const viewItem = data.viewItem;
 				const modelRange = data.modelRange;
 				const modelElement = modelRange && modelRange.start.nodeAfter;
@@ -74,12 +88,28 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				// this table model element. In the downcast we'll take this classes to place them again
 				// in the figure that wraps the table. This is because the figure element doesn't exist in
 				// the model but CkEditor wraps every table and image with a <figure>.
-				const figureClasses = modelElement.getAttribute( 'figureClasses' ) || [];
+				let figureClasses = modelElement.getAttribute( 'figureClasses' ) || [];
 				const parentFigureClasses = [...viewItem.parent.getClassNames()].filter(figureClass => !!figureClass);
 
-				figureClasses.push(...parentFigureClasses);
+				figureClasses = [...figureClasses, ...parentFigureClasses];
 
-				conversionApi.writer.setAttribute('figureClasses', figureClasses, modelElement);
+				const alignmentClass = parentFigureClasses.filter(figureClass => figureClass.startsWith(this.alignmentClassPrefix))[0];
+				const alignmentAlias = alignmentClass && alignmentClass.replace(this.alignmentClassPrefix, '') || alignmentValuesMap.default;
+				const alignmentToApply = Object.keys(alignmentValuesMap).find(alignmentKey => alignmentValuesMap[alignmentKey] === alignmentAlias);
+
+				if (!alignmentClass) {
+					const defaultAlignClass = `${this.alignmentClassPrefix}${alignmentAlias}`;
+					figureClasses = [...figureClasses, defaultAlignClass];
+				}
+
+				writer.setAttribute('figureClasses', figureClasses, modelElement);
+
+
+				if (alignmentToApply === 'center') {
+					writer.setAttribute('alignment', null, modelElement);
+				} else {
+					writer.setAttribute('alignment', alignmentToApply, modelElement);
+				}
 			})
 		}, {priority: 'high'});
 
@@ -112,14 +142,14 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 							}
 
 							if (elementName === 'table') {
-								viewWriter.addClass(modelElement.getAttribute('figureClasses'), figureViewElement);
+								const tableAlignment = modelElement.getAttribute('alignment');
+								const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
 
-								// Apply default alignment css class if it's the first time we load the figure (data migration)
-								if (!figureViewElement.hasClass('op-uc-figure')) {
-									viewWriter.addClass('op-uc-figure_align-center', figureViewElement);
+								if (!tableAlignment) {
+									const defaultAlignClass = `${this.alignmentClassPrefix}${alignmentValuesMap.default}`;
+									viewWriter.addClass(defaultAlignClass, figureViewElement);
 								}
 
-								const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
 								viewElements = [...viewElements, ...childrenToAdd];
 							}
 
@@ -144,7 +174,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		});
 	}
 
-	_addCustomCSSClassesToAttributes(attributesWithCustomClassesMap) {
+	_addCustomCSSClassesToAttributes(attributesWithCustomClassesMap, alignmentValuesMap) {
 		const attributesWithCustomClasses = Object.keys(attributesWithCustomClassesMap);
 
 		this.editor.conversion.for('downcast').add(dispatcher => {
@@ -176,31 +206,25 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 
 				if (attributeName === 'alignment') {
-					const viewElement = conversionApi.mapper.toViewElement(modelElement);
-
 					if (modelElement.name === 'table') {
-						const alignmentValuesMap = {
-							'left': 'start',
-							'right': 'end',
-							'center': 'center'
-						};
+						const figureViewElement = conversionApi.mapper.toViewElement(modelElement);
 						// When the selected align is 'center', data.attributeNewValue is null
-						const alignmentToApply = alignmentValuesMap[data.attributeNewValue || 'center'];
+						const alignmentToApply = alignmentValuesMap[data.attributeNewValue || alignmentValuesMap.default];
 						const alignmentClasses = Object
 													.values(alignmentValuesMap)
 													.map(alignmentValue => `${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
 
 						alignmentClasses
-							.filter(alignmentClass => viewElement.hasClass(alignmentClass))
-							.forEach(alignmentClass => viewWriter.removeClass(alignmentClass, viewElement));
+							.filter(alignmentClass => figureViewElement.hasClass(alignmentClass))
+							.forEach(alignmentClass => viewWriter.removeClass(alignmentClass, figureViewElement));
 
 						// Remove inline alignment styles and classes, they will be handled by
 						// custom classes (ie: op-uc-figure_align-center)
-						if (viewElement.hasStyle('float')) {
-							viewWriter.removeStyle('float', viewElement);
+						if (figureViewElement.hasStyle('float')) {
+							viewWriter.removeStyle('float', figureViewElement);
 						}
 
-						viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, viewElement);
+						viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
 					}
 				}
 			}, { priority: 'low' });

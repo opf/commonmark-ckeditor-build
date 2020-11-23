@@ -1,4 +1,5 @@
 import {opImageUploadPlugins, opMacroPlugins} from './op-plugins';
+import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
 
 export function configurationCustomizer(editorClass) {
 	return (wrapper, configuration) => {
@@ -28,6 +29,7 @@ export function configurationCustomizer(editorClass) {
 
 		// Return the original promise for instance creation
 		return editorClass.create(wrapper, configuration).then(editor => {
+			CKEditorInspector.attach(editor);
 			return editor;
 		});
 	};
