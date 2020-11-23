@@ -1,71 +1,68 @@
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
 export default class OpCustomCssClassesPlugin extends Plugin {
-	get preFix() {
-		return 'op-uc-';
-	}
 
-	get elementsWithCustomClassesMap() {
-		return {
-			'paragraph': 'p',
-			'heading1': 'h1',
-			'heading2': 'h2',
-			'heading3': 'h3',
-			'heading4': 'h4',
-			'heading5': 'h5',
-			'heading6': 'h6',
-			'blockQuote': 'blockquote',
-			'figure': 'figure',
-			'table': ['table', 'figure--content'],
-			'tr': 'table--row',
-			'td': 'table--cell',
-			'th': ['table--cell', 'table--cell_head'],
-			'ol': 'list',
-			'ul': 'list',
-			// The list item's name in the view is 'li' while in the model is 'listItem'
-			'listItem': 'list--item',
-			'li': 'list--item',
-			// The image's name in the view is 'img' while in the model is 'image'
-			'image': ['image', 'figure--content'],
-			'img': ['image', 'figure--content'],
-			'codeblock': 'code-block',
-			'caption': 'figure--description',
-			'op-macro-embedded-table': 'placeholder',
-			'op-macro-wp-button': 'placeholder',
-			'op-macro-child-pages': 'placeholder',
-			'op-macro-toc': 'placeholder',
+	get config() {
+		const preFix = 'op-uc-';
+		const editorClass = `${preFix}container`;
+		const elementsWithCustomClassesMap = {
+			'paragraph': `${preFix}p`,
+			'heading1': `${preFix}h1`,
+			'heading2': `${preFix}h2`,
+			'heading3': `${preFix}h3`,
+			'heading4': `${preFix}h4`,
+			'heading5': `${preFix}h5`,
+			'heading6': `${preFix}h6`,
+			'blockQuote': `${preFix}blockquote`,
+			'figure': `${preFix}figure`,
+			'table': [`${preFix}table`, `${preFix}figure--content`],
+			'tr': `${preFix}table--row`,
+			'td': `${preFix}table--cell`,
+			'th': [`${preFix}table--cell`, `${preFix}table--cell_head`],
+			'ol': `${preFix}list`,
+			'ul': `${preFix}list`,
+				// The list item's name in the view is 'li' while in the model is 'listItem'
+			'listItem': `${preFix}list--item`,
+			'li': `${preFix}list--item`,
+				// The image's name in the view is 'img' while in the model is 'image'
+			'image': [`${preFix}image`, `${preFix}figure--content`],
+			'img': [`${preFix}image`, `${preFix}figure--content`],
+			'codeblock': `${preFix}code-block`,
+			'caption': `${preFix}figure--description`,
+			'op-macro-embedded-table': `${preFix}placeholder`,
+			'op-macro-wp-button': `${preFix}placeholder`,
+			'op-macro-child-pages': `${preFix}placeholder`,
+			'op-macro-toc': `${preFix}placeholder`,
 		};
-	};
-
-	get attributesWithCustomClassesMap() {
-		return {
-			'code': `${this.prefix}code`,
-			'linkHref': `${this.prefix}link`,
-			'alignment':`${this.prefix}figure_align-`
+		const attributesWithCustomClassesMap = {
+			'code': `${preFix}code`,
+			'linkHref': `${preFix}link`,
+			'alignment': `${preFix}figure_align-`
 		};
-	};
-
-	get alignmentValuesMap() {
-		return {
+		const alignmentValuesMap = {
 			'left': 'start',
 			'right': 'end',
 			'center': 'center',
 			'default': 'center',
-		}
-	};
+		};
 
-	get alignmentClassPrefix() {
-		return this.attributesWithCustomClassesMap.alignment;
+		return {
+			preFix,
+			editorClass,
+			elementsWithCustomClassesMap,
+			attributesWithCustomClassesMap,
+			alignmentValuesMap,
+		}
 	}
 
 	init() {
 		this._addCustomCSSClassesToTheEditorContainer(this.editor);
-		this._addCustomCSSClassesToElements(this.elementsWithCustomClassesMap, this.attributesWithCustomClassesMap, this.alignmentValuesMap);
-		this._addCustomCSSClassesToAttributes(this.attributesWithCustomClassesMap, this.alignmentValuesMap);
+		this._addCustomCSSClassesToElements(this.config.elementsWithCustomClassesMap, this.config.attributesWithCustomClassesMap, this.config.alignmentValuesMap);
+		this._addCustomCSSClassesToAttributes(this.config.attributesWithCustomClassesMap, this.config.alignmentValuesMap);
 	}
 
 	_addCustomCSSClassesToTheEditorContainer(editor) {
-		editor.sourceElement.parentElement.classList.add(`${this.preFix}container`);
+		editor.sourceElement.parentElement.classList.add(this.config.editorClass);
 	}
 
 	_addCustomCSSClassesToElements(elementsWithCustomClassesMap, attributesWithCustomClassesMap, alignmentValuesMap) {
@@ -103,7 +100,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 
 				writer.setAttribute('figureClasses', figureClasses, modelElement);
-
 
 				if (alignmentToApply === 'center') {
 					writer.setAttribute('alignment', null, modelElement);
@@ -163,9 +159,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 					viewElements.forEach(viewElement => {
 						const elementKey = isNestedElement ? viewElement.name : elementName;
-						let elementClasses = Array.isArray(elementsWithCustomClassesMap[elementKey]) ?
-												elementsWithCustomClassesMap[elementKey].map(elementClass => `${this.preFix}${elementClass}`) :
-												`${this.preFix}${elementsWithCustomClassesMap[elementKey]}`;
+						const elementClasses = elementsWithCustomClassesMap[elementKey];
 
 						viewWriter.addClass(elementClasses, viewElement);
 					});
@@ -190,7 +184,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				if (attributeName === 'linkHref') {
 					const viewElement = viewWriter.createAttributeElement(
 						'a',
-						{ class: `${this.preFix}${attributesWithCustomClassesMap[attributeName]}` },
+						{ class: attributesWithCustomClassesMap[attributeName] },
 						{ priority: 5 }
 					);
 
@@ -202,7 +196,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const viewChildren = Array.from(conversionApi.writer.createRangeIn(parentViewElement).getItems());
 					const codeElement = viewChildren.find(item => item.is('element', 'code'));
 
-					viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, codeElement);
+					viewWriter.addClass(attributesWithCustomClassesMap[attributeName], codeElement);
 				}
 
 				if (attributeName === 'alignment') {
@@ -212,7 +206,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						const alignmentToApply = alignmentValuesMap[data.attributeNewValue || alignmentValuesMap.default];
 						const alignmentClasses = Object
 													.values(alignmentValuesMap)
-													.map(alignmentValue => `${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
+													.map(alignmentValue => `${attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
 
 						alignmentClasses
 							.filter(alignmentClass => figureViewElement.hasClass(alignmentClass))
@@ -224,7 +218,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 							viewWriter.removeStyle('float', figureViewElement);
 						}
 
-						viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
+						viewWriter.addClass(`${attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
 					}
 				}
 			}, { priority: 'low' });
