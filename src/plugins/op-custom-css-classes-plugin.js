@@ -52,7 +52,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	}
 
 	_addCustomCSSClassesToTheEditorContainer(editor) {
-		editor.sourceElement.parentElement.classList.add(`${this.preFix}container`);
+		editor.sourceElement.classList.add(`${this.preFix}container`, `${this.preFix}container_editing`);
 	}
 
 	_addCustomCSSClassesToElements(elementsWithCustomClassesMap) {
@@ -165,17 +165,12 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					);
 
 					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
-				}
-
-				if (attributeName === 'code') {
+				} else if (attributeName === 'code') {
 					const parentViewElement = conversionApi.mapper.toViewElement(modelElement.parent);
 					const viewChildren = Array.from(conversionApi.writer.createRangeIn(parentViewElement).getItems());
 					const codeElement = viewChildren.find(item => item.is('element', 'code'));
-
 					viewWriter.addClass(`${this.preFix}${attributesWithCustomClassesMap[attributeName]}`, codeElement);
-				}
-
-				if (attributeName === 'alignment') {
+				} else if (attributeName === 'alignment') {
 					const viewElement = conversionApi.mapper.toViewElement(modelElement);
 
 					if (modelElement.name === 'table') {
