@@ -39,9 +39,9 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 	get attributesWithCustomClassesMap() {
 		return {
-			'code': 'code',
-			'linkHref': 'link',
-			'alignment':'figure_align-'
+			'code': `${this.prefix}code`,
+			'linkHref': `${this.prefix}link`,
+			'alignment':`${this.prefix}figure_align-`
 		};
 	};
 
@@ -55,12 +55,12 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	};
 
 	get alignmentClassPrefix() {
-		return `${this.preFix}${this.attributesWithCustomClassesMap.alignment}`;
+		return this.attributesWithCustomClassesMap.alignment;
 	}
 
 	init() {
 		this._addCustomCSSClassesToTheEditorContainer(this.editor);
-		this._addCustomCSSClassesToElements(this.elementsWithCustomClassesMap, this.alignmentValuesMap);
+		this._addCustomCSSClassesToElements(this.elementsWithCustomClassesMap, this.attributesWithCustomClassesMap, this.alignmentValuesMap);
 		this._addCustomCSSClassesToAttributes(this.attributesWithCustomClassesMap, this.alignmentValuesMap);
 	}
 
@@ -68,7 +68,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		editor.sourceElement.parentElement.classList.add(`${this.preFix}container`);
 	}
 
-	_addCustomCSSClassesToElements(elementsWithCustomClassesMap, alignmentValuesMap) {
+	_addCustomCSSClassesToElements(elementsWithCustomClassesMap, attributesWithCustomClassesMap, alignmentValuesMap) {
 		const elementsWithCustomClasses = Object.keys(elementsWithCustomClassesMap);
 
 		this.editor.model.schema.extend('table', { allowAttributes: [ 'figureClasses' ] } );
@@ -93,12 +93,12 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 				figureClasses = [...figureClasses, ...parentFigureClasses];
 
-				const alignmentClass = parentFigureClasses.filter(figureClass => figureClass.startsWith(this.alignmentClassPrefix))[0];
-				const alignmentAlias = alignmentClass && alignmentClass.replace(this.alignmentClassPrefix, '') || alignmentValuesMap.default;
+				const alignmentClass = parentFigureClasses.filter(figureClass => figureClass.startsWith(attributesWithCustomClassesMap.alignment))[0];
+				const alignmentAlias = alignmentClass && alignmentClass.replace(attributesWithCustomClassesMap.alignment, '') || alignmentValuesMap.default;
 				const alignmentToApply = Object.keys(alignmentValuesMap).find(alignmentKey => alignmentValuesMap[alignmentKey] === alignmentAlias);
 
 				if (!alignmentClass) {
-					const defaultAlignClass = `${this.alignmentClassPrefix}${alignmentAlias}`;
+					const defaultAlignClass = `${attributesWithCustomClassesMap.alignment}${alignmentAlias}`;
 					figureClasses = [...figureClasses, defaultAlignClass];
 				}
 
@@ -146,7 +146,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 								const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
 
 								if (!tableAlignment) {
-									const defaultAlignClass = `${this.alignmentClassPrefix}${alignmentValuesMap.default}`;
+									const defaultAlignClass = `${attributesWithCustomClassesMap.alignment}${alignmentValuesMap.default}`;
 									viewWriter.addClass(defaultAlignClass, figureViewElement);
 								}
 
