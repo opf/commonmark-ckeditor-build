@@ -4,7 +4,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 	get config() {
 		const preFix = 'op-uc-';
-		const editorClass = `${preFix}container`;
+		const editorClass = `${preFix}container_editing`;s
 		const elementsWithCustomClassesMap = {
 			'paragraph': `${preFix}p`,
 			'heading1': `${preFix}h1`,
@@ -62,7 +62,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	}
 
 	_addCustomCSSClassesToTheEditorContainer(editor) {
-		editor.sourceElement.parentElement.classList.add(this.config.editorClass);
+		editor.sourceElement.classList.add(this.config.editorClass);
 	}
 
 	_addCustomCSSClassesToElements(elementsWithCustomClassesMap, attributesWithCustomClassesMap, alignmentValuesMap) {
@@ -189,17 +189,13 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					);
 
 					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
-				}
-
-				if (attributeName === 'code') {
+				} else if (attributeName === 'code') {
 					const parentViewElement = conversionApi.mapper.toViewElement(modelElement.parent);
 					const viewChildren = Array.from(conversionApi.writer.createRangeIn(parentViewElement).getItems());
 					const codeElement = viewChildren.find(item => item.is('element', 'code'));
 
 					viewWriter.addClass(attributesWithCustomClassesMap[attributeName], codeElement);
-				}
-
-				if (attributeName === 'alignment') {
+				} else if (attributeName === 'alignment') {
 					if (modelElement.name === 'table') {
 						const figureViewElement = conversionApi.mapper.toViewElement(modelElement);
 						// When the selected align is 'center', data.attributeNewValue is null
