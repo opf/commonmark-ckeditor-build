@@ -21,10 +21,11 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'th': [`${preFix}table--cell`, `${preFix}table--cell_head`],
 			'ol': `${preFix}list`,
 			'ul': `${preFix}list`,
-				// The list item's name in the view is 'li' while in the model is 'listItem'
+			'todo': `${preFix}task-list`,
+			// The list item's name in the view is 'li' while in the model is 'listItem'
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
-				// The image's name in the view is 'img' while in the model is 'image'
+			// The image's name in the view is 'img' while in the model is 'image'
 			'image': [`${preFix}image`, `${preFix}figure--content`],
 			'img': [`${preFix}image`, `${preFix}figure--content`],
 			'codeblock': `${preFix}code-block`,
@@ -111,60 +112,74 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 		this.editor.conversion.for('downcast').add(dispatcher => {
 			dispatcher.on(`insert`, (evt, data, conversionApi) => {
-					const viewWriter = conversionApi.writer;
-					const elementName = data.item.name;
-					const modelElement = data.item;
-					const viewElement = conversionApi.mapper.toViewElement(modelElement);
-					let viewElements = [viewElement];
-					// Images and tables are nested in a figure element, listItems are nested inside ul or ol
-					// elements (only in the view, in the model are single elements).
-					const isNestedElement = elementName === 'image' || elementName === 'table' || elementName === 'listItem';
+				const viewWriter = conversionApi.writer;
+				const elementName = data.item.name;
+				const modelElement = data.item;
+				const viewElement = conversionApi.mapper.toViewElement(modelElement);
+				let viewElements = [viewElement];
+				// Images and tables are nested in a figure element, listItems are nested inside ul or ol
+				// elements (only in the view, in the model are single elements).
+				const isNestedElement = elementName === 'image' || elementName === 'table' || elementName === 'listItem';
 
-					if (!elementsWithCustomClasses.includes(elementName) || !viewElement) {
-						return;
-					}
+				if (!elementsWithCustomClasses.includes(elementName) || !viewElement) {
+					return;
+				}
 
-					if (isNestedElement) {
-						if (elementName === 'listItem') {
-							const listElement = viewElement.parent;
-							viewElements = [...viewElements, listElement];
-						} else {
-							const figureViewElement = viewElement;
+				if (isNestedElement) {
+					if (elementName === 'listItem') {
+						const listElement = viewElement.parent;
+						const listType = modelElement.getAttribute('listType');
+
+						if (listType === 'todo') {
 							const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
+							const label = viewChildren.find(item => item.is('element', 'label'));
+							const span = viewChildren.find(item => item.is('element', 'span'));
 
-							if (elementName === 'image') {
-								const image = viewChildren.find(item => item.is('element', 'img'));
-								viewElements = [...viewElements, image];
+							viewWriter.addClass(elementsWithCustomClassesMap[listType], listElement);
+							viewWriter.removeClass('todo-list', listElement);
+							viewWriter.removeClass('todo-list__label', label);
+							viewWriter.removeClass('todo-list__label__description', span);
+							viewElements = [];
+						} else {                                
+							viewElements = [...viewElements, listElement];                            
+						}
+					} else {
+						const figureViewElement = viewElement;
+						const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
+
+						if (elementName === 'image') {
+							const image = viewChildren.find(item => item.is('element', 'img'));
+							viewElements = [...viewElements, image];
+						}
+
+						if (elementName === 'table') {
+							const tableAlignment = modelElement.getAttribute('alignment');
+							const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
+
+							if (!tableAlignment) {
+								const defaultAlignClass = `${attributesWithCustomClassesMap.alignment}${alignmentValuesMap.default}`;
+								viewWriter.addClass(defaultAlignClass, figureViewElement);
 							}
 
-							if (elementName === 'table') {
-								const tableAlignment = modelElement.getAttribute('alignment');
-								const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
+							viewElements = [...viewElements, ...childrenToAdd];
+						}
 
-								if (!tableAlignment) {
-									const defaultAlignClass = `${attributesWithCustomClassesMap.alignment}${alignmentValuesMap.default}`;
-									viewWriter.addClass(defaultAlignClass, figureViewElement);
-								}
-
-								viewElements = [...viewElements, ...childrenToAdd];
-							}
-
-							// Remove 'image' and 'table' classes. Styles will be handled by
-							// custom classes (ie: op-uc-table)
-							if (figureViewElement.hasClass(elementName)) {
-								viewWriter.removeClass(elementName, figureViewElement);
-							}
+						// Remove 'image' and 'table' classes. Styles will be handled by
+						// custom classes (ie: op-uc-table)
+						if (figureViewElement.hasClass(elementName)) {
+							viewWriter.removeClass(elementName, figureViewElement);
 						}
 					}
+				}
 
-					viewElements.forEach(viewElement => {
-						const elementKey = isNestedElement ? viewElement.name : elementName;
-						const elementClasses = elementsWithCustomClassesMap[elementKey];
+				viewElements.forEach(viewElement => {
+					const elementKey = isNestedElement ? viewElement.name : elementName;
+					const elementClasses = elementsWithCustomClassesMap[elementKey];
 
-						viewWriter.addClass(elementClasses, viewElement);
-					});
-				},
-				{priority: 'low'});
+					viewWriter.addClass(elementClasses, viewElement);
+				});
+			},
+			{priority: 'low'});
 		});
 	}
 
