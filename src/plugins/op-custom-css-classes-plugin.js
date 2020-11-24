@@ -4,7 +4,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 	get config() {
 		const preFix = 'op-uc-';
-		const editorClass = `${preFix}container_editing`;s
+		const editorClass = `${preFix}container_editing`;
 		const elementsWithCustomClassesMap = {
 			'paragraph': `${preFix}p`,
 			'heading1': `${preFix}h1`,

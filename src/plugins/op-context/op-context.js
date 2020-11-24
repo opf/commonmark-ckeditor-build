@@ -20,5 +20,4 @@ export function getOPPreviewContext(editor) {
 
 export function getOPPath(editor, pathName) {
 	return getOPService(editor,'pathHelperService');
-
 }
