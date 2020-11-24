@@ -16,6 +16,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'blockQuote': `${preFix}blockquote`,
 			'figure': `${preFix}figure`,
 			'table': [`${preFix}table`, `${preFix}figure--content`],
+			'thead': `${preFix}table--head`,
 			'tr': `${preFix}table--row`,
 			'td': `${preFix}table--cell`,
 			'th': [`${preFix}table--cell`, `${preFix}table--cell_head`],
