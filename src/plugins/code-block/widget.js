@@ -23,7 +23,7 @@ export function isCodeBlockWidgetSelected( selection ) {
 
 export function createCodeBlockWidget( modelElement, writer, label ) {
 	const container = writer.createContainerElement(
-		'div',
+		'pre',
 		{
 			title: window.I18n.t('js.editor.macro.toolbar_help')
 		}
