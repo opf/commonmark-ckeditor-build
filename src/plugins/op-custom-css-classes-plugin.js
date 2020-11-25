@@ -70,7 +70,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	_addCustomCSSClassesToElements(elementsWithCustomClassesMap, attributesWithCustomClassesMap, alignmentValuesMap) {
 		const elementsWithCustomClasses = Object.keys(elementsWithCustomClassesMap);
 
-		this.editor.model.schema.extend('table', { allowAttributes: [ 'figureClasses' ] } );
+		this.editor.model.schema.extend('table', { allowAttributes: [ 'figureClasses' ] });
 
 		this.editor.conversion.for('upcast').add(dispatcher => {
 			dispatcher.on(`element:table`, (evt, data, conversionApi) => {
@@ -87,7 +87,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				// this table model element. In the downcast we'll take this classes to place them again
 				// in the figure that wraps the table. This is because the figure element doesn't exist in
 				// the model but CkEditor wraps every table and image with a <figure>.
-				let figureClasses = modelElement.getAttribute( 'figureClasses' ) || [];
+				let figureClasses = modelElement.getAttribute('figureClasses') || [];
 				const parentFigureClasses = [...viewItem.parent.getClassNames()].filter(figureClass => !!figureClass);
 
 				figureClasses = [...figureClasses, ...parentFigureClasses];
@@ -197,20 +197,21 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					return;
 				}
 
-				if (attributeName === 'linkHref') {
+				if (attributeName === 'linkHref' || attributeName === 'code') {
+					const attributeTag = attributeName === 'linkHref' ? 'a' : attributeName;
+					const attributePriority = attributeName === 'linkHref' ? 5 : 10;
+					const viewSelection = viewWriter.document.selection;
 					const viewElement = viewWriter.createAttributeElement(
-						'a',
+						attributeTag,
 						{ class: attributesWithCustomClassesMap[attributeName] },
-						{ priority: 5 }
+						{ priority: attributePriority }
 					);
 
-					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
-				} else if (attributeName === 'code') {
-					const parentViewElement = conversionApi.mapper.toViewElement(modelElement.parent);
-					const viewChildren = Array.from(conversionApi.writer.createRangeIn(parentViewElement).getItems());
-					const codeElement = viewChildren.find(item => item.is('element', 'code'));
-
-					viewWriter.addClass(attributesWithCustomClassesMap[attributeName], codeElement);
+					if (modelElement.is('selection')) {
+						viewWriter.wrap(viewSelection.getFirstRange(), viewElement);
+					} else {
+						viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
+					}
 				} else if (attributeName === 'alignment') {
 					if (modelElement.name === 'table') {
 						const figureViewElement = conversionApi.mapper.toViewElement(modelElement);
