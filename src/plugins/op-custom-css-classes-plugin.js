@@ -39,7 +39,11 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		const attributesWithCustomClassesMap = {
 			'code': `${preFix}code`,
 			'linkHref': `${preFix}link`,
-			'alignment': `${preFix}figure_align-`
+			'alignment': `${preFix}figure_align-`,
+			'todo': `${preFix}task-list`,
+			'numbered': `${preFix}list`,
+			'bulleted': `${preFix}list`,
+			'listType': null,
 		};
 		const alignmentValuesMap = {
 			'left': 'start',
@@ -60,7 +64,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	init() {
 		this._addCustomCSSClassesToTheEditorContainer(this.editor);
 		this._addCustomCSSClassesToElements(this.config.elementsWithCustomClassesMap, this.config.attributesWithCustomClassesMap, this.config.alignmentValuesMap);
-		this._addCustomCSSClassesToAttributes(this.config.attributesWithCustomClassesMap, this.config.alignmentValuesMap);
+		this._addCustomCSSClassesToAttributes(this.config.elementsWithCustomClassesMap, this.config.attributesWithCustomClassesMap, this.config.alignmentValuesMap);
 	}
 
 	_addCustomCSSClassesToTheEditorContainer(editor) {
@@ -128,22 +132,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 				if (isNestedElement) {
 					if (elementName === 'listItem') {
-						const listElement = viewElement.parent;
-						const listType = modelElement.getAttribute('listType');
-
-						if (listType === 'todo') {
-							const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
-							const label = viewChildren.find(item => item.is('element', 'label'));
-							const span = viewChildren.find(item => item.is('element', 'span'));
-
-							viewWriter.addClass(elementsWithCustomClassesMap[listType], listElement);
-							viewWriter.removeClass('todo-list', listElement);
-							viewWriter.removeClass('todo-list__label', label);
-							viewWriter.removeClass('todo-list__label__description', span);
-							viewElements = [];
-						} else {                                
-							viewElements = [...viewElements, listElement];                            
-						}
+						viewElements = this._manageListItems(viewWriter, modelElement, viewElement, viewElements, elementsWithCustomClassesMap, attributesWithCustomClassesMap);
 					} else {
 						const figureViewElement = viewElement;
 						const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
@@ -184,7 +173,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		});
 	}
 
-	_addCustomCSSClassesToAttributes(attributesWithCustomClassesMap, alignmentValuesMap) {
+	_addCustomCSSClassesToAttributes(elementsWithCustomClassesMap, attributesWithCustomClassesMap, alignmentValuesMap) {
 		const attributesWithCustomClasses = Object.keys(attributesWithCustomClassesMap);
 
 		this.editor.conversion.for('downcast').add(dispatcher => {
@@ -233,8 +222,71 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 						viewWriter.addClass(`${attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
 					}
+				} else if (attributeName === 'listType') {
+					const viewElement = conversionApi.mapper.toViewElement(modelElement);
+					const viewElements = this._manageListItems(viewWriter, modelElement, viewElement, [viewElement], this.config.elementsWithCustomClassesMap, attributesWithCustomClassesMap);
+
+					viewElements.forEach(viewElement => {
+						const elementKey = viewElement.name;
+						const elementClasses = this.config.elementsWithCustomClassesMap[elementKey];
+
+						viewWriter.addClass(elementClasses, viewElement);
+					});
 				}
 			}, { priority: 'low' });
 		});
+	}
+
+	_manageListItems(viewWriter, modelElement, viewElement, viewElements, elementsWithCustomClassesMap, attributesWithCustomClassesMap) {
+		const listElement = viewElement.parent;
+		const listType = modelElement.getAttribute('listType');
+		const listTypeClass = attributesWithCustomClassesMap[listType];
+		const previousElement = listElement.previousSibling;
+		const nextElement = listElement.nextSibling;
+		const previousListElement = previousElement &&
+									previousElement.name === listElement.name &&
+									previousElement.hasClass(listTypeClass) ?
+										previousElement :
+										null;
+		const nextListElement = nextElement &&
+								nextElement.name === listElement.name &&
+								nextElement.hasClass(listTypeClass) ?
+									nextElement :
+									null;
+
+		if (previousListElement) {
+			viewWriter.mergeContainers(viewWriter.createPositionAfter(previousListElement));
+		}
+
+		if (nextListElement) {
+			viewWriter.mergeContainers(viewWriter.createPositionBefore(nextListElement));
+		}
+
+		if (listType === 'todo') {
+			viewWriter.addClass(listTypeClass, listElement);
+			// Remove the regular lists classes (op-uc-list, op-uc-list--item) from todo lists if present
+			// They could be present for example when the list type of the item has changed
+			if (listElement.hasClass(elementsWithCustomClassesMap[listElement.name])) {
+				viewWriter.removeClass(elementsWithCustomClassesMap[listElement.name], listElement);
+			}
+
+			if (viewElement.hasClass(elementsWithCustomClassesMap[viewElement.name])) {
+				viewWriter.removeClass(elementsWithCustomClassesMap[viewElement.name], viewElement);
+			}
+
+			viewElements = [];
+		} else {
+			// Remove the op-uc-task-list class if present.
+			// It could be present for example when the list type has changed
+			const todoListClass = attributesWithCustomClassesMap['todo'];
+
+			if (listElement.hasClass(todoListClass)) {
+				viewWriter.removeClass(todoListClass, listElement);
+			}
+
+			viewElements = [...viewElements, listElement];
+		}
+
+		return viewElements;
 	}
 }
