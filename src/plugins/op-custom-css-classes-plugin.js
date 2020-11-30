@@ -22,7 +22,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'th': [`${preFix}table--cell`, `${preFix}table--cell_head`],
 			'ol': `${preFix}list`,
 			'ul': `${preFix}list`,
-			'todo': `${preFix}task-list`,
+			'todo': `${preFix}list ${preFix}task-list`,
 			// The list item's name in the view is 'li' while in the model is 'listItem'
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
@@ -298,8 +298,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			if (viewElement.hasClass(elementsWithCustomClassesMap[viewElement.name])) {
 				viewWriter.removeClass(elementsWithCustomClassesMap[viewElement.name], viewElement);
 			}
-
-			viewElements = [];
 		} else {
 			// Remove the op-uc-task-list class if present.
 			// It could be present for example when the list type has changed
@@ -308,10 +306,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			if (listElement.hasClass(todoListClass)) {
 				viewWriter.removeClass(todoListClass, listElement);
 			}
-
-			viewElements = [...viewElements, listElement];
 		}
 
-		return viewElements;
+		return [...viewElements, listElement];
 	}
 }
