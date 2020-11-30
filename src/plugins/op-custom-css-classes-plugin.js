@@ -93,7 +93,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				// in the figure that wraps the table. This is because the figure element doesn't exist in
 				// the model but CkEditor wraps every table and image with a <figure>.
 				let figureClasses = modelElement.getAttribute('figureClasses') || [];
-				const parentFigureClasses = [...viewItem.parent.getClassNames()].filter(figureClass => !!figureClass);
+				let parentFigureRawClasses = viewItem.parent.getClassNames && viewItem.parent.getClassNames();
+				const parentFigureClasses = parentFigureRawClasses ? [...parentFigureRawClasses].filter(figureClass => !!figureClass) : [];
 
 				figureClasses = [...figureClasses, ...parentFigureClasses];
 
