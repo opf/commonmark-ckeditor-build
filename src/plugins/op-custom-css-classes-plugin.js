@@ -22,7 +22,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'th': [`${preFix}table--cell`, `${preFix}table--cell_head`],
 			'ol': `${preFix}list`,
 			'ul': `${preFix}list`,
-			'todo': `${preFix}list ${preFix}task-list`,
+			'todo': `${preFix}list ${preFix}list_task-list`,
 			// The list item's name in the view is 'li' while in the model is 'listItem'
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
