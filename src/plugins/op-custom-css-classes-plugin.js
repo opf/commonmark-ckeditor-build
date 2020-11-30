@@ -40,7 +40,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'code': `${preFix}code`,
 			'linkHref': `${preFix}link`,
 			'alignment': `${preFix}figure_align-`,
-			'todo': `${preFix}task-list`,
+			'todo': `${preFix}list_task-list`,
 			'numbered': `${preFix}list`,
 			'bulleted': `${preFix}list`,
 			'listType': null,
