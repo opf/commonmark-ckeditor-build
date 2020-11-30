@@ -44,6 +44,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'numbered': `${preFix}list`,
 			'bulleted': `${preFix}list`,
 			'listType': null,
+			'headingColumns': null,
 		};
 		const alignmentValuesMap = {
 			'left': 'start',
@@ -135,7 +136,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						viewElements = this._manageListItems(viewWriter, modelElement, viewElement, viewElements, elementsWithCustomClassesMap, attributesWithCustomClassesMap);
 					} else {
 						const figureViewElement = viewElement;
-						const viewChildren = Array.from(conversionApi.writer.createRangeIn(viewElement).getItems());
+						const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
 
 						if (elementName === 'image') {
 							const image = viewChildren.find(item => item.is('element', 'img'));
@@ -224,14 +225,38 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					}
 				} else if (attributeName === 'listType') {
 					const viewElement = conversionApi.mapper.toViewElement(modelElement);
-					const viewElements = this._manageListItems(viewWriter, modelElement, viewElement, [viewElement], this.config.elementsWithCustomClassesMap, attributesWithCustomClassesMap);
+					const viewElements = this._manageListItems(viewWriter, modelElement, viewElement, [viewElement], elementsWithCustomClassesMap, attributesWithCustomClassesMap);
 
 					viewElements.forEach(viewElement => {
 						const elementKey = viewElement.name;
-						const elementClasses = this.config.elementsWithCustomClassesMap[elementKey];
+						const elementClasses = elementsWithCustomClassesMap[elementKey];
 
 						viewWriter.addClass(elementClasses, viewElement);
 					});
+				} else if (attributeName === 'headingColumns') {
+					const addHeadingColumns = data.attributeNewValue;
+					const viewElement = conversionApi.mapper.toViewElement(modelElement);
+					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
+					const viewElements = viewChildren.filter(viewChild => Object.keys(elementsWithCustomClassesMap).includes(viewChild.name));
+
+					if (addHeadingColumns) {
+						viewElements.forEach(viewElement => {
+							const elementKey = viewElement.name;
+							const elementClasses = elementsWithCustomClassesMap[elementKey];
+
+							viewWriter.addClass(elementClasses, viewElement);
+						});
+					} else {
+						viewElements
+							.filter(viewElement => viewElement.hasClass(elementsWithCustomClassesMap.th[1]))
+							.forEach(viewElement => {
+								const nextSibling = viewElement.nextSibling;
+
+								if (nextSibling && nextSibling.name !== 'th') {
+									viewWriter.removeClass(elementsWithCustomClassesMap.th[1], viewElement);
+								}
+							});
+					}
 				}
 			}, { priority: 'low' });
 		});
