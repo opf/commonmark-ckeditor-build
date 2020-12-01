@@ -290,15 +290,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 		if (listType === 'todo') {
 			viewWriter.addClass(listTypeClass, listElement);
-			// Remove the regular lists classes (op-uc-list, op-uc-list--item) from todo lists if present
-			// They could be present for example when the list type of the item has changed
-			if (listElement.hasClass(elementsWithCustomClassesMap[listElement.name])) {
-				viewWriter.removeClass(elementsWithCustomClassesMap[listElement.name], listElement);
-			}
-
-			if (viewElement.hasClass(elementsWithCustomClassesMap[viewElement.name])) {
-				viewWriter.removeClass(elementsWithCustomClassesMap[viewElement.name], viewElement);
-			}
 		} else {
 			// Remove the op-uc-task-list class if present.
 			// It could be present for example when the list type has changed
