@@ -74,7 +74,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	}
 
 	_addCustomCSSClassesToElements(config) {
-		this.editor.model.schema.extend('table', { allowAttributes: [ 'figureClasses' ] });
+		this.editor.model.schema.extend('table', {allowAttributes: [ 'figureClasses' ]});
 
 		this.editor
 				.conversion
@@ -91,7 +91,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		this.editor
 				.conversion
 				.for('downcast')
-				.add(dispatcher => dispatcher.on('attribute', this._manageAttributesInsertion(config), { priority: 'low' }));
+				.add(dispatcher => dispatcher.on('attribute', this._manageAttributesInsertion(config), {priority: 'low'}));
 	}
 
 	_manageTableUpcast(config) {
@@ -210,8 +210,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				const viewSelection = viewWriter.document.selection;
 				const viewElement = viewWriter.createAttributeElement(
 					attributeTag,
-					{ class: config.attributesWithCustomClassesMap[attributeName] },
-					{ priority: attributePriority }
+					{class: config.attributesWithCustomClassesMap[attributeName]},
+					{priority: attributePriority}
 				);
 
 				if (modelElement.is('selection')) {
@@ -321,7 +321,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	_wrapInFigureContentContainer(element, parentElement, config, viewWriter) {
 		const containerElement = viewWriter.createContainerElement(
 			'div',
-			{ class: config.elementsWithCustomClassesMap.content }
+			{class: config.elementsWithCustomClassesMap.content}
 		);
 
 		viewWriter.insert(viewWriter.createPositionAt(containerElement, 0), element);
