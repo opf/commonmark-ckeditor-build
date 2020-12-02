@@ -27,14 +27,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
 			// The image's name in the view is 'img' while in the model is 'image'
-			'image': [`${preFix}image`, `${preFix}figure--content`],
-			'img': [`${preFix}image`, `${preFix}figure--content`],
+			'image': [`${preFix}image`],
+			'img': [`${preFix}image`],
 			'codeblock': `${preFix}code-block`,
 			'caption': `${preFix}figure--description`,
 			'op-macro-embedded-table': `${preFix}placeholder`,
 			'op-macro-wp-button': `${preFix}placeholder`,
 			'op-macro-child-pages': `${preFix}placeholder`,
 			'op-macro-toc': `${preFix}placeholder`,
+			'content': `${preFix}figure--content`
 		};
 		const attributesWithCustomClassesMap = {
 			'code': `${preFix}code`,
@@ -141,6 +142,13 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 						if (elementName === 'image') {
 							const image = viewChildren.find(item => item.is('element', 'img'));
+							const containerElement = viewWriter.createContainerElement(
+								'div',
+								{ class: elementsWithCustomClassesMap.content }
+							);
+							viewWriter.insert(viewWriter.createPositionAt(containerElement, 0), image);
+							viewWriter.insert(viewWriter.createPositionAt(figureViewElement, 0), containerElement);
+
 							viewElements = [...viewElements, image];
 						}
 
@@ -194,7 +202,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const viewSelection = viewWriter.document.selection;
 					const viewElement = viewWriter.createAttributeElement(
 						attributeTag,
-						{ class: attributesWithCustomClassesMap[attributeName] },
+						{ class: `` },
 						{ priority: attributePriority }
 					);
 
