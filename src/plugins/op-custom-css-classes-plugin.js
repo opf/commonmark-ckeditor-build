@@ -15,7 +15,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'heading6': `${preFix}h6`,
 			'blockQuote': `${preFix}blockquote`,
 			'figure': `${preFix}figure`,
-			'table': [`${preFix}table`, `${preFix}figure--content`],
+			'table': `${preFix}table`,
 			'thead': `${preFix}table--head`,
 			'tr': `${preFix}table--row`,
 			'td': `${preFix}table--cell`,
@@ -27,8 +27,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
 			// The image's name in the view is 'img' while in the model is 'image'
-			'image': [`${preFix}image`],
-			'img': [`${preFix}image`],
+			'image': `${preFix}image`,
+			'img': `${preFix}image`,
 			'codeblock': `${preFix}code-block`,
 			'caption': `${preFix}figure--description`,
 			'op-macro-embedded-table': `${preFix}placeholder`,
@@ -142,19 +142,17 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 						if (elementName === 'image') {
 							const image = viewChildren.find(item => item.is('element', 'img'));
-							const containerElement = viewWriter.createContainerElement(
-								'div',
-								{ class: elementsWithCustomClassesMap.content }
-							);
-							viewWriter.insert(viewWriter.createPositionAt(containerElement, 0), image);
-							viewWriter.insert(viewWriter.createPositionAt(figureViewElement, 0), containerElement);
+							this._wrapInFigureContentContainer(image, figureViewElement, elementsWithCustomClassesMap, viewWriter);
 
 							viewElements = [...viewElements, image];
 						}
 
 						if (elementName === 'table') {
+							const table = viewChildren.find(item => item.is('element', 'table'));
 							const tableAlignment = modelElement.getAttribute('alignment');
 							const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
+
+							this._wrapInFigureContentContainer(table, figureViewElement, elementsWithCustomClassesMap, viewWriter);
 
 							if (!tableAlignment) {
 								const defaultAlignClass = `${attributesWithCustomClassesMap.alignment}${alignmentValuesMap.default}`;
@@ -309,5 +307,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		}
 
 		return [...viewElements, listElement];
+	}
+
+	_wrapInFigureContentContainer(element, parentElement, elementsWithCustomClassesMap, viewWriter) {
+		const containerElement = viewWriter.createContainerElement(
+			'div',
+			{ class: elementsWithCustomClassesMap.content }
+		);
+
+		viewWriter.insert(viewWriter.createPositionAt(containerElement, 0), element);
+		viewWriter.insert(viewWriter.createPositionAt(parentElement, 0), containerElement);
 	}
 }
