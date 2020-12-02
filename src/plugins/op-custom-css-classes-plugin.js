@@ -200,7 +200,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const viewSelection = viewWriter.document.selection;
 					const viewElement = viewWriter.createAttributeElement(
 						attributeTag,
-						{ class: `` },
+						{ class: attributesWithCustomClassesMap[attributeName] },
 						{ priority: attributePriority }
 					);
 
