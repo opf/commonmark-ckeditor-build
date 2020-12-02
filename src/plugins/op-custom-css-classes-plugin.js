@@ -291,7 +291,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		if (listType === 'todo') {
 			viewWriter.addClass(listTypeClass, listElement);
 		} else {
-			// Remove the op-uc-task-list class if present.
+			// Remove the op-uc-list_task-list class if present.
 			// It could be present for example when the list type has changed
 			const todoListClass = attributesWithCustomClassesMap['todo'];
 
