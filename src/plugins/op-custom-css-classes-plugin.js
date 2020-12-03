@@ -46,6 +46,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'bulleted': `${preFix}list`,
 			'listType': null,
 			'headingColumns': null,
+			'width': null,
 		};
 		const alignmentValuesMap = {
 			'left': 'start',
@@ -273,6 +274,12 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 								viewWriter.removeClass(config.elementsWithCustomClassesMap.th[1], viewElement);
 							}
 						});
+				}
+			} else if (attributeName === 'width') {
+				const viewElement = conversionApi.mapper.toViewElement(modelElement);
+
+				if (viewElement.hasClass('image_resized')) {
+					viewWriter.removeClass('image_resized', viewElement);
 				}
 			}
 		}

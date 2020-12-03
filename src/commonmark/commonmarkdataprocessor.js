@@ -116,13 +116,10 @@ export default class CommonMarkDataProcessor {
 			  }
 		});
 
-		// Replace images with appropriate source URLs derived from an attachment,
-		// if any. Otherwise use the original src
 		turndownService.addRule('img', {
 			filter: 'img',
-
 			replacement: function (content, node) {
-			  return node.parentElement.outerHTML;
+			  return node.parentElement.parentElement.outerHTML;
 			}
 		});
 
