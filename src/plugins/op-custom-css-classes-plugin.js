@@ -31,10 +31,10 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'img': `${preFix}image`,
 			'codeblock': `${preFix}code-block`,
 			'caption': `${preFix}figure--description`,
-			'op-macro-embedded-table': `${preFix}placeholder`,
-			'op-macro-wp-button': `${preFix}placeholder`,
-			'op-macro-child-pages': `${preFix}placeholder`,
-			'op-macro-toc': `${preFix}placeholder`,
+			'op-macro-embedded-table': [`${preFix}placeholder`, `${preFix}embedded-table`],
+			'op-macro-wp-button': [`${preFix}placeholder`, `${preFix}wp-button`],
+			'op-macro-child-pages': [`${preFix}placeholder`, `${preFix}child-pages`],
+			'op-macro-toc': [`${preFix}placeholder`, `${preFix}toc`],
 			'content': `${preFix}figure--content`
 		};
 		const attributesWithCustomClassesMap = {
