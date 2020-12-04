@@ -47,6 +47,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'listType': null,
 			'headingColumns': null,
 			'width': null,
+			'uploadStatus': null
 		};
 		const alignmentValuesMap = {
 			'left': 'start',
@@ -200,6 +201,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			const attributeName = data.attributeKey;
 			const viewWriter = conversionApi.writer;
 			const modelElement = data.item;
+			const viewElement = conversionApi.mapper.toViewElement(modelElement);
 
 			if (!attributesWithCustomClasses.includes(attributeName)) {
 				return;
@@ -222,7 +224,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 			} else if (attributeName === 'alignment') {
 				if (modelElement.name === 'table') {
-					const figureViewElement = conversionApi.mapper.toViewElement(modelElement);
+					const figureViewElement = viewElement;
 					// When the selected align is 'center', data.attributeNewValue is null
 					const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue || config.alignmentValuesMap.default];
 					const alignmentClasses = Object
@@ -242,7 +244,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					viewWriter.addClass(`${config.attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
 				}
 			} else if (attributeName === 'listType') {
-				const viewElement = conversionApi.mapper.toViewElement(modelElement);
 				const viewElements = this._manageListItems(viewWriter, modelElement, viewElement, [viewElement], config);
 
 				viewElements.forEach(viewElement => {
@@ -253,7 +254,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				});
 			} else if (attributeName === 'headingColumns') {
 				const addHeadingColumns = data.attributeNewValue;
-				const viewElement = conversionApi.mapper.toViewElement(modelElement);
 				const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
 				const viewElements = viewChildren.filter(viewChild => Object.keys(config.elementsWithCustomClassesMap).includes(viewChild.name));
 
@@ -276,10 +276,17 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						});
 				}
 			} else if (attributeName === 'width') {
-				const viewElement = conversionApi.mapper.toViewElement(modelElement);
-
 				if (viewElement.hasClass('image_resized')) {
 					viewWriter.removeClass('image_resized', viewElement);
+				}
+			} else if (attributeName === 'uploadStatus') {
+				if (data.attributeNewValue === 'complete') {
+					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
+					let placeholderElement = viewChildren.find(viewChild => viewChild.hasClass('ck-upload-placeholder-loader'));
+
+					if (placeholderElement) {
+						viewWriter.remove(viewWriter.createRangeOn(placeholderElement));
+					}
 				}
 			}
 		}
@@ -292,15 +299,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		const previousElement = listElement.previousSibling;
 		const nextElement = listElement.nextSibling;
 		const previousListElement = previousElement &&
-		previousElement.name === listElement.name &&
-		previousElement.hasClass(listTypeClass) ?
-			previousElement :
-			null;
+									previousElement.name === listElement.name &&
+									previousElement.hasClass(listTypeClass) ?
+										previousElement :
+										null;
 		const nextListElement = nextElement &&
-		nextElement.name === listElement.name &&
-		nextElement.hasClass(listTypeClass) ?
-			nextElement :
-			null;
+								nextElement.name === listElement.name &&
+								nextElement.hasClass(listTypeClass) ?
+									nextElement :
+									null;
 
 		if (previousListElement) {
 			viewWriter.mergeContainers(viewWriter.createPositionAfter(previousListElement));
