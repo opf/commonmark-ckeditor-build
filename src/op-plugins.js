@@ -3,6 +3,7 @@ import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-tab
 import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
 import OpUploadPlugin from './plugins/op-upload-plugin';
 import OPChildPagesPlugin from "./plugins/op-macro-child-pages/op-macro-child-pages-plugin";
+import OpTableToolbar from "./plugins/op-table-toolbar-plugin";
 import Essentials from "@ckeditor/ckeditor5-essentials/src/essentials";
 import UploadAdapter from "@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter";
 import AutoFormat from "@ckeditor/ckeditor5-autoformat/src/autoformat";
@@ -24,7 +25,6 @@ import OPHelpLinkPlugin from "./plugins/op-help-link-plugin/op-help-link-plugin"
 import CodeBlockPlugin from "./plugins/code-block/code-block";
 import OPPreviewPlugin from "./plugins/op-preview.plugin";
 import Table from "@ckeditor/ckeditor5-table/src/table";
-import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar";
 import TableProperties from '@ckeditor/ckeditor5-table/src/tableproperties';
 import TableCellProperties from '@ckeditor/ckeditor5-table/src/tablecellproperties';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
@@ -88,7 +88,7 @@ export const builtinPlugins = [
 
 	CommonMark,
 	Table,
-	TableToolbar,
+	OpTableToolbar,
 	TableProperties,
 	TableCellProperties,
 

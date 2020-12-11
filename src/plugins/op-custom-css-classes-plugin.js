@@ -169,6 +169,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					if (elementName === 'table') {
 						const tableAlignment = modelElement.getAttribute('alignment');
 						const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
+						const table = viewChildren.find(item => item.is('element', 'table'));
+						this._wrapInFigureContentContainer(table, figureViewElement, config, viewWriter);
 
 						if (!tableAlignment) {
 							const defaultAlignClass = `${config.attributesWithCustomClassesMap.alignment}${config.alignmentValuesMap.default}`;

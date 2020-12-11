@@ -29,8 +29,8 @@ export default class OPPreviewPlugin extends Plugin {
 			} );
 
 
-			let showPreview = function(preview) {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
+			const showPreview = function(preview) {
+				const $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
 				let $reference;
 
 				if ($mainEditor.length) {
@@ -39,7 +39,7 @@ export default class OPPreviewPlugin extends Plugin {
 					$reference = $editable;
 				}
 
-				let $previewWrapper = jQuery('<div class="ck-editor__preview"></div>');
+				const $previewWrapper = jQuery('<div class="ck-editor__preview op-uc-container"></div>');
 				$reference.siblings('.ck-editor__preview').remove();
 
 				const previewService = getOPService(editor, 'ckEditorPreview');
@@ -51,9 +51,9 @@ export default class OPPreviewPlugin extends Plugin {
 				disableItems(editor, view);
 			};
 
-			let getAndShowPreview = function() {
-				let link = getOPPreviewContext(editor);
-				let url = getOPPath(editor).api.v3.previewMarkup(link);
+			const getAndShowPreview = function() {
+				const link = getOPPreviewContext(editor);
+				const url = getOPPath(editor).api.v3.previewMarkup(link);
 
 				jQuery
 					.ajax({
@@ -65,8 +65,8 @@ export default class OPPreviewPlugin extends Plugin {
 					}).done(showPreview);
 			};
 
-			let disablePreviewing = function() {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
+			const disablePreviewing = function() {
+				const $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
 
 				unregisterPreview();
 				$mainEditor.siblings('.ck-editor__preview').remove();

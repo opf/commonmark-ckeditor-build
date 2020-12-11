@@ -23,10 +23,11 @@ export default class OPMacroWpButtonEditing extends Plugin {
 
 		// Schema.
 		model.schema.register( 'op-macro-wp-button', {
-			allowWhere: ['$block'],
+			allowWhere: [ '$text'],
 			allowAttributes: ['type', 'classes'],
-			isBlock: true,
-		    isLimit: true
+			// isBlock: true,
+		    isInline: true,
+		    isLimit: true,
 		});
 
 		conversion.for( 'upcast' )
@@ -35,7 +36,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 					name: 'macro',
 					classes: 'create_work_package_link'
 				},
-				model: ( viewElement, {writer:modelWriter} ) => {
+				model: ( viewElement, { writer: modelWriter } ) => {
 					const type = viewElement.getAttribute( 'data-type' ) || '';
 					const classes = viewElement.getAttribute( 'data-classes' ) || '';
 
