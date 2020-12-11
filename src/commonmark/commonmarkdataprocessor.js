@@ -59,6 +59,7 @@ export default class CommonMarkDataProcessor {
 
 		// Fix empty code blocks
 		fixEmptyCodeBlocks( domFragment );
+
 		// Convert DOM DocumentFragment to view DocumentFragment.
 		return this._domConverter.domToView( domFragment );
 	}
@@ -102,8 +103,8 @@ export default class CommonMarkDataProcessor {
 			filter: function (node) {
 				// check if we're a todo list item
 				return node.nodeName === 'LI' && node.closest('ul.todo-list');
-			  },
-			  replacement: function (content, node, options) {
+			},
+			replacement: function (content, node, options) {
 				content = content
 					.replace(/^\n+/, '') // remove leading newlines
 					.replace(/\n+$/, '\n') // replace trailing newlines with just a single one
@@ -113,13 +114,22 @@ export default class CommonMarkDataProcessor {
 				var input = node.querySelector('input[type=checkbox]');
 				var tasklist = (input && input.checked) ? '[x] ' : '[ ] ';
 				return prefix + tasklist + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '');
-			  }
+			}
 		});
 
-		turndownService.addRule('img', {
+		turndownService.addRule('imageFigure', {
 			filter: 'img',
 			replacement: function (content, node) {
-			  return node.parentElement.parentElement.outerHTML;
+				return node.parentElement.parentElement.outerHTML;
+			}
+		});
+
+		// Remove figcaption text, it is processed together with the
+		// figure and the image in the imageFigure rule
+		turndownService.addRule('figcaption', {
+			filter: 'figcaption',
+			replacement: function (content, node) {
+				return '';
 			}
 		});
 
@@ -142,7 +152,7 @@ export default class CommonMarkDataProcessor {
 		turndownService.addRule('strikethrough', {
 			filter: ['del', 's', 'strike'],
 			replacement: function (content) {
-			  return '~~' + content + '~~'
+				return '~~' + content + '~~'
 			}
 		});
 
