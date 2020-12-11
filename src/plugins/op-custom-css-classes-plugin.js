@@ -161,6 +161,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 					if (elementName === 'image') {
 						const image = viewChildren.find(item => item.is('element', 'img'));
+
 						this._wrapInFigureContentContainer(image, figureViewElement, config, viewWriter);
 
 						viewElements = [...viewElements, image];
@@ -176,12 +177,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						}
 
 						viewElements = [...viewElements, ...childrenToAdd];
-					}
-
-					// Remove 'image' and 'table' classes. Styles will be handled by
-					// custom classes (ie: op-uc-table)
-					if (figureViewElement.hasClass(elementName)) {
-						viewWriter.removeClass(elementName, figureViewElement);
 					}
 				}
 			}
