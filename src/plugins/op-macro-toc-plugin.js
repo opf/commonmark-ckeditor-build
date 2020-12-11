@@ -78,7 +78,7 @@ export default class OPMacroTocPlugin extends Plugin {
 
 	createTocViewElement(writer) {
 		const placeholder = writer.createText( this.label );
-		const container = writer.createContainerElement( 'div', { class: 'macro -toc' } );
+		const container = writer.createContainerElement( 'div');
 
 		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
 		return container;

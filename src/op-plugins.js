@@ -38,6 +38,7 @@ import OPSourceCodePlugin from './plugins/op-source-code.plugin';
 import Mention from "@ckeditor/ckeditor5-mention/src/mention";
 import {MentionCaster} from './mentions/mentions-caster';
 import ImageResize from "@ckeditor/ckeditor5-image/src/imageresize";
+import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -93,6 +94,7 @@ export const builtinPlugins = [
 
 	OPMacroListPlugin,
 
+	OpCustomCssClassesPlugin,
 ].concat(
 	// OpenProject Macro plugin group
 	opMacroPlugins,

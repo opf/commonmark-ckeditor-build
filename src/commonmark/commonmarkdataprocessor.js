@@ -103,8 +103,8 @@ export default class CommonMarkDataProcessor {
 			filter: function (node) {
 				// check if we're a todo list item
 				return node.nodeName === 'LI' && node.closest('ul.todo-list');
-			  },
-			  replacement: function (content, node, options) {
+			},
+			replacement: function (content, node, options) {
 				content = content
 					.replace(/^\n+/, '') // remove leading newlines
 					.replace(/\n+$/, '\n') // replace trailing newlines with just a single one
@@ -114,24 +114,31 @@ export default class CommonMarkDataProcessor {
 				var input = node.querySelector('input[type=checkbox]');
 				var tasklist = (input && input.checked) ? '[x] ' : '[ ] ';
 				return prefix + tasklist + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '');
-			  }
+			}
 		});
 
-		// Replace images with appropriate source URLs derived from an attachment,
-		// if any. Otherwise use the original src
-		turndownService.addRule('img', {
+		turndownService.addRule('imageFigure', {
 			filter: 'img',
-
 			replacement: function (content, node) {
-			  return node.parentElement.outerHTML;
+				return node.parentElement.parentElement.outerHTML;
+			}
+		});
+
+		// Remove figcaption text, it is processed together with the
+		// figure and the image in the imageFigure rule
+		turndownService.addRule('figcaption', {
+			filter: 'figcaption',
+			replacement: function (content, node) {
+				return '';
 			}
 		});
 
 		// Keep HTML tables and remove filler elements
 		turndownService.addRule('htmlTables', {
 			filter: function (node) {
+				const tables = node.getElementsByTagName('table');
 				// check if we're a todo list item
-				return node.nodeName === 'FIGURE' && node.classList.contains('table');
+				return node.nodeName === 'FIGURE' && tables.length;
 			},
 			replacement: function (_content, node) {
 				// Remove filler nodes
@@ -145,7 +152,7 @@ export default class CommonMarkDataProcessor {
 		turndownService.addRule('strikethrough', {
 			filter: ['del', 's', 'strike'],
 			replacement: function (content) {
-			  return '~~' + content + '~~'
+				return '~~' + content + '~~'
 			}
 		});
 
