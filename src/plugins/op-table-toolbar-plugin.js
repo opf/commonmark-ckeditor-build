@@ -3,6 +3,13 @@
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
+/*
+ * This is a copy of the tabletoolbar.js file in the official CKEditor table plugin:
+ * https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-table/src/tabletoolbar.js
+ *
+ * getRelateElement is changed to take one element further up the tree, bypassing the op-uc-figure--content element we've added
+ */
+
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import WidgetToolbarRepository from '@ckeditor/ckeditor5-widget/src/widgettoolbarrepository';
 import { isWidget } from '@ckeditor/ckeditor5-widget/src/utils';
