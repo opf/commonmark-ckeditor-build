@@ -25,7 +25,6 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		model.schema.register( 'op-macro-wp-button', {
 			allowWhere: [ '$text'],
 			allowAttributes: ['type', 'classes'],
-			// isBlock: true,
 		    isInline: true,
 		    isLimit: true,
 		});
