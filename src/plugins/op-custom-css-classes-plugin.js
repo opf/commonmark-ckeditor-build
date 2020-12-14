@@ -20,6 +20,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'tr': `${preFix}table--row`,
 			'td': `${preFix}table--cell`,
 			'th': [`${preFix}table--cell`, `${preFix}table--cell_head`],
+			'tableCell': `${preFix}table--cell`,
+			'tableRow': `${preFix}table--row`,
 			'ol': `${preFix}list`,
 			'ul': `${preFix}list`,
 			'todo': `${preFix}list ${preFix}list_task-list`,
@@ -146,7 +148,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			let viewElements = [viewElement];
 			// Images and tables are nested in a figure element, listItems are nested inside ul or ol
 			// elements (only in the view, in the model are single elements).
-			const isNestedElement = elementName === 'image' || elementName === 'table' || elementName === 'listItem';
+			const nestedElements = ['image', 'table', 'tableCell', 'tableRow', 'listItem'];
+			const isNestedElement = nestedElements.includes(elementName);
 
 			if (!elementsWithCustomClasses.includes(elementName) || !viewElement) {
 				return;
@@ -165,18 +168,20 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						this._wrapInFigureContentContainer(image, figureViewElement, config, viewWriter);
 
 						viewElements = [...viewElements, image];
-					}
-
-					if (elementName === 'table') {
-						const tableAlignment = modelElement.getAttribute('alignment');
+					} else if (elementName === 'table' || elementName === 'tableRow') {
 						const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
 
-						if (!tableAlignment) {
-							const defaultAlignClass = `${config.attributesWithCustomClassesMap.alignment}${config.alignmentValuesMap.default}`;
-							viewWriter.addClass(defaultAlignClass, figureViewElement);
-						}
-
 						viewElements = [...viewElements, ...childrenToAdd];
+
+						if (elementName === 'table') {
+							const tableAlignment = modelElement.getAttribute('alignment');
+
+							if (!tableAlignment) {
+								const defaultAlignClass = `${config.attributesWithCustomClassesMap.alignment}${config.alignmentValuesMap.default}`;
+
+								viewWriter.addClass(defaultAlignClass, figureViewElement);
+							}
+						}
 					}
 				}
 			}
