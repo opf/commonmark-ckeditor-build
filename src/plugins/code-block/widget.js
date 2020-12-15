@@ -37,7 +37,7 @@ export function renderCodeBlockContent( writer, modelElement, container ) {
 	// Append language element
 	const languageClass = modelElement.getAttribute( 'opCodeblockLanguage' ) || 'language-text';
 	const language = languageClass.replace(/^language-/, '');
-	const langElement = writer.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
+	const langElement = writer.createContainerElement( 'div', { class: 'op-uc-code-block--language' } );
 	setTextNode( writer, language, langElement, 'text' );
 	writer.insert( writer.createPositionAt( container, 0 ), langElement );
 
