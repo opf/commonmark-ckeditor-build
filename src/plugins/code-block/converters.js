@@ -21,7 +21,7 @@ export function modelCodeBlockToView() {
 		// Wrap the element in a <pre> <code> block
 		const viewWriter = conversionApi.writer;
 		const preElement = viewWriter.createContainerElement( 'pre' );
-		const langElement = viewWriter.createContainerElement( 'div', { class: 'op-ckeditor--code-block-language' } );
+		const langElement = viewWriter.createContainerElement( 'div', { class: 'op-uc-code-block--language' } );
 		const codeElement = viewWriter.createContainerElement( 'code', { class: language } );
 		const langContent = viewWriter.createText( language );
 		const contentElement = viewWriter.createText( content );
