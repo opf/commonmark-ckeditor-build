@@ -39,7 +39,7 @@ export default class OPPreviewPlugin extends Plugin {
 					$reference = $editable;
 				}
 
-				let $previewWrapper = jQuery('<div class="ck-editor__preview"></div>');
+				let $previewWrapper = jQuery('<div class="ck-editor__preview op-uc-container"></div>');
 				$reference.siblings('.ck-editor__preview').remove();
 
 				const previewService = getOPService(editor, 'ckEditorPreview');
