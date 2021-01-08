@@ -21,14 +21,15 @@ export function userMentions(queryText) {
 					const type = mention._type.toLowerCase();
 					const text = `@${mention.name}`;
 					const id = `@${mention.id}`;
+					const idNumber = mention.id;
 					const typesPathMap = {
 						user: pluginContext.services.apiV3Service[`${type}s`].segment,
 						group: `admin/${pluginContext.services.apiV3Service[`${type}s`].segment}`,
 					}
 					const typeSegment = typesPathMap[type];
-					const link = `${base}/${typeSegment}/${mention.id}`;
+					const link = `${base}/${typeSegment}/${idNumber}`;
 
-					return { type, id, text, link, name: mention.name };
+					return { type, id, text, link, idNumber, name: mention.name };
 				}));
 			});
 		})
