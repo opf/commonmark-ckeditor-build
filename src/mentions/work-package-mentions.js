@@ -9,7 +9,9 @@ export function workPackageMentions(query) {
 			.getJSON(url, {q: query, scope: 'all'}, collection => {
 				resolve(collection.map(wp => {
 					const id = `#${wp.id}`;
-					return { type: 'work_package', id: id, text: id, name: wp.to_s, link: base + wp.id };
+					const idNumber = wp.id;
+
+					return { id, idNumber, type: 'work_package', text: id, name: wp.to_s, link: base + wp.id };
 				}));
 			});
 		})
