@@ -132,8 +132,7 @@ export function MentionCaster( editor ) {
 		});
 
 	function getMentionLink(id, type) {
-		const typePathBase = pluginContext.services.apiV3Service[`${type}s`].segment;
-		const typePath = type === 'group' ? `admin/${typePathBase}` : typePathBase;
+		const typePath = pluginContext.services.apiV3Service[`${type}s`].segment;
 		const base = window.OpenProject.urlRoot;
 
 		return `${base}/${typePath}/${id}`;
