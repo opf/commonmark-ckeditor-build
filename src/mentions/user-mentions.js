@@ -22,11 +22,7 @@ export function userMentions(queryText) {
 					const text = `@${mention.name}`;
 					const id = `@${mention.id}`;
 					const idNumber = mention.id;
-					const typesPathMap = {
-						user: pluginContext.services.apiV3Service[`${type}s`].segment,
-						group: `admin/${pluginContext.services.apiV3Service[`${type}s`].segment}`,
-					}
-					const typeSegment = typesPathMap[type];
+					const typeSegment = pluginContext.services.apiV3Service[`${type}s`].segment;
 					const link = `${base}/${typeSegment}/${idNumber}`;
 
 					return { type, id, text, link, idNumber, name: mention.name };
