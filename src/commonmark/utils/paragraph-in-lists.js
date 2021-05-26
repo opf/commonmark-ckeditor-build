@@ -4,7 +4,7 @@
  * https://community.openproject.com/work_packages/28765
  */
 export function removeParagraphsInLists(root) {
-	let walker = document.createNodeIterator(
+	const walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
 		NodeFilter.SHOW_ELEMENT,
