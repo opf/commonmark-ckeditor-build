@@ -106,8 +106,9 @@ export default class CommonMarkDataProcessor {
 					return false;
 				}
 
+				// Check for a parent ul, this LI might however be in an OL item
 				const parentUl = node.closest('ul');
-				return parentUl.classList.contains('todo-list');
+				return parentUl && parentUl.classList.contains('todo-list');
 			},
 			replacement: function (content, node, options) {
 				content = content
