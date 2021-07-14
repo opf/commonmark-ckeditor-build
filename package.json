@@ -43,6 +43,7 @@
     "@ckeditor/ckeditor5-undo": "25.0.0",
     "@ckeditor/ckeditor5-upload": "25.0.0",
     "@ckeditor/ckeditor5-widget": "25.0.0",
+    "@ckeditor/ckeditor5-watchdog": "25.0.0",
     "markdown-it": "^11.0.0",
     "markdown-it-task-lists": "^2.1.1",
     "postcss-loader": "^3.0.0",
