@@ -1,4 +1,9 @@
-import {getOPResource, getOPPath, getPluginContext} from "../plugins/op-context/op-context";
+import {
+	getOPResource,
+	getOPPath,
+	getPluginContext,
+	getOPHelper,
+} from "../plugins/op-context/op-context";
 
 export function userMentions(queryText) {
 	 let editor = this;
@@ -9,7 +14,7 @@ export function userMentions(queryText) {
 		return [];
 	 }
 
-	const project_id = resource.project.idFromLink;
+	const project_id = getOPHelper(editor, 'idFromLink')(resource.project.href);
 	const url = getOPPath(editor).api.v3.principals(project_id, queryText);
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
