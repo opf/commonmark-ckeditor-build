@@ -126,7 +126,12 @@ export default class CommonMarkDataProcessor {
 		turndownService.addRule('imageFigure', {
 			filter: 'img',
 			replacement: function (content, node) {
-				return node.parentElement.parentElement.outerHTML;
+				const parent = node.parentElement;
+				if (parent && parent.parentElement) {
+					return parent.parentElement.outerHTML;
+				}
+
+				return parent.outerHTML;
 			}
 		});
 

@@ -29,7 +29,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
 			// The image's name in the view is 'img' while in the model is 'image'
-			'image': `${preFix}image`,
+			'imageBlock': `${preFix}image`,
 			'img': `${preFix}image`,
 			'codeblock': `${preFix}code-block`,
 			'caption': `${preFix}figure--description`,
@@ -43,6 +43,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'code': `${preFix}code`,
 			'linkHref': `${preFix}link`,
 			'alignment': `${preFix}figure_align-`,
+			'tableAlignment': `${preFix}figure_align-`,
 			'todo': `${preFix}list_task-list`,
 			'numbered': `${preFix}list`,
 			'bulleted': `${preFix}list`,
@@ -148,7 +149,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			let viewElements = [viewElement];
 			// Images and tables are nested in a figure element, listItems are nested inside ul or ol
 			// elements (only in the view, in the model are single elements).
-			const nestedElements = ['image', 'table', 'tableCell', 'tableRow', 'listItem'];
+			const nestedElements = ['imageBlock', 'table', 'tableCell', 'tableRow', 'listItem'];
 			const isNestedElement = nestedElements.includes(elementName);
 
 			if (!elementsWithCustomClasses.includes(elementName) || !viewElement) {
@@ -162,7 +163,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					const figureViewElement = viewElement;
 					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
 
-					if (elementName === 'image') {
+					if (elementName === 'imageBlock') {
 						const image = viewChildren.find(item => item.is('element', 'img'));
 
 						this._wrapInFigureContentContainer(image, figureViewElement, config, viewWriter);
@@ -174,7 +175,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						viewElements = [...viewElements, ...childrenToAdd];
 
 						if (elementName === 'table') {
-							const tableAlignment = modelElement.getAttribute('alignment');
+							const tableAlignment = modelElement.getAttribute('tableAlignment');
 
 							if (!tableAlignment) {
 								const defaultAlignClass = `${config.attributesWithCustomClassesMap.alignment}${config.alignmentValuesMap.default}`;
@@ -222,27 +223,25 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				} else {
 					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
 				}
-			} else if (attributeName === 'alignment') {
-				if (modelElement.name === 'table') {
-					const figureViewElement = viewElement;
-					// When the selected align is 'center', data.attributeNewValue is null
-					const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue || config.alignmentValuesMap.default];
-					const alignmentClasses = Object
-						.values(config.alignmentValuesMap)
-						.map(alignmentValue => `${config.attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
+			} else if (attributeName === 'tableAlignment') {
+				const figureViewElement = viewElement;
+				// When the selected align is 'center', data.attributeNewValue is null
+				const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue || config.alignmentValuesMap.default];
+				const alignmentClasses = Object
+					.values(config.alignmentValuesMap)
+					.map(alignmentValue => `${config.attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
 
-					alignmentClasses
-						.filter(alignmentClass => figureViewElement.hasClass(alignmentClass))
-						.forEach(alignmentClass => viewWriter.removeClass(alignmentClass, figureViewElement));
+				alignmentClasses
+					.filter(alignmentClass => figureViewElement.hasClass(alignmentClass))
+					.forEach(alignmentClass => viewWriter.removeClass(alignmentClass, figureViewElement));
 
-					// Remove inline alignment styles and classes, they will be handled by
-					// custom classes (ie: op-uc-figure_align-center)
-					if (figureViewElement.hasStyle('float')) {
-						viewWriter.removeStyle('float', figureViewElement);
-					}
-
-					viewWriter.addClass(`${config.attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
+				// Remove inline alignment styles and classes, they will be handled by
+				// custom classes (ie: op-uc-figure_align-center)
+				if (figureViewElement.hasStyle('float')) {
+					viewWriter.removeStyle('float', figureViewElement);
 				}
+
+				viewWriter.addClass(`${config.attributesWithCustomClassesMap[attributeName]}${alignmentToApply}`, figureViewElement);
 			} else if (attributeName === 'listType') {
 				const viewElements = this._manageListItems(viewWriter, modelElement, viewElement, [viewElement], config);
 
