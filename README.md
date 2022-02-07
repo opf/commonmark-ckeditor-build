@@ -48,9 +48,9 @@ Whenever a new CKEditor release is made, there are a plethora of packages to be 
 
 ## Development
 
-- Run `npm run watch-and-link`
+- Run `npm run watch`
 
-Now the webpack development mode is symlinking the latest builds into the openproject core. You can now seamlessly develop in this repository and browse/test in OpenProject core
+Now the webpack development mode is building the files and outputting them to `app/assets/javascripts/vendor/ckeditor/*`, overriding anything in there.
 
 
 

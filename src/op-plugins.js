@@ -12,7 +12,6 @@ import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough"
 import Italic from "@ckeditor/ckeditor5-basic-styles/src/italic";
 import BlockQuote from "@ckeditor/ckeditor5-block-quote/src/blockquote";
 import Heading from "@ckeditor/ckeditor5-heading/src/heading";
-import Image from "@ckeditor/ckeditor5-image/src/image";
 import ImageCaption from "@ckeditor/ckeditor5-image/src/imagecaption";
 import ImageStyle from "@ckeditor/ckeditor5-image/src/imagestyle";
 import ImageToolbar from "@ckeditor/ckeditor5-image/src/imagetoolbar";
@@ -39,6 +38,7 @@ import Mention from "@ckeditor/ckeditor5-mention/src/mention";
 import {MentionCaster} from './mentions/mentions-caster';
 import ImageResize from "@ckeditor/ckeditor5-image/src/imageresize";
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
+import ImageBlock from '@ckeditor/ckeditor5-image/src/imageblock';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -64,7 +64,7 @@ export const builtinPlugins = [
 	Strikethrough,
 	BlockQuote,
 	Heading,
-	Image,
+	ImageBlock,
 	ImageCaption,
 	ImageStyle,
 	ImageResize,
