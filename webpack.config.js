@@ -7,20 +7,22 @@
 
 /* eslint-env node */
 
+
 const path = require( 'path' );
 const webpack = require( 'webpack' );
 const { bundler, styles } = require( '@ckeditor/ckeditor5-dev-utils' );
 const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
-const UglifyJsWebpackPlugin = require( 'uglifyjs-webpack-plugin' );
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const TerserPlugin = require('terser-webpack-plugin');
+const TerserPlugin = require( 'terser-webpack-plugin' );
 
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
-let config = {
-	mode: mode,
+module.exports = {
+	devtool: 'source-map',
+	performance: { hints: false },
 
 	entry: path.resolve( __dirname, 'src', 'op-ckeditor.js' ),
+
+	mode: mode,
 
 	output: {
 		library: 'OPEditor',
@@ -31,9 +33,20 @@ let config = {
 	},
 
 	optimization: {
-		// minimize: true,
-		// minimizer: [new TerserPlugin()],
+		minimizer: [
+			new TerserPlugin( {
+				sourceMap: true,
+				terserOptions: {
+					output: {
+						// Preserve CKEditor 5 license comments.
+						comments: /^!/
+					}
+				},
+				extractComments: false
+			} )
+		]
 	},
+
 
 	plugins: [
 		new CKEditorWebpackPlugin( {
@@ -43,11 +56,11 @@ let config = {
 			additionalLanguages: ['de']
 		} ),
 
-		// new BundleAnalyzerPlugin(),
+		new webpack.BannerPlugin( {
+			banner: bundler.getLicenseBanner(),
+			raw: true
+		} )
 	],
-
-	devtool: 'source-map',
-	performance: { hints: false },
 
 	module: {
 		rules: [
@@ -61,33 +74,26 @@ let config = {
 					{
 						loader: 'style-loader',
 						options: {
-                            injectType: 'singletonStyleTag'
-                        }
+							injectType: 'singletonStyleTag',
+							attributes: {
+								'data-cke': true
+							}
+						}
 					},
+					'css-loader',
 					{
 						loader: 'postcss-loader',
-						options: styles.getPostCssConfig( {
-							themeImporter: {
-								themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' )
-							},
-							minify: true
-						} )
-					},
+						options: {
+							postcssOptions: styles.getPostCssConfig( {
+								themeImporter: {
+									themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' )
+								},
+								minify: true
+							} )
+						}
+					}
 				]
 			}
 		]
 	}
 };
-
-if (process.env.NODE_ENV === 'production') {
-	console.log('Adding production plugins');
-	config.plugins.push(
-		new webpack.BannerPlugin( {
-			banner: bundler.getLicenseBanner(),
-			raw: true
-		} )
-	)
-}
-
-
-module.exports = config;
