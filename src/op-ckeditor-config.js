@@ -60,8 +60,7 @@ export const defaultConfig = {
 			}
 		],
 		toolbar: [
-			'imageStyle:full',
-			'|',
+			'toggleImageCaption',
 			'imageTextAlternative',
 			'|',
 			'imageResize:50',
