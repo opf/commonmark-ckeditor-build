@@ -5,7 +5,7 @@ import {originalSrcAttribute} from '../../commonmark/commonmarkdataprocessor';
 
 export function replaceImageAttachmentsByName(resource) {
 	return dispatcher => {
-		dispatcher.on('attribute:src:image', converter, { priority: 'highest' } );
+		dispatcher.on('attribute:src:imageBlock', converter, { priority: 'highest' } );
 	};
 
 	function converter( evt, data, conversionApi ) {
@@ -26,7 +26,7 @@ export function replaceImageAttachmentsByName(resource) {
 
 export function replaceNamedAttachmentWithUrl(resource) {
 	return dispatcher => {
-		dispatcher.on('attribute:src:image', converter, { priority: 'highest' } );
+		dispatcher.on('attribute:src:imageBlock', converter, { priority: 'highest' } );
 	};
 
 	function converter( evt, data, conversionApi ) {
