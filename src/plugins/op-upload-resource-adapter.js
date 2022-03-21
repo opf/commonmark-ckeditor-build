@@ -1,3 +1,5 @@
+import {getOPService} from './op-context/op-context';
+
 export default class OpUploadResourceAdapter {
     constructor(loader, resource, editor) {
         this.loader = loader;
@@ -7,16 +9,18 @@ export default class OpUploadResourceAdapter {
 
     upload() {
 		const resource = this.resource;
-        if (!(resource && resource.uploadAttachments)) {
-			const resourceContext = resource ? resource.name : 'Missing context';
-            console.warn(`uploadAttachments not present on context: ${resourceContext}`);
-            return Promise.reject("You're not allowed to upload attachments on this resource.");
+		const resourceService = getOPService(this.editor, 'attachmentsResourceService');
+
+        if (!resource) {
+            console.warn(`resource not available in this CKEditor instance`);
+            return Promise.reject("Not possible to upload attachments without resource");
 		}
 
 		return this.loader.file
 			.then(file => {
-			return resource
-				.uploadAttachments([file])
+			return resourceService
+				.attachFiles(resource, [file])
+				.toPromise()
 				.then((result) => {
 					this.editor.model.fire('op:attachment-added', result);
 
@@ -29,7 +33,7 @@ export default class OpUploadResourceAdapter {
 	}
 
 	buildResponse(result) {
-		return { default: result.uploadUrl };
+		return { default: result._links.staticDownloadLocation.href };
 	}
 
     abort() {
