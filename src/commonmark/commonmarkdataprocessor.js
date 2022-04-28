@@ -16,6 +16,7 @@ import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
 import {fixEmptyCodeBlocks} from "./utils/fix-empty-code-blocks";
+import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
 
 export const originalSrcAttribute = 'data-original-src';
 
@@ -59,6 +60,9 @@ export default class CommonMarkDataProcessor {
 
 		// Fix empty code blocks
 		fixEmptyCodeBlocks( domFragment );
+
+		// Fix duplicate whitespace in task lists
+		fixTasklistWhitespaces( domFragment );
 
 		// Convert DOM DocumentFragment to view DocumentFragment.
 		return this._domConverter.domToView( domFragment );
