@@ -131,11 +131,11 @@ export default class CommonMarkDataProcessor {
 			filter: 'img',
 			replacement: function (content, node) {
 				const parent = node.parentElement;
-				if (parent && parent.parentElement) {
+				if (parent && parent.classList.contains('op-uc-figure--content')) {
 					return parent.parentElement.outerHTML;
 				}
 
-				return parent.outerHTML;
+				return node.outerHTML;
 			}
 		});
 

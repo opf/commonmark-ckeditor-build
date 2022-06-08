@@ -42,6 +42,11 @@ export const defaultConfig = {
 		]
 	},
 	image: {
+		insert: {
+			// Default to inline image type by default
+			type: 'inline',
+		},
+		resizeUnit: 'px',
 		resizeOptions: [
 			{
 				name: 'imageResize:original',
@@ -63,8 +68,9 @@ export const defaultConfig = {
 			'toggleImageCaption',
 			'imageTextAlternative',
 			'|',
-			'imageResize:50',
-			'imageResize:75',
+			'imageStyle:inline',
+			'imageStyle:block',
+			'|',
 			'imageResize:original'
 		]
 	},

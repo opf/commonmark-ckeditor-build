@@ -39,6 +39,7 @@ import {MentionCaster} from './mentions/mentions-caster';
 import ImageResize from "@ckeditor/ckeditor5-image/src/imageresize";
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
 import ImageBlock from '@ckeditor/ckeditor5-image/src/imageblock';
+import ImageInline from '@ckeditor/ckeditor5-image/src/imageinline';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -65,6 +66,7 @@ export const builtinPlugins = [
 	BlockQuote,
 	Heading,
 	ImageBlock,
+	ImageInline,
 	ImageCaption,
 	ImageStyle,
 	ImageResize,

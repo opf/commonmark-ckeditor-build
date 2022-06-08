@@ -29,6 +29,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'listItem': `${preFix}list--item`,
 			'li': `${preFix}list--item`,
 			// The image's name in the view is 'img' while in the model is 'image'
+			'imageInline': `${preFix}image ${preFix}image_inline`,
 			'imageBlock': `${preFix}image`,
 			'img': `${preFix}image`,
 			'codeblock': `${preFix}code-block`,
