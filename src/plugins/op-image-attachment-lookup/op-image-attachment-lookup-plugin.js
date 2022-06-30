@@ -49,7 +49,13 @@ export function replaceNamedAttachmentWithUrl(resource) {
 
 		const viewWriter = conversionApi.writer;
 		const figure = conversionApi.mapper.toViewElement( data.item );
-		const img = figure.getChild( 0 );
+		let img;
+
+		if (data.item.name === "imageInline") {
+			img = figure;
+		} else {
+			img = figure.getChild( 0 );
+		}
 
 		if (match) {
 			viewWriter.setAttribute(originalSrcAttribute, src, img );
