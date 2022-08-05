@@ -26,6 +26,13 @@ export function configurationCustomizer(editorClass) {
 			configuration.removePlugins.push(...disabledMacros);
 		}
 
+		// Disable specific mentions
+		configuration.disabledMentions = [];
+		const disabledMentions = context.disabledMentions;
+		if (Array.isArray(disabledMentions)) {
+			configuration.disabledMentions = disabledMentions;
+		}
+
 		// Return the original promise for instance creation
 		return editorClass.create(wrapper, configuration).then(editor => {
 			return editor;
