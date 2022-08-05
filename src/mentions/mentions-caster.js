@@ -1,7 +1,6 @@
 import {getPluginContext} from "../plugins/op-context/op-context";
 import ClickObserver from '@ckeditor/ckeditor5-engine/src/view/observer/clickobserver';
 
-
 export function MentionCaster( editor ) {
 	const pluginContext = getPluginContext(editor);
 	const view = editor.editing.view;
