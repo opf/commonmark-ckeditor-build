@@ -33,15 +33,13 @@ export default class OPMacroListPlugin extends Plugin {
 			}
 			const dropdownView = createDropdown( locale );
 
-			addToolbarToDropdown(dropdownView, dropdownItems);
+			addToolbarToDropdown(dropdownView, dropdownItems, { isVertical: true, class: 'op-macro-list-button' });
 			dropdownView.buttonView.set( {
 				isOn: false,
 				withText: true,
 				tooltip: dropdownTooltip,
 				label: window.I18n.t('js.editor.macro.dropdown.macros')
 			} );
-			dropdownView.toolbarView.isVertical = true;
-			dropdownView.toolbarView.className = 'op-macro-list-button';
 
 			return dropdownView;
 		} );
