@@ -1,4 +1,4 @@
-import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
+import { ViewPosition } from '@ckeditor/ckeditor5-engine';
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
 import {setContent} from './widget';
 

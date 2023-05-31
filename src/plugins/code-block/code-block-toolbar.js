@@ -1,5 +1,5 @@
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-import ContextualBalloon from '@ckeditor/ckeditor5-ui/src/panel/balloon/contextualballoon';
+import { Plugin } from '@ckeditor/ckeditor5-core';
+import { ContextualBalloon } from '@ckeditor/ckeditor5-ui';
 
 import {createToolbarEditButton} from '../../helpers/create-toolbar-edit-button';
 import {createEditToolbar} from '../../helpers/create-toolbar';

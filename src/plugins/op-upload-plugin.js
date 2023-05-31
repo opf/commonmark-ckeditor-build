@@ -1,8 +1,8 @@
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-import FileRepository from '@ckeditor/ckeditor5-upload/src/filerepository';
+import { Plugin } from '@ckeditor/ckeditor5-core';
+import { FileRepository } from '@ckeditor/ckeditor5-upload';
 import OpUploadResourceAdapter from './op-upload-resource-adapter';
 import {getOPResource} from './op-context/op-context';
-import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
+import { ImageUpload } from '@ckeditor/ckeditor5-image';
 
 export default class OpUploadPlugin extends Plugin {
 

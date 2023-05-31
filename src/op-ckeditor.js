@@ -1,11 +1,11 @@
-import DecoupledEditorBase from '@ckeditor/ckeditor5-editor-decoupled/src/decouplededitor';
-import EditorWatchdog from '@ckeditor/ckeditor5-watchdog/src/editorwatchdog';
+import { DecoupledEditor } from '@ckeditor/ckeditor5-editor-decoupled';
+import { EditorWatchdog } from '@ckeditor/ckeditor5-watchdog';
 import {builtinPlugins} from './op-plugins';
 import {defaultConfig} from "./op-ckeditor-config";
 import {configurationCustomizer} from './op-config-customizer';
 
-export class ConstrainedEditor extends DecoupledEditorBase {}
-export class FullEditor extends DecoupledEditorBase {}
+export class ConstrainedEditor extends DecoupledEditor {}
+export class FullEditor extends DecoupledEditor {}
 
 // Export the two common interfaces
 window.OPConstrainedEditor = ConstrainedEditor;

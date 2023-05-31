@@ -9,8 +9,7 @@
 
 /* eslint-env browser */
 
-import HtmlDataProcessor from '@ckeditor/ckeditor5-engine/src/dataprocessor/htmldataprocessor';
-import DomConverter from '@ckeditor/ckeditor5-engine/src/view/domconverter';
+import { HtmlDataProcessor, DomConverter } from '@ckeditor/ckeditor5-engine';
 import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';

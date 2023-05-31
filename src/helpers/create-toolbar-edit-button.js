@@ -1,5 +1,5 @@
 import imageIcon from '../icons/edit.svg';
-import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 export function createToolbarEditButton(editor, name, callback) {
 	// Add editing button

@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"lib": [
+			"DOM",
+			"DOM.Iterable"
+		],
+		"module": "es6",
+		"target": "es2019",
+		"moduleResolution": "node"
+	}
+}

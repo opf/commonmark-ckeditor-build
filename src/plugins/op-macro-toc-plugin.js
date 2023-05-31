@@ -1,6 +1,6 @@
-import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 
 import { toWidget } from '@ckeditor/ckeditor5-widget/src/utils';
 

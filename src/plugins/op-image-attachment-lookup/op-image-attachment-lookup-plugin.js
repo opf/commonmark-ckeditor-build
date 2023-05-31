@@ -1,4 +1,4 @@
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 import {getOPResource} from '../op-context/op-context';
 import {originalSrcAttribute} from '../../commonmark/commonmarkdataprocessor';
 

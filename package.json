@@ -42,6 +42,7 @@
     "@ckeditor/ckeditor5-ui": "38.0.1",
     "@ckeditor/ckeditor5-undo": "38.0.1",
     "@ckeditor/ckeditor5-upload": "38.0.1",
+    "@ckeditor/ckeditor5-engine": "38.0.1",
     "@ckeditor/ckeditor5-watchdog": "38.0.1",
     "@ckeditor/ckeditor5-widget": "38.0.1",
     "css-loader": "^6.8.1",
