@@ -1,5 +1,5 @@
 
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 import CodeBlockEditing from './code-block-editing';
 import CodeBlockToolbar from './code-block-toolbar';
 

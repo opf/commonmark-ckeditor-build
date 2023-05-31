@@ -1,4 +1,4 @@
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 import Selection from '@ckeditor/ckeditor5-engine/src/model/selection';
 
 export default class OPAttachmentListenerPlugin extends Plugin {

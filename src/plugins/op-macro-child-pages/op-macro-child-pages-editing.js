@@ -1,9 +1,9 @@
-import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 
-import ViewPosition from '@ckeditor/ckeditor5-engine/src/view/position';
-import ViewRange from '@ckeditor/ckeditor5-engine/src/view/range';
+import { ViewPosition } from '@ckeditor/ckeditor5-engine';
+import { ViewRange } from '@ckeditor/ckeditor5-engine';
 
 import {toChildPagesMacroWidget} from './utils';
 

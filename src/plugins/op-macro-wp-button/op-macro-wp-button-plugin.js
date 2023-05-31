@@ -1,5 +1,5 @@
-import Widget from '@ckeditor/ckeditor5-widget/src/widget';
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Widget } from '@ckeditor/ckeditor5-widget';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 import OPMacroWpButtonEditing from './op-macro-wp-button-editing';
 import OPMacroWpButtonToolbar from './op-macro-wp-button-toolbar';
 

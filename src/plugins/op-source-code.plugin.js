@@ -3,9 +3,9 @@
 import sourceIcon from '../icons/source.svg';
 import wysiwygIcon from '../icons/wysiwyg.svg';
 
-import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 import {getOPPath, getOPPreviewContext, getOPService} from './op-context/op-context';
 import {enableItems, disableItems} from '../helpers/button-disabler';
 

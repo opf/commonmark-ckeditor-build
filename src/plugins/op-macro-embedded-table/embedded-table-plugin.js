@@ -1,6 +1,6 @@
 import EmbeddedTableEditing from './embedded-table-editing';
-import Widget from '@ckeditor/ckeditor5-widget/src/widget';
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import { Widget } from '@ckeditor/ckeditor5-widget';
+import { Plugin } from '@ckeditor/ckeditor5-core';
 import EmbeddedTableToolbar from './embedded-table-toolbar';
 
 export default class OPMacroEmbeddedTable extends Plugin {
