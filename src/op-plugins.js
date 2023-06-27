@@ -35,6 +35,7 @@ import CommonMark from './commonmark/commonmark';
 import OPSourceCodePlugin from './plugins/op-source-code.plugin';
 // import Mention from "../forked/ckeditor5-mention/src/mention";
 import { Mention } from '@ckeditor/ckeditor5-mention';
+import { ImageResize } from '@ckeditor/ckeditor5-image';
 import {
 	Emoji, EmojiActivity, EmojiFlags, EmojiFood, EmojiNature, EmojiObjects, EmojiPeople,
 	EmojiPlaces, EmojiSymbols
