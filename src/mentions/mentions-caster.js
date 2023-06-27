@@ -91,6 +91,10 @@ export function MentionCaster( editor ) {
 					return;
 				}
 
+				if (modelAttributeValue.type === 'emoji') {
+					return writer.createAttributeElement('span');
+				}
+
 				const element = writer.createAttributeElement(
 					'a',
 					{
@@ -114,6 +118,10 @@ export function MentionCaster( editor ) {
 				// Do not convert empty attributes (lack of value means no mention).
 				if ( !modelAttributeValue ) {
 					return;
+				}
+
+				if (modelAttributeValue.type === 'emoji') {
+					return writer.createAttributeElement('span');
 				}
 
 				const element = writer.createAttributeElement(

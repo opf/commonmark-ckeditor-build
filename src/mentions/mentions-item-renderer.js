@@ -6,3 +6,11 @@ export function customItemRenderer( item ) {
 
     return itemElement;
 }
+
+export function emojiItemRenderer( item ) {
+	const itemElement = document.createElement( 'span' );
+
+	itemElement.textContent = `${item.text} (${item.name})`;
+
+	return itemElement;
+}
