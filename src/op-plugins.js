@@ -35,8 +35,11 @@ import CommonMark from './commonmark/commonmark';
 import OPSourceCodePlugin from './plugins/op-source-code.plugin';
 // import Mention from "../forked/ckeditor5-mention/src/mention";
 import { Mention } from '@ckeditor/ckeditor5-mention';
-import {MentionCaster} from './mentions/mentions-caster';
-import { ImageResize } from '@ckeditor/ckeditor5-image';
+import {
+	Emoji, EmojiActivity, EmojiFlags, EmojiFood, EmojiNature, EmojiObjects, EmojiPeople,
+	EmojiPlaces, EmojiSymbols
+} from '@phudak/ckeditor5-emoji/src';
+import { MentionCaster } from './mentions/mentions-caster';
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
 import { ImageBlock } from '@ckeditor/ckeditor5-image';
 import { ImageInline } from '@ckeditor/ckeditor5-image';
@@ -48,6 +51,18 @@ export const opMacroPlugins = [
 	OPMacroEmbeddedTable,
 	OPMacroWpButtonPlugin,
 	OPChildPagesPlugin,
+];
+
+export const opEmojiPlugins = [
+	Emoji,
+	EmojiActivity,
+	EmojiFlags,
+	EmojiFood,
+	EmojiNature,
+	EmojiObjects,
+	EmojiPeople,
+	EmojiPlaces,
+	EmojiSymbols,
 ];
 
 export const opImageUploadPlugins = [
@@ -103,4 +118,7 @@ export const builtinPlugins = [
 
 	// OpenProject image upload plugins
 	opImageUploadPlugins,
+
+	// OpenProject emoji plugins
+	opEmojiPlugins,
 );
