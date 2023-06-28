@@ -10,7 +10,7 @@ export function customItemRenderer( item ) {
 export function emojiItemRenderer( item ) {
 	const itemElement = document.createElement( 'span' );
 
-	itemElement.textContent = `${item.text} (${item.name})`;
+	itemElement.textContent = `${item.text} ${item.name}`;
 
 	return itemElement;
 }
