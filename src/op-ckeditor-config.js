@@ -1,6 +1,7 @@
 import {userMentions} from "./mentions/user-mentions";
 import {workPackageMentions} from "./mentions/work-package-mentions";
-import {customItemRenderer} from './mentions/mentions-item-renderer';
+import {customItemRenderer, emojiItemRenderer} from './mentions/mentions-item-renderer';
+import {emojiMentions} from "./mentions/emoji-mentions";
 
 export const defaultConfig = {
 	heading: {
@@ -95,6 +96,12 @@ export const defaultConfig = {
 				itemRenderer: customItemRenderer,
 				minimumCharacters: 1
 			},
+			{
+				marker: ':',
+				feed: emojiMentions,
+				itemRenderer: emojiItemRenderer,
+				minimumCharacters: 1
+			}
 		]
 	},
 
