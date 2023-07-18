@@ -12964,7 +12964,7 @@
 		"symbol": "🔣",
 		"group": "symbols",
 		"keywords": [
-			"〒♪&amp;%",
+			"〒♪&%",
 			"input",
 			"input symbols"
 		]
@@ -13669,7 +13669,7 @@
 		]
 	},
 	{
-		"id": ":flag_antigua_&amp;_barbuda:",
+		"id": ":flag_antigua_&_barbuda:",
 		"symbol": "🇦🇬",
 		"group": "flags",
 		"keywords": [
@@ -13773,7 +13773,7 @@
 		]
 	},
 	{
-		"id": ":flag_bosnia_&amp;_herzegovina:",
+		"id": ":flag_bosnia_&_herzegovina:",
 		"symbol": "🇧🇦",
 		"group": "flags",
 		"keywords": [
@@ -14157,7 +14157,7 @@
 		]
 	},
 	{
-		"id": ":flag_ceuta_&amp;_melilla:",
+		"id": ":flag_ceuta_&_melilla:",
 		"symbol": "🇪🇦",
 		"group": "flags",
 		"keywords": [
@@ -14389,7 +14389,7 @@
 		]
 	},
 	{
-		"id": ":flag_south_georgia_&amp;_south_sandwich_islands:",
+		"id": ":flag_south_georgia_&_south_sandwich_islands:",
 		"symbol": "🇬🇸",
 		"group": "flags",
 		"keywords": [
@@ -14437,7 +14437,7 @@
 		]
 	},
 	{
-		"id": ":flag_heard_&amp;_mcdonald_islands:",
+		"id": ":flag_heard_&_mcdonald_islands:",
 		"symbol": "🇭🇲",
 		"group": "flags",
 		"keywords": [
@@ -14637,7 +14637,7 @@
 		]
 	},
 	{
-		"id": ":flag_st._kitts_&amp;_nevis:",
+		"id": ":flag_st._kitts_&_nevis:",
 		"symbol": "🇰🇳",
 		"group": "flags",
 		"keywords": [
@@ -15117,7 +15117,7 @@
 		]
 	},
 	{
-		"id": ":flag_st._pierre_&amp;_miquelon:",
+		"id": ":flag_st._pierre_&_miquelon:",
 		"symbol": "🇵🇲",
 		"group": "flags",
 		"keywords": [
@@ -15285,7 +15285,7 @@
 		]
 	},
 	{
-		"id": ":flag_svalbard_&amp;_jan_mayen:",
+		"id": ":flag_svalbard_&_jan_mayen:",
 		"symbol": "🇸🇯",
 		"group": "flags",
 		"keywords": [
@@ -15349,7 +15349,7 @@
 		]
 	},
 	{
-		"id": ":flag_são_tomé_&amp;_príncipe:",
+		"id": ":flag_são_tomé_&_príncipe:",
 		"symbol": "🇸🇹",
 		"group": "flags",
 		"keywords": [
@@ -15397,7 +15397,7 @@
 		]
 	},
 	{
-		"id": ":flag_turks_&amp;_caicos_islands:",
+		"id": ":flag_turks_&_caicos_islands:",
 		"symbol": "🇹🇨",
 		"group": "flags",
 		"keywords": [
@@ -15493,7 +15493,7 @@
 		]
 	},
 	{
-		"id": ":flag_trinidad_&amp;_tobago:",
+		"id": ":flag_trinidad_&_tobago:",
 		"symbol": "🇹🇹",
 		"group": "flags",
 		"keywords": [
@@ -15589,7 +15589,7 @@
 		]
 	},
 	{
-		"id": ":flag_st._vincent_&amp;_grenadines:",
+		"id": ":flag_st._vincent_&_grenadines:",
 		"symbol": "🇻🇨",
 		"group": "flags",
 		"keywords": [
@@ -15637,7 +15637,7 @@
 		]
 	},
 	{
-		"id": ":flag_wallis_&amp;_futuna:",
+		"id": ":flag_wallis_&_futuna:",
 		"symbol": "🇼🇫",
 		"group": "flags",
 		"keywords": [
