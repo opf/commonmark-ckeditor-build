@@ -18,14 +18,14 @@ export function userMentions(queryText) {
 		return [];
 	}
 
-	const project_id = getOPHelper(editor, 'idFromLink')(resource.project.href);
-	const url = getOPPath(editor).api.v3.principals(project_id, queryText) + '&select=elements/_type,elements/id,elements/name';
+	const workPackageId = getOPHelper(editor, 'idFromLink')(resource.href);
+	const url = getOPPath(editor).api.v3.principals(workPackageId, queryText) + '&select=elements/_type,elements/id,elements/name';
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
 
 	return new Promise((resolve, reject) => {
 		jQuery.getJSON(url, collection => {
-			resolve(collection._embedded.elements.map(mention => {
+			resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
 				const type = mention._type.toLowerCase();
 				const text = `@${mention.name}`;
 				const id = `@${mention.id}`;
