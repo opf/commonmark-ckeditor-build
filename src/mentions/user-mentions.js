@@ -18,8 +18,7 @@ export function userMentions(queryText) {
 		return [];
 	}
 
-	const workPackageId = getOPHelper(editor, 'idFromLink')(resource.href);
-	const url = getOPPath(editor).api.v3.principals(workPackageId, queryText) + '&select=elements/_type,elements/id,elements/name';
+	const url = getOPPath(editor).api.v3.principals(resource, queryText) + '&select=elements/_type,elements/id,elements/name';
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
 
