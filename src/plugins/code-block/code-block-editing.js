@@ -6,6 +6,7 @@ import {modelCodeBlockToView, viewCodeBlockToModel, codeBlockContentToView} from
 import {createCodeBlockWidget, isCodeBlockWidget} from './widget';
 import DoubleClickObserver from './click-observer';
 import { getPluginContext } from '../op-context/op-context';
+import {viewToModelPositionOutsideModelElement} from "@ckeditor/ckeditor5-widget";
 
 export default class CodeBlockEditing extends Plugin {
 
@@ -46,6 +47,13 @@ export default class CodeBlockEditing extends Plugin {
 		conversion
 			.for('dataDowncast')
 			.add(modelCodeBlockToView());
+
+		this.editor.editing.mapper.on(
+			'viewToModelPosition',
+			viewToModelPositionOutsideModelElement( this.editor.model, viewElement => {
+				return viewElement.hasClass( 'op-uc-code-block' )
+			} )
+		);
 
 		// Register click handler to code block to edit it immediately
 		view.addObserver( DoubleClickObserver );

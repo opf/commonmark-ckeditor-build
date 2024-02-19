@@ -30,6 +30,7 @@ export function modelCodeBlockToView() {
 
 		conversionApi.mapper.bindElements( codeBlock, codeElement );
 		conversionApi.mapper.bindElements( codeBlock, preElement );
+		conversionApi.mapper.bindElements( codeBlock, langElement );
 
 		// Insert at matching position
 		const insertPosition = conversionApi.mapper.toViewPosition( data.range.start );
