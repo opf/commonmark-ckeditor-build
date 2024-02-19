@@ -4,7 +4,7 @@ import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-butt
 import OpUploadPlugin from './plugins/op-upload-plugin';
 import OPChildPagesPlugin from "./plugins/op-macro-child-pages/op-macro-child-pages-plugin";
 import { Essentials } from '@ckeditor/ckeditor5-essentials';
-import { UploadAdapter } from '@ckeditor/ckeditor5-adapter-ckfinder';
+import { CKFinderUploadAdapter } from '@ckeditor/ckeditor5-adapter-ckfinder';
 import { Autoformat } from '@ckeditor/ckeditor5-autoformat';
 import { Bold } from '@ckeditor/ckeditor5-basic-styles';
 import { Code } from '@ckeditor/ckeditor5-basic-styles';
@@ -57,7 +57,7 @@ export const opImageUploadPlugins = [
 
 export const builtinPlugins = [
 	Essentials,
-	UploadAdapter,
+	CKFinderUploadAdapter,
 	Autoformat,
 	Bold,
 	Code,
@@ -84,9 +84,9 @@ export const builtinPlugins = [
 	PasteFromOffice,
 
 	OPHelpLinkPlugin,
-	CodeBlockPlugin,
 	OPPreviewPlugin,
 	OPSourceCodePlugin,
+    CodeBlockPlugin,
 
 	CommonMark,
 	Table,
