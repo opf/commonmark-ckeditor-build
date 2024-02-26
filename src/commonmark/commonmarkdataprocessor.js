@@ -189,6 +189,8 @@ export default class CommonMarkDataProcessor {
 			replacement: ( _content, node ) => node.outerHTML,
 		});
 
-		return turndownService.turndown( domFragment );
+		let turndown = turndownService.turndown( domFragment );
+		// Escape non-breaking space characters
+		return turndown.replace(/\u00A0/, '&nbsp;');
 	}
 }
