@@ -24,6 +24,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'tableRow': `${preFix}table--row`,
 			'ol': `${preFix}list`,
 			'ul': `${preFix}list`,
+			'list': `${preFix}list`,
 			'todo': `${preFix}list ${preFix}list_task-list`,
 			// The list item's name in the view is 'li' while in the model is 'listItem'
 			'listItem': `${preFix}list--item`,
@@ -293,29 +294,12 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	}
 
 	_manageListItems(viewWriter, modelElement, viewElement, viewElements, config) {
-		const listElement = viewElement.parent;
+		const listItemElement = viewElement.findAncestor('li');
+		const listElement = viewElement.findAncestor(/^(ul|ol)$/);
 		const listType = modelElement.getAttribute('listType');
 		const listTypeClass = config.attributesWithCustomClassesMap[listType];
 		const previousElement = listElement.previousSibling;
 		const nextElement = listElement.nextSibling;
-		const previousListElement = previousElement &&
-									previousElement.name === listElement.name &&
-									previousElement.hasClass(listTypeClass) ?
-										previousElement :
-										null;
-		const nextListElement = nextElement &&
-								nextElement.name === listElement.name &&
-								nextElement.hasClass(listTypeClass) ?
-									nextElement :
-									null;
-
-		if (previousListElement) {
-			viewWriter.mergeContainers(viewWriter.createPositionAfter(previousListElement));
-		}
-
-		if (nextListElement) {
-			viewWriter.mergeContainers(viewWriter.createPositionBefore(nextListElement));
-		}
 
 		if (listType === 'todo') {
 			viewWriter.addClass(listTypeClass, listElement);
@@ -329,7 +313,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			}
 		}
 
-		return [...viewElements, listElement];
+		return [...viewElements, listElement, listItemElement];
 	}
 
 	_wrapInFigureContentContainer(element, parentElement, config, viewWriter) {

@@ -82,6 +82,16 @@ export default class OpImageAttachmentLookup extends Plugin {
 		conversion
 			.for('dataDowncast')
 			.add(replaceNamedAttachmentWithUrl(resource));
+
+		// Disable the native image size lookup as it breaks this method
+		const imageUtils = editor.plugins.get( 'ImageUtils' );
+
+		imageUtils.decorate( 'setImageNaturalSizeAttributes' );
+
+		imageUtils.on( 'setImageNaturalSizeAttributes', ( evt, [ element ] ) => {
+			console.log( 'model image element:', { element } );
+			evt.stop();
+		}, { priority: 'highest' } );
 	}
 
 }
