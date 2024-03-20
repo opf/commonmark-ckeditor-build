@@ -47,7 +47,7 @@
     "@ckeditor/ckeditor5-upload": "41.1.0",
     "@ckeditor/ckeditor5-watchdog": "41.1.0",
     "@ckeditor/ckeditor5-widget": "41.1.0",
-	"@ckeditor/ckeditor5-mermaid": "git://github.com/ckeditor/ckeditor5-mermaid.git#4fcdc10758ff524326c0d7d79c707c90ad06976a",
+	"@ckeditor/ckeditor5-mermaid": "https://github.com/ckeditor/ckeditor5-mermaid#4fcdc107",
 	"babel-jest": "^29.7.0",
     "css-loader": "^6.10.0",
     "jest": "^29.7.0",
