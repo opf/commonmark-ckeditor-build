@@ -87,8 +87,8 @@ export const builtinPlugins = [
 	OPHelpLinkPlugin,
 	OPPreviewPlugin,
 	OPSourceCodePlugin,
-    CodeBlockPlugin,
 	Mermaid,
+    CodeBlockPlugin,
 
 	CommonMark,
 	Table,
