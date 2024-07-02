@@ -296,6 +296,12 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 	_manageListItems(viewWriter, modelElement, viewElement, viewElements, config) {
 		const listItemElement = viewElement.findAncestor('li');
 		const listElement = viewElement.findAncestor(/^(ul|ol)$/);
+
+
+		if (!listElement) {
+			return viewElements;
+		}
+
 		const listType = modelElement.getAttribute('listType');
 		const listTypeClass = config.attributesWithCustomClassesMap[listType];
 		const previousElement = listElement.previousSibling;
