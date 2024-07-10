@@ -40,6 +40,7 @@ import { ImageResize } from '@ckeditor/ckeditor5-image';
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
 import { ImageBlock } from '@ckeditor/ckeditor5-image';
 import { ImageInline } from '@ckeditor/ckeditor5-image';
+import { PageBreak } from '@ckeditor/ckeditor5-page-break';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -75,6 +76,7 @@ export const builtinPlugins = [
 	Link,
 	List,
 	TodoList,
+	PageBreak,
 	Paragraph,
 	Typing,
 
