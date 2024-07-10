@@ -29,6 +29,10 @@ module.exports = {
 
 	mode: mode,
 
+	externals: {
+		'mermaid/dist/mermaid': 'mermaid'
+	},
+
 	output: {
 		library: 'OPEditor',
 		path: path.resolve(core, 'frontend/src/vendor/ckeditor/' ),

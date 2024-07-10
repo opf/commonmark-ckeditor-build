@@ -42,20 +42,16 @@ export function modelCodeBlockToView() {
 
 export function viewCodeBlockToModel() {
 	return dispatcher => {
-		dispatcher.on( 'element:pre', converter, { priority: 'high' } );
+		dispatcher.on( 'element:code', converter, { priority: 'high' } );
 	};
 
 	function converter( evt, data, conversionApi ) {
-		// Do not convert if this is not an "image figure".
-		if ( !conversionApi.consumable.test( data.viewItem, { name: true } ) ) {
-			return;
-		}
+		const codeBlock = data.viewItem;
+		const hasPreElementParent = !codeBlock.parent || !codeBlock.parent.is( 'element', 'pre' );
+		const hasCodeAncestors = data.modelCursor.findAncestor( 'code' );
+		const { consumable, writer } = conversionApi;
 
-		// Find an code element inside the pre element.
-		const codeBlock = Array.from( data.viewItem.getChildren() ).find( viewChild => viewChild.is('element', 'code'));
-
-		// Do not convert if code block is absent
-		if ( !codeBlock || !conversionApi.consumable.consume( codeBlock, { name: true } ) ) {
+		if ( codeBlock.hasClass( 'language-mermaid' ) || hasPreElementParent || hasCodeAncestors ) {
 			return;
 		}
 
