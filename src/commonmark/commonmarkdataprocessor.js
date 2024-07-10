@@ -179,6 +179,20 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
+
+		turndownService.addRule( 'openProjectPageBreak', {
+			filter: (node) => {
+				return (
+					node.nodeName === 'DIV' &&
+					node.classList.contains('page-break')
+				)
+			},
+			replacement: ( _content, node ) => {
+				// return the page break in a format CKEditor detects as page break if rereading it
+				return '<br style="page-break-after:always;"/>';
+			}
+		});
+
 		turndownService.addRule( 'mentions', {
 			filter: (node) => {
 				return (
