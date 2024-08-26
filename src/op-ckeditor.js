@@ -19,7 +19,6 @@ FullEditor.builtinPlugins = builtinPlugins;
 FullEditor.defaultConfig = Object.assign({}, defaultConfig);
 FullEditor.defaultConfig.toolbar = {
 		items: [
-			'opContentRevisions',
 			'heading',
 			'|',
 			'bold',
@@ -37,6 +36,7 @@ FullEditor.defaultConfig.toolbar = {
 			'insertTable',
 			'macroList',
 			'|',
+			'opContentRevisions',
 			'undo',
 			'redo',
 			'openProjectShowFormattingHelp',
@@ -63,6 +63,9 @@ ConstrainedEditor.defaultConfig.toolbar = {
 		'imageUpload',
 		'blockQuote',
 		'|',
+		'opContentRevisions',
+		'undo',
+		'redo',
 		'openProjectShowFormattingHelp',
 		'preview',
 		'opShowSource'

@@ -21,7 +21,7 @@ export function loadFromLocalStorage(storageKey) {
 export async function saveInLocalStorage(editor) {
   const timestamp = Date.now();
   const key = editor.config.get(OP_CONTENT_REVISION_KEY);
-  const content = await editor.getData({ trim: false });
+  const content = await editor.getData();
 
   // Do not try to save if content is undefined
   if (!content) {
