@@ -25,3 +25,7 @@ export function getOPHelper(editor, name) {
 export function getOPPath(editor) {
 	return getOPService(editor,'pathHelperService');
 }
+
+export function getOPI18n(editor) {
+	return getOPService(editor,'i18n');
+}

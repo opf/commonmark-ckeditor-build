@@ -40,6 +40,8 @@ import { ImageResize } from '@ckeditor/ckeditor5-image';
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
 import { ImageBlock } from '@ckeditor/ckeditor5-image';
 import { ImageInline } from '@ckeditor/ckeditor5-image';
+import { Autosave } from '@ckeditor/ckeditor5-autosave';
+import OpContentRevisions from "./plugins/op-content-revisions/op-content-revisions";
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -59,6 +61,7 @@ export const builtinPlugins = [
 	Essentials,
 	CKFinderUploadAdapter,
 	Autoformat,
+	Autosave,
 	Bold,
 	Code,
 	Italic,
@@ -86,7 +89,8 @@ export const builtinPlugins = [
 	OPHelpLinkPlugin,
 	OPPreviewPlugin,
 	OPSourceCodePlugin,
-    CodeBlockPlugin,
+	OpContentRevisions,
+	CodeBlockPlugin,
 
 	CommonMark,
 	Table,
