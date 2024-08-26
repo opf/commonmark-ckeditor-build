@@ -2,7 +2,7 @@ import {Plugin} from "ckeditor5/src/core";
 import OpContentRevisionsUI from "./ui";
 import {loadFromLocalStorage, saveInLocalStorage} from "./storage";
 import OpContentRevisionsCommand from "./command";
-import {getOPResource} from "../op-context/op-context";
+import {getOPFieldName, getOPResource} from "../op-context/op-context";
 import {Autosave} from "@ckeditor/ckeditor5-autosave";
 
 export const OP_CONTENT_REVISION_KEY = "opContentRevisionKey";
@@ -22,7 +22,7 @@ export default class OpContentRevisions extends Plugin {
     super(editor)
 
     // Define a storage key for this instance
-    const revisionKey = this.createStorageKey(editor);
+    const revisionKey = this.createLocalStorageKey(editor);
     editor.config.define(OP_CONTENT_REVISION_KEY, revisionKey);
   }
 
@@ -57,8 +57,9 @@ export default class OpContentRevisions extends Plugin {
    * Create a storage key from the given resource, if available.
    * Fall back to using the current URL path.
    */
-  createStorageKey(editor) {
+  createLocalStorageKey(editor) {
     const resource = getOPResource(editor);
+    const field = getOPFieldName(editor);
 
     let segment = "";
 
@@ -67,6 +68,11 @@ export default class OpContentRevisions extends Plugin {
     } else {
       segment = location.pathname;
     }
+
+    if (field) {
+      segment += `_${field}`;
+    }
+
 
     return `${OP_CONTENT_REVISION_PREFIX}_${segment}`;
   }

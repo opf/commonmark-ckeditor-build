@@ -6,6 +6,10 @@ export function getOPResource(editor) {
 	return _.get(editor.config, '_config.openProject.context.resource');
 }
 
+export function getOPFieldName(editor) {
+	return _.get(editor.config, '_config.openProject.context.field');
+}
+
 export function getOPPreviewContext(editor) {
 	return _.get(editor.config, '_config.openProject.context.previewContext');
 }

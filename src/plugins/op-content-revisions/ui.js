@@ -5,7 +5,7 @@ import {Plugin} from "ckeditor5/src/core";
 import {addListToDropdown, createDropdown, Notification} from "ckeditor5/src/ui";
 import {Collection} from "ckeditor5/src/utils";
 import {loadFromLocalStorage} from "./storage";
-import {countWords} from "./utils";
+import {countWords, generateHash} from "./utils";
 
 import imageIcon from "./../../icons/revisions.svg";
 import {getOPI18n, getOPService} from "../op-context/op-context";
@@ -73,13 +73,17 @@ function addAvailableRevisions(editor, collection) {
     return;
   }
 
+  const currentContent = editor.getData();
+  const currentHash = generateHash(currentContent);
+
   for (let index = record.items.length; index > 0; ) {
     index--;
 
     const data = record.items[index];
     const time = timezoneService.formattedRelativeDateTime(data.timestamp);
     const words = i18n.t("js.units.word", { count: countWords(data.content) });
-    const label = `${time} (${words})`;
+    const matches = data.hash === currentHash ? `${i18n.t('js.label_current')} - ` : "";
+    const label = `${matches}${time} (${words})`;
 
     const def = {
       type: "button",
