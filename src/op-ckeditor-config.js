@@ -2,8 +2,15 @@ import {userMentions} from "./mentions/user-mentions";
 import {workPackageMentions} from "./mentions/work-package-mentions";
 import {customItemRenderer, emojiItemRenderer} from './mentions/mentions-item-renderer';
 import {emojiMentions} from "./mentions/emoji-mentions";
+import {saveInLocalStorage} from "./plugins/op-content-revisions/storage";
 
 export const defaultConfig = {
+	autosave: {
+		waitingTime: 5000,
+		save(editor) {
+			return saveInLocalStorage(editor);
+		},
+	},
 	heading: {
 		options: [
 			{model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph'},

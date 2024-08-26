@@ -19,6 +19,7 @@ FullEditor.builtinPlugins = builtinPlugins;
 FullEditor.defaultConfig = Object.assign({}, defaultConfig);
 FullEditor.defaultConfig.toolbar = {
 		items: [
+			'opContentRevisions',
 			'heading',
 			'|',
 			'bold',
@@ -41,7 +42,7 @@ FullEditor.defaultConfig.toolbar = {
 			'openProjectShowFormattingHelp',
 			'|',
 			'preview',
-			'opShowSource'
+			'opShowSource',
 		]
 };
 
