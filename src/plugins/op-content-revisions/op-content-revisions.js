@@ -15,11 +15,11 @@ export default class OpContentRevisions extends Plugin {
   }
 
   static get pluginName() {
-    return 'OpContentRevisions'
+    return "OpContentRevisions";
   }
 
   constructor(editor) {
-    super(editor)
+    super(editor);
 
     // Define a storage key for this instance
     const revisionKey = this.createLocalStorageKey(editor);
@@ -32,11 +32,14 @@ export default class OpContentRevisions extends Plugin {
   init() {
     const editor = this.editor;
 
-    editor.commands.add('opContentRevisionApply', new OpContentRevisionsCommand(editor));
+    editor.commands.add("opContentRevisionApply", new OpContentRevisionsCommand(editor));
 
     // Remove expired revisions for all saved drafts
-    editor.once('ready', () => {
+    editor.once("ready", () => {
       const now = Date.now();
+
+      // disable beforeunload hook, we have our own
+      editor.plugins.get("Autosave")._domEmitter.stopListening(window, "beforeunload");
 
       Object
         .keys(localStorage)
@@ -50,7 +53,7 @@ export default class OpContentRevisions extends Plugin {
             }
           }
         });
-    })
+    });
   }
 
   /**
