@@ -85,6 +85,8 @@
     "test": "jest --config=config/jest.config.js"
   },
   "dependencies": {
-    "eslint": "^9.9.0"
+    "@ckeditor/ckeditor5-autosave": "^43.0.0",
+    "eslint": "^9.9.0",
+    "lz-string": "^1.5.0"
   }
 }

@@ -6,6 +6,10 @@ export function getOPResource(editor) {
 	return _.get(editor.config, '_config.openProject.context.resource');
 }
 
+export function getOPFieldName(editor) {
+	return _.get(editor.config, '_config.openProject.context.field');
+}
+
 export function getOPPreviewContext(editor) {
 	return _.get(editor.config, '_config.openProject.context.previewContext');
 }
@@ -24,4 +28,8 @@ export function getOPHelper(editor, name) {
 
 export function getOPPath(editor) {
 	return getOPService(editor,'pathHelperService');
+}
+
+export function getOPI18n(editor) {
+	return getOPService(editor,'i18n');
 }
