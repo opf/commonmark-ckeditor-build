@@ -195,7 +195,6 @@ export default class CommonMarkDataProcessor {
 
 		turndownService.addRule( 'emptyLines', {
 			filter: (node) => {
-				console.log(node);
 				return (node.nodeName === 'BR') ||
 					(node.nodeName === 'P' && node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR');
 			},
