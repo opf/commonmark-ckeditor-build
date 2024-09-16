@@ -48,7 +48,12 @@ export default class CommonMarkDataProcessor {
 		let taskLists = require('markdown-it-task-lists');
 		let parser = md.use(taskLists, {label: true});
 
-		const html = parser.render( data );
+		const markdown = data
+			// _htmlDP creates from `<br>/n` a superfluous blank element `<p><br><br data-cke-filler="true"></p>/n`
+			// so we create the empty paragraph ourselves
+			.replace(/<br>\n/g, '<p></p>');
+
+		const html = parser.render( markdown )
 
 		// Convert input HTML data to DOM DocumentFragment.
 		const domFragment = this._htmlDP._toDom( html );
@@ -96,6 +101,8 @@ export default class CommonMarkDataProcessor {
 			headingStyle: 'atx',
 			codeBlockStyle: 'fenced'
 		} );
+
+		turndownService.keep(['br'])
 
 		turndownService.use([
 			highlightedCodeBlock,
@@ -198,11 +205,16 @@ export default class CommonMarkDataProcessor {
 				return (node.nodeName === 'BR') ||
 					(node.nodeName === 'P' && node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR');
 			},
-			replacement: ( _content, node ) => "<br>",
+			replacement: ( _content, node ) => '<br>',
 		});
 
 		let turndown = turndownService.turndown( domFragment );
-		// Escape non-breaking space characters
-		return turndown.replace(/\u00A0/, '&nbsp;');
+		return turndown
+			// Escape non-breaking space characters
+			.replace(/\u00A0/, '&nbsp;')
+			// turndown compacts `<p><br></p><p><br></p>` to `<br>\n<br>\n\n`
+			// which is not what we need for two (or more) empty lines
+			.replace(/<br><br>/g, '<br>\n\n<br>')
+
 	}
 }
