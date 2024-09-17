@@ -71,13 +71,6 @@ export default class CommonMarkDataProcessor {
 
 		const viewFragment = this._domConverter.domToView(domFragment);
 
-		console.log('>>>', '---');
-		console.log('>>>', 'to DOM');
-		console.log('>>>', 'markdown', data.split('\n'));
-		console.log('>>>', 'domFragment', domFragment);
-		console.log('>>>', 'viewFragment', viewFragment);
-		console.log('>>>', '---');
-
 		// Convert DOM DocumentFragment to view DocumentFragment.
 		return viewFragment;
 	}
@@ -217,13 +210,6 @@ export default class CommonMarkDataProcessor {
 		});
 
 		let turndown = turndownService.turndown(domFragment);
-
-		console.log('>>>', '---');
-		console.log('>>>', 'to Markdown');
-		console.log('>>>', 'domFragment', domFragment);
-		console.log('>>>', 'markdown', turndown.split('\n'));
-		console.log('>>>', '---');
-
 		// Escape non-breaking space characters
 		return turndown.replace(/\u00A0/, '&nbsp;');
 	}
