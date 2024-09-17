@@ -9,13 +9,15 @@
 
 /* eslint-env browser */
 
-import { HtmlDataProcessor, DomConverter } from '@ckeditor/ckeditor5-engine';
+import {HtmlDataProcessor, DomConverter} from '@ckeditor/ckeditor5-engine';
 import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
 import {fixEmptyCodeBlocks} from "./utils/fix-empty-code-blocks";
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
+import {fixBreaksOnRootLevel} from './utils/fix-breaks-on-root-level';
+import {fixBreaksInTableParagraphs} from "./utils/fix-breaks-in-table-paragraphs";
 
 export const originalSrcAttribute = 'data-original-src';
 
@@ -48,28 +50,36 @@ export default class CommonMarkDataProcessor {
 		let taskLists = require('markdown-it-task-lists');
 		let parser = md.use(taskLists, {label: true});
 
-		const markdown = data
-			// _htmlDP creates from `<br>/n` a superfluous blank element `<p><br><br data-cke-filler="true"></p>/n`
-			// so we create the empty paragraph ourselves
-			.replace(/<br>\n/g, '<p></p>');
-
-		const html = parser.render( markdown )
+		const html = parser.render( data );
 
 		// Convert input HTML data to DOM DocumentFragment.
-		const domFragment = this._htmlDP._toDom( html );
+		const domFragment = this._htmlDP._toDom(html);
 
 		// Fix some CommonMark specifics
 		// Paragraphs within list elements (https://community.openproject.com/work_packages/28765)
-		removeParagraphsInLists( domFragment );
+		removeParagraphsInLists(domFragment);
 
 		// Fix empty code blocks
-		fixEmptyCodeBlocks( domFragment );
+		fixEmptyCodeBlocks(domFragment);
 
 		// Fix duplicate whitespace in task lists
-		fixTasklistWhitespaces( domFragment );
+		fixTasklistWhitespaces(domFragment);
+
+		fixBreaksOnRootLevel(domFragment)
+
+		fixBreaksInTableParagraphs(domFragment)
+
+		const viewFragment = this._domConverter.domToView(domFragment);
+
+		console.log('>>>', '---');
+		console.log('>>>', 'to DOM');
+		console.log('>>>', 'markdown', data.split('\n'));
+		console.log('>>>', 'domFragment', domFragment);
+		console.log('>>>', 'viewFragment', viewFragment);
+		console.log('>>>', '---');
 
 		// Convert DOM DocumentFragment to view DocumentFragment.
-		return this._domConverter.domToView( domFragment );
+		return viewFragment;
 	}
 
 	/**
@@ -101,8 +111,6 @@ export default class CommonMarkDataProcessor {
 			headingStyle: 'atx',
 			codeBlockStyle: 'fenced'
 		} );
-
-		turndownService.keep(['br'])
 
 		turndownService.use([
 			highlightedCodeBlock,
@@ -162,13 +170,9 @@ export default class CommonMarkDataProcessor {
 				return node.nodeName === 'FIGURE' && tables.length;
 			},
 			replacement: function (_content, node) {
-				node.querySelectorAll('td p.op-uc-p')
-					.forEach((node) => {
-						if (node.childNodes.length === 0) {
-							node.parentElement.insertBefore(document.createElement("br"), node);
-							node.remove();
-						}
-					});
+				// Remove filler attribute, but keep empty lines
+				node.querySelectorAll('td br[data-cke-filler]')
+					.forEach((node) => node.removeAttribute('data-cke-filler'));
 
 				return node.outerHTML;
 			}
@@ -200,21 +204,27 @@ export default class CommonMarkDataProcessor {
 			replacement: ( _content, node ) => node.outerHTML,
 		});
 
-		turndownService.addRule( 'emptyLines', {
+		turndownService.addRule('emptyParagraphs', {
 			filter: (node) => {
-				return (node.nodeName === 'BR') ||
-					(node.nodeName === 'P' && node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR');
+				return (
+					(node.nodeName === 'P') &&
+					((node.childNodes.length === 0) ||
+						(node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR')
+					)
+				);
 			},
-			replacement: ( _content, node ) => '<br>',
+			replacement: (_content, node) => '<br>\n\n',
 		});
 
-		let turndown = turndownService.turndown( domFragment );
-		return turndown
-			// Escape non-breaking space characters
-			.replace(/\u00A0/, '&nbsp;')
-			// turndown compacts `<p><br></p><p><br></p>` to `<br>\n<br>\n\n`
-			// which is not what we need for two (or more) empty lines
-			.replace(/<br><br>/g, '<br>\n\n<br>')
+		let turndown = turndownService.turndown(domFragment);
 
+		console.log('>>>', '---');
+		console.log('>>>', 'to Markdown');
+		console.log('>>>', 'domFragment', domFragment);
+		console.log('>>>', 'markdown', turndown.split('\n'));
+		console.log('>>>', '---');
+
+		// Escape non-breaking space characters
+		return turndown.replace(/\u00A0/, '&nbsp;');
 	}
 }
