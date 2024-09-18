@@ -13,13 +13,18 @@ import {HtmlDataProcessor, DomConverter} from '@ckeditor/ckeditor5-engine';
 import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
-import {removeParagraphsInLists} from './utils/paragraph-in-lists';
 import {fixBreaksInCodeBlocks, fixCodeBlocks} from "./utils/fix-code-blocks";
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
 import {fixBreaksOnRootLevel} from './utils/fix-breaks-on-root-level';
 import {fixBreaksInTableParagraphs} from "./utils/fix-breaks-in-table-paragraphs";
+import markdownIt from 'markdown-it';
+import markdownItTaskLists from 'markdown-it-task-lists';
 
 export const originalSrcAttribute = 'data-original-src';
+
+function debugOutFragment(fragment) {
+	console.log(Array.prototype.reduce.call(fragment.childNodes, (result, node) => result + (node.outerHTML || node.nodeValue), ''));
+}
 
 /**
  * This data processor implementation uses CommonMark as input/output data.
@@ -38,26 +43,21 @@ export default class CommonMarkDataProcessor {
 	 * @param {String} data A CommonMark string.
 	 * @returns {module:engine/view/documentfragment~DocumentFragment} The converted view element.
 	 */
-	toView( data ) {
-		const md = require( 'markdown-it' )( {
+	toView(data) {
+		const md = markdownIt({
 			// Output html
 			html: true,
 			// Use GFM language fence prefix
-			langPrefix: 'language-',
-		} );
+			langPrefix: 'language-'
+		});
 
 		// Use tasklist plugin
-		let taskLists = require('markdown-it-task-lists');
-		let parser = md.use(taskLists, {label: true});
+		let parser = md.use(markdownItTaskLists, {label: true});
 
-		const html = parser.render( data );
+		const html = parser.render(data);
 
 		// Convert input HTML data to DOM DocumentFragment.
 		const domFragment = this._htmlDP._toDom(html);
-
-		// Fix some CommonMark specifics
-		// Paragraphs within list elements (https://community.openproject.com/work_packages/28765)
-		removeParagraphsInLists(domFragment);
 
 		// Fix empty line on the end of code blocks
 		fixBreaksInCodeBlocks(domFragment)
@@ -68,8 +68,10 @@ export default class CommonMarkDataProcessor {
 		// Fix duplicate whitespace in task lists
 		fixTasklistWhitespaces(domFragment);
 
+		// Fix for multiple empty lines in markdown
 		fixBreaksOnRootLevel(domFragment)
 
+		// Fix for multiple empty lines in html tables
 		fixBreaksInTableParagraphs(domFragment)
 
 		const viewFragment = this._domConverter.domToView(domFragment);
@@ -85,9 +87,9 @@ export default class CommonMarkDataProcessor {
 	 * @param {module:engine/view/documentfragment~DocumentFragment} viewFragment
 	 * @returns {String} CommonMark string.
 	 */
-	toData( viewFragment ) {
+	toData(viewFragment) {
 		// Convert view DocumentFragment to DOM DocumentFragment.
-		const domFragment = this._domConverter.viewToDom( viewFragment, document );
+		const domFragment = this._domConverter.viewToDom(viewFragment, document);
 
 		// Replace leading and trailing nbsp at the end of strong and em tags
 		// with single spaces
@@ -103,10 +105,10 @@ export default class CommonMarkDataProcessor {
 		linkPreprocessor(domFragment);
 
 		// Use Turndown to convert DOM fragment to markdown
-		const turndownService = new TurndownService( {
+		const turndownService = new TurndownService({
 			headingStyle: 'atx',
 			codeBlockStyle: 'fenced'
-		} );
+		});
 
 		turndownService.use([
 			highlightedCodeBlock,
@@ -191,23 +193,23 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
-		turndownService.addRule( 'openProjectMacros', {
-			filter: [ 'macro' ],
-			replacement: ( _content, node ) => {
+		turndownService.addRule('openProjectMacros', {
+			filter: ['macro'],
+			replacement: (_content, node) => {
 				node.innerHTML = '';
 				const outer = node.outerHTML;
 				return outer.replace("</macro>", "\n</macro>")
 			}
 		});
 
-		turndownService.addRule( 'mentions', {
+		turndownService.addRule('mentions', {
 			filter: (node) => {
 				return (
 					node.nodeName === 'MENTION' &&
 					node.classList.contains('mention')
 				)
 			},
-			replacement: ( _content, node ) => node.outerHTML,
+			replacement: (_content, node) => node.outerHTML,
 		});
 
 		turndownService.addRule('emptyParagraphs', {

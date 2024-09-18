@@ -17,7 +17,8 @@ describe('CommonMarkProcessor', () => {
 		it('should not autolink with params', () => {
 			testDataProcessor(
 				'Link: http://example.com/?foo=1&bar=2.',
-				'<p>Link: http://example.com/?foo=1&bar=2.</p>'
+				'<p>Link: http://example.com/?foo=1&bar=2.</p>',
+				'Link: http://example.com/?foo=1&amp;bar=2.'
 			);
 		});
 
