@@ -12,7 +12,7 @@
 import {HtmlDataProcessor, DomConverter} from '@ckeditor/ckeditor5-engine';
 import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
+import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
 import {fixBreaksInCodeBlocks, fixCodeBlocks} from "./utils/fix-code-blocks";
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
 import {fixBreaksOnRootLevel} from './utils/fix-breaks-on-root-level';
@@ -47,6 +47,7 @@ export default class CommonMarkDataProcessor {
 		const md = markdownIt({
 			// Output html
 			html: true,
+			breaks: true,
 			// Use GFM language fence prefix
 			langPrefix: 'language-'
 		});
@@ -103,6 +104,9 @@ export default class CommonMarkDataProcessor {
 
 		// Replace link attributes with their computed href attribute
 		linkPreprocessor(domFragment);
+
+		// Turndown is filtering out empty paragraphs <p></p>, so we need to fix that with <p><br></p>
+		breaksPreprocessor(domFragment);
 
 		// Use Turndown to convert DOM fragment to markdown
 		const turndownService = new TurndownService({
@@ -184,7 +188,6 @@ export default class CommonMarkDataProcessor {
 				return node.outerHTML;
 			}
 		});
-
 
 		turndownService.addRule('strikethrough', {
 			filter: ['del', 's', 'strike'],

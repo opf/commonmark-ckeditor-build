@@ -16,12 +16,15 @@ export function fixBreaksOnRootLevel(root) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
 			}
-		},
-		false
+		}
 	);
 
 	let node;
+	let list = []
 	while (node = walker.nextNode()) {
+		list.push(node);
+	}
+	for (const node of list) {
 		root.insertBefore(document.createElement('p'), node);
 		node.remove();
 	}

@@ -19,8 +19,7 @@ export function fixBreaksInTableParagraphs(root) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
 			}
-		},
-		false
+		}
 	);
 
 	let node;

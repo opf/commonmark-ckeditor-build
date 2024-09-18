@@ -325,10 +325,9 @@ describe('CommonMarkProcessor', () => {
 				'reference]\n\n' +
 				'[multiline reference]: foo',
 
-				// Multiline reference will be converted to a single line
-				'<p>This is <a href="foo">multiline reference</a></p>',
+				'<p>This is <a href="foo">multiline<br></br>reference</a></p>',
 
-				'This is [multiline reference](http://localhost/foo)'
+				'This is [multiline\nreference](http://localhost/foo)'
 			);
 		});
 
@@ -338,10 +337,9 @@ describe('CommonMarkProcessor', () => {
 				'reference]\n\n' +
 				'[multiline reference]: foo',
 
-				// Multiline reference will be converted to a single line
-				'<p>This is <a href="foo">multiline reference</a></p>',
+				'<p>This is <a href="foo">multiline<br></br>reference</a></p>',
 
-				'This is [multiline reference](http://localhost/foo)'
+				'This is [multiline\nreference](http://localhost/foo)'
 			);
 		});
 

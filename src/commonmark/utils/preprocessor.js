@@ -58,6 +58,25 @@ export function linkPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nod
 	}
 }
 
+export function breaksPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nodes) {
+	let walker = document.createNodeIterator(
+		root,
+		NodeFilter.SHOW_ELEMENT,
+		{
+			acceptNode: function (node) {
+				if (node.tagName === 'P' && !node.parentElement && node.childNodes.length === 0) {
+					return NodeFilter.FILTER_ACCEPT;
+				}
+			}
+		}
+	);
+
+	let node;
+	while (node = walker.nextNode()) {
+		node.appendChild(document.createElement('br'));
+	}
+}
+
 
 export function hasParentOfType(node, tagNames) {
 	let parent = node.parentElement;

@@ -15,20 +15,6 @@ describe('CommonMarkProcessor', () => {
 			);
 		});
 
-		it('multiline', () => {
-			testDataProcessor(
-				'first\n' +
-				'second\n' +
-				'third',
-
-				// GitHub is rendering as:
-				// <p>first<br>
-				// second<br>
-				// third</p>
-				'<p>first<br></br>second<br></br>third</p>'
-			);
-		});
-
 		it('with header after #1', () => {
 			testDataProcessor(
 				'single line\n' +
@@ -81,6 +67,50 @@ describe('CommonMarkProcessor', () => {
 				'single line\n' +
 				'\n' +
 				'*   item'
+			);
+		});
+
+		it('multiline', () => {
+			testDataProcessor(
+				'first\n' +
+				'second\n' +
+				'third',
+
+				// GitHub is rendering as:
+				// <p>first<br>
+				// second<br>
+				// third</p>
+				'<p>first<br></br>second<br></br>third</p>'
+			);
+		});
+
+		it('a blank line', () => {
+			testDataProcessor(
+				'first\n\n' +
+				'<br>\n\n' +
+				'third',
+
+				// GitHub is rendering as:
+				// <p>first</p>
+				// <br>
+				// <p>third</p>
+				'<p>first</p><p></p><p>third</p>',
+			);
+		});
+
+		it('multiple blank lines', () => {
+			testDataProcessor(
+				'first\n\n' +
+				'<br>\n\n' +
+				'<br>\n\n' +
+				'fourth',
+
+				// GitHub is rendering as:
+				// <p>first</p>
+				// <br>
+				// <br>
+				// <p>third</p>
+				'<p>first</p><p></p><p></p><p>fourth</p>'
 			);
 		});
 	});
