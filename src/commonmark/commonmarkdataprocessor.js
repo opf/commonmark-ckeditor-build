@@ -14,7 +14,7 @@ import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor} from './utils/preprocessor';
 import {removeParagraphsInLists} from './utils/paragraph-in-lists';
-import {fixEmptyCodeBlocks} from "./utils/fix-empty-code-blocks";
+import {fixBreaksInCodeBlocks, fixCodeBlocks} from "./utils/fix-code-blocks";
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
 import {fixBreaksOnRootLevel} from './utils/fix-breaks-on-root-level';
 import {fixBreaksInTableParagraphs} from "./utils/fix-breaks-in-table-paragraphs";
@@ -59,8 +59,11 @@ export default class CommonMarkDataProcessor {
 		// Paragraphs within list elements (https://community.openproject.com/work_packages/28765)
 		removeParagraphsInLists(domFragment);
 
+		// Fix empty line on the end of code blocks
+		fixBreaksInCodeBlocks(domFragment)
+
 		// Fix empty code blocks
-		fixEmptyCodeBlocks(domFragment);
+		fixCodeBlocks(domFragment);
 
 		// Fix duplicate whitespace in task lists
 		fixTasklistWhitespaces(domFragment);
@@ -155,6 +158,15 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
+		turndownService.addRule('markdownTables', {
+			filter: function (node) {
+				return node.nodeName === 'TABLE' && (!node.parentElement || node.parentElement.nodeName !== 'FIGURE');
+			},
+			replacement: function (_content, node) {
+				return node.outerHTML; // we do not convert back to markdown, but use HTML for tables
+			}
+		});
+
 		// Keep HTML tables and remove filler elements
 		turndownService.addRule('htmlTables', {
 			filter: function (node) {
@@ -170,6 +182,7 @@ export default class CommonMarkDataProcessor {
 				return node.outerHTML;
 			}
 		});
+
 
 		turndownService.addRule('strikethrough', {
 			filter: ['del', 's', 'strike'],
