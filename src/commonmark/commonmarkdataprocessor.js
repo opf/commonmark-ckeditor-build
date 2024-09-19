@@ -224,7 +224,13 @@ export default class CommonMarkDataProcessor {
 					)
 				);
 			},
-			replacement: (_content, node) => '<br>\n\n',
+			replacement: (_content, node) =>  {
+				if (!node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
+					return '';
+				} else {
+					return '<br>\n\n'
+				}
+			},
 		});
 
 		let turndown = turndownService.turndown(domFragment);

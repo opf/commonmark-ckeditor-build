@@ -113,5 +113,13 @@ describe('CommonMarkProcessor', () => {
 				'<p>first</p><p></p><p></p><p>fourth</p>'
 			);
 		});
+
+		it('does not create a blank line for a empty markdown', () => {
+			testDataProcessor(
+				' ' ,
+				'',
+				'',
+			);
+		});
 	});
 });

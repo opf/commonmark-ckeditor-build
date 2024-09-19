@@ -351,6 +351,52 @@ describe('CommonMarkProcessor', () => {
 		});
 	});
 
+	it('should create multi lines in lists', () => {
+		testDataProcessor(
+			'1.  First\n' +
+			'    Flup\n' +
+			'    End\n\n' +
+			'2.  Second\n\n' +
+			'3.  Third\n' +
+			'    Fluppy\n' +
+			'    End\n\n' +
+			'4.  Fourth',
+
+			'<ol>' +
+			'<li><p>First<br></br>Flup<br></br>End</p></li>' +
+			'<li><p>Second</p></li>' +
+			'<li><p>Third<br></br>Fluppy<br></br>End</p></li>' +
+			'<li><p>Fourth</p></li>' +
+			'</ol>'
+		);
+	});
+
+	it('should allow empty lines in lists', () => {
+		testDataProcessor(
+			'* test\n' +
+			'+ test\n' +
+			'- test',
+
+			'<ul>' +
+			'<li>test</li>' +
+			'</ul>' +
+			'<ul>' +
+			'<li>test</li>' +
+			'</ul>' +
+			'<ul>' +
+			'<li>test</li>' +
+			'</ul>',
+
+			// After converting back list items will be unified.
+			'*   test\n' +
+			'\n' +
+			'*   test\n' +
+			'\n' +
+			'*   test'
+		);
+	});
+
+
 	describe('todo lists', () => {
 		it('should process todo lists', () => {
 			testDataProcessor(
@@ -367,9 +413,9 @@ describe('CommonMarkProcessor', () => {
 				{
 					simulatePlugin: () => {
 						return '<ul class="todo-list">' +
-						'<li class="task-list-item"><label><input class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 1</label></li>' +
-						'<li class="task-list-item"><label><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 2</label></li>' +
-						'</ul>';
+							'<li class="task-list-item"><label><input class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 1</label></li>' +
+							'<li class="task-list-item"><label><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 2</label></li>' +
+							'</ul>';
 					}
 				}
 			);
