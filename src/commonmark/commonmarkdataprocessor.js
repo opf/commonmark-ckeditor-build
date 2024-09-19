@@ -13,17 +13,12 @@ import {HtmlDataProcessor, DomConverter} from '@ckeditor/ckeditor5-engine';
 import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
-import {fixBreaksInCodeBlocks, fixCodeBlocks} from "./utils/fix-code-blocks";
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
 import {fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel} from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
 
 export const originalSrcAttribute = 'data-original-src';
-
-function debugOutFragment(fragment) {
-	console.log(Array.prototype.reduce.call(fragment.childNodes, (result, node) => result + (node.outerHTML || node.nodeValue), ''));
-}
 
 /**
  * This data processor implementation uses CommonMark as input/output data.
@@ -54,16 +49,17 @@ export default class CommonMarkDataProcessor {
 		// Use tasklist plugin
 		let parser = md.use(markdownItTaskLists, {label: true});
 
+		const previousRenderer = parser.renderer.rules.code_block;
+		md.renderer.rules.code_block = function (tokens, idx, options, env, self) {
+			// markdown-it adds a newline to the end of code blocks, we need to remove it
+			tokens[idx].content = tokens[idx].content.replace(/\n$/, '');
+			return previousRenderer(tokens, idx, options, env, self);
+		};
+
 		const html = parser.render(data);
 
 		// Convert input HTML data to DOM DocumentFragment.
 		const domFragment = this._htmlDP._toDom(html);
-
-		// Fix empty line on the end of code blocks
-		fixBreaksInCodeBlocks(domFragment)
-
-		// Fix empty code blocks
-		fixCodeBlocks(domFragment);
 
 		// Fix duplicate whitespace in task lists
 		fixTasklistWhitespaces(domFragment);
@@ -113,7 +109,20 @@ export default class CommonMarkDataProcessor {
 		// Use Turndown to convert DOM fragment to markdown
 		const turndownService = new TurndownService({
 			headingStyle: 'atx',
-			codeBlockStyle: 'fenced'
+			codeBlockStyle: 'fenced',
+			blankReplacement: function (content, node) {
+				if (node.tagName === 'CODE') {
+					// we don't want to remove code silently
+					const prefix = (node.getAttribute('class') || '').replace('language-', '');
+					const textContent = node.textContent || '';
+
+					return "```" + prefix + '\n' + (textContent.length ? textContent : '\n') + "```\n";
+					// we don't want to remove pre silently
+				} else if (node.tagName === 'PRE') {
+					return content;
+				}
+				return node.isBlock ? '\n\n' : ''
+			},
 		});
 
 		turndownService.use([
@@ -226,7 +235,7 @@ export default class CommonMarkDataProcessor {
 					)
 				);
 			},
-			replacement: (_content, node) =>  {
+			replacement: (_content, node) => {
 				if (!node.parentElement && !node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
 					return '';
 				} else {
@@ -235,9 +244,24 @@ export default class CommonMarkDataProcessor {
 			},
 		});
 
+		// turndownService.addRule('emptyCode', {
+		// 	filter: (node) => {
+		// 		console.log(node);
+		// 		// return (
+		// 		// 	(node.nodeName === 'CODE' && node.textContent && node.textContent.includes('###turndown-ignore###'))
+		// 		// );
+		// 		return false;
+		// 	},
+		// 	replacement: (_content, node) => {
+		// 		const s = node.textContent.replace('###turndown-ignore###', '');
+		// 		console.log(s);
+		// 		return s;
+		// 	},
+		// });
+
 		let turndown = turndownService.turndown(domFragment);
 
 		// Escape non-breaking space characters
-		return turndown.replace(/\u00A0/, '&nbsp;');
+		return turndown.replace(/\u00A0/, '&nbsp;').replace('###turndown-ignore###\n', '');
 	}
 }

@@ -50,7 +50,9 @@ describe('CommonMarkProcessor', () => {
 				'<p><code>some `backticks` inside</code></p>'
 			);
 		});
+	});
 
+	describe('code block', () => {
 		it('should process code blocks indented with tabs', () => {
 			testDataProcessor(
 				'	code block',
@@ -161,7 +163,7 @@ describe('CommonMarkProcessor', () => {
 				// We will need to handle this separately by some feature.
 
 				'<pre><code class="language-js">var a = \'hello\';\n' +
-				'console.log(a + \' world\');</code></pre>'
+				'console.log(a + \' world\');\n</code></pre>'
 			);
 		});
 
@@ -174,7 +176,7 @@ describe('CommonMarkProcessor', () => {
 				// GitHub is rendering as special html with syntax highlighting.
 				// We will need to handle this separately by some feature.
 
-				'<pre><code class="language-bash">#!/bin/bash</code></pre>',
+				'<pre><code class="language-bash">#!/bin/bash\n</code></pre>',
 
 				// When converting back ~~~ are normalized to ```.
 
@@ -195,7 +197,7 @@ describe('CommonMarkProcessor', () => {
 				// We will need to handle this separately by some feature.
 
 				'<pre><code class="language-js">var a = \'hello\';\n' +
-				'console.log(a + \' world\');</code></pre>',
+				'console.log(a + \' world\');\n</code></pre>',
 
 				// When converting back ``````` are normalized to ```.
 
@@ -217,7 +219,7 @@ describe('CommonMarkProcessor', () => {
 				// We will need to handle this separately by some feature.
 
 				'<pre><code class="language-js">var a = \'hello\';\n' +
-				'console.log(a + \' world\');</code></pre>',
+				'console.log(a + \' world\');\n</code></pre>',
 
 				// When converting back ~~~~~~~~~~ are normalized to ```.
 
@@ -225,41 +227,6 @@ describe('CommonMarkProcessor', () => {
 				'var a = \'hello\';\n' +
 				'console.log(a + \' world\');\n' +
 				'```'
-			);
-		});
-
-		it('should process empty code block', () => {
-			testDataProcessor(
-				'```js\n' +
-				'```',
-
-				// GitHub is rendering as special html with syntax highlighting.
-				// We will need to handle this separately by some feature.
-
-				'<pre><code class="language-js">\n</code></pre>',
-
-				// When converting back, empty code blocks will be removed.
-				// This might be an issue when switching from source to editor
-				// but changing this cannot be done in to-markdown converters.
-				''
-			);
-		});
-
-		it('should process code block with empty line', () => {
-			testDataProcessor(
-				'```js\n' +
-				'\n' +
-				'```',
-
-				// GitHub is rendering as special html with syntax highlighting.
-				// We will need to handle this separately by some feature.
-
-				'<pre><code class="language-js">\n</code></pre>',
-
-				// When converting back, empty code blocks will be removed.
-				// This might be an issue when switching from source to editor
-				// but changing this cannot be done in to-markdown converters.
-				''
 			);
 		});
 
@@ -288,7 +255,7 @@ describe('CommonMarkProcessor', () => {
 				'<pre><code>' +
 				'```\n' +
 				'Code\n' +
-				'```' +
+				'```\n' +
 				'</code></pre>'
 			);
 		});
@@ -308,9 +275,52 @@ describe('CommonMarkProcessor', () => {
 				'```\n' +
 				'Code\n' +
 				'```\n' +
-				'````' +
+				'````\n' +
 				'</code></pre>'
 			);
 		});
+
+		it('should process empty code block', () => {
+			testDataProcessor(
+				'```js\n' +
+				'```',
+				'<pre><code class="language-js"></code></pre>',
+				// we always keep min one line in code block
+				'```js\n' +
+				'\n' +
+				'```',
+			);
+		});
+
+		it('should process code block with empty line', () => {
+			testDataProcessor(
+				'```js\n' +
+				'\n' +
+				'```',
+
+				// GitHub is rendering as special html with syntax highlighting.
+				// We will need to handle this separately by some feature.
+
+				'<pre><code class="language-js">\n</code></pre>',
+
+				'```js\n' +
+				'\n' +
+				'```',
+			);
+		});
+
+		it('should keep the amount of empty lines', () => {
+			testDataProcessor(
+				'```js\n' +
+				'\n\n\n' +
+				'```',
+				'<pre><code class="language-js">\n\n\n</code></pre>',
+
+				'```js\n' +
+				'\n\n\n' +
+				'```',
+			);
+		});
+
 	});
 });

@@ -94,7 +94,7 @@ describe('Commonmark', () => {
 					'\\<h1>Test\\</h1>\n' +
 					'```',
 					'<pre><code>' +
-					'\\<h1>Test\\</h1>' +
+					'\\<h1>Test\\</h1>\n' +
 					'</code></pre>');
 			});
 

@@ -76,7 +76,6 @@ export function breaksPreprocessor(root, allowed_whitespace_nodes, allowed_raw_n
 	}
 }
 
-
 export function hasParentOfType(node, tagNames) {
 	let parent = node.parentElement;
 

@@ -107,13 +107,13 @@ describe('CommonMarkProcessor', () => {
 				'<p>Example 1:</p>' +
 				'<pre>' +
 				'<code>' +
-				'code 1' +
+				'code 1\n' +
 				'</code>' +
 				'</pre>' +
 				'<p>Example 2:</p>' +
 				'<pre>' +
 				'<code>' +
-				'code 2' +
+				'code 2\n' +
 				'</code>' +
 				'</pre>' +
 				'</blockquote>',
