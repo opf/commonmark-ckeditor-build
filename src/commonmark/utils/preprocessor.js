@@ -38,7 +38,7 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
  * @param {*} allowed_whitespace_nodes
  * @param {*} allowed_raw_nodes
  */
-export function linkPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nodes) {
+export function linkPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw_nodes) {
 	let walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
@@ -57,7 +57,7 @@ export function linkPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nod
 	}
 }
 
-export function breaksPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nodes) {
+export function breaksPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw_nodes) {
 	let walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,

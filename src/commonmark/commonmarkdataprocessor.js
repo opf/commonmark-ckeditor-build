@@ -106,23 +106,25 @@ export default class CommonMarkDataProcessor {
 		// Turndown is filtering out empty paragraphs <p></p>, so we need to fix that with <p><br></p>
 		breaksPreprocessor(domFragment);
 
+		const blankReplacement = function (content, node) {
+			if (node.tagName === 'CODE') {
+				// we don't want to remove code silently
+				const prefix = (node.getAttribute('class') || '').replace('language-', '');
+				const textContent = node.textContent || '';
+
+				return "```" + prefix + '\n' + (textContent.length ? textContent : '\n') + "```\n";
+				// we don't want to remove pre silently
+			} else if (node.tagName === 'PRE') {
+				return content;
+			}
+			return node.isBlock ? '\n\n' : ''
+		};
+
 		// Use Turndown to convert DOM fragment to markdown
 		const turndownService = new TurndownService({
 			headingStyle: 'atx',
 			codeBlockStyle: 'fenced',
-			blankReplacement: function (content, node) {
-				if (node.tagName === 'CODE') {
-					// we don't want to remove code silently
-					const prefix = (node.getAttribute('class') || '').replace('language-', '');
-					const textContent = node.textContent || '';
-
-					return "```" + prefix + '\n' + (textContent.length ? textContent : '\n') + "```\n";
-					// we don't want to remove pre silently
-				} else if (node.tagName === 'PRE') {
-					return content;
-				}
-				return node.isBlock ? '\n\n' : ''
-			},
+			blankReplacement: blankReplacement,
 		});
 
 		turndownService.use([
@@ -170,7 +172,7 @@ export default class CommonMarkDataProcessor {
 		// figure and the image in the imageFigure rule
 		turndownService.addRule('figcaption', {
 			filter: 'figcaption',
-			replacement: function (content, node) {
+			replacement: function (_content, _node) {
 				return '';
 			}
 		});
