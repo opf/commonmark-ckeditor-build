@@ -15,8 +15,7 @@ import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
 import {fixBreaksInCodeBlocks, fixCodeBlocks} from "./utils/fix-code-blocks";
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
-import {fixBreaksOnRootLevel} from './utils/fix-breaks-on-root-level';
-import {fixBreaksInTableParagraphs} from "./utils/fix-breaks-in-table-paragraphs";
+import {fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel} from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
 
@@ -73,7 +72,10 @@ export default class CommonMarkDataProcessor {
 		fixBreaksOnRootLevel(domFragment)
 
 		// Fix for multiple empty lines in html tables
-		fixBreaksInTableParagraphs(domFragment)
+		fixBreaksInTables(domFragment)
+
+		// Fix for multiple empty lines in markdown lists
+		fixBreaksInLists(domFragment)
 
 		const viewFragment = this._domConverter.domToView(domFragment);
 
@@ -225,7 +227,7 @@ export default class CommonMarkDataProcessor {
 				);
 			},
 			replacement: (_content, node) =>  {
-				if (!node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
+				if (!node.parentElement && !node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
 					return '';
 				} else {
 					return '<br>\n\n'
@@ -234,6 +236,7 @@ export default class CommonMarkDataProcessor {
 		});
 
 		let turndown = turndownService.turndown(domFragment);
+
 		// Escape non-breaking space characters
 		return turndown.replace(/\u00A0/, '&nbsp;');
 	}

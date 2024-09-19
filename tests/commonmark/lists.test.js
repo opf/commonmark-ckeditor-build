@@ -373,29 +373,45 @@ describe('CommonMarkProcessor', () => {
 
 	it('should allow empty lines in lists', () => {
 		testDataProcessor(
-			'* test\n' +
-			'+ test\n' +
-			'- test',
-
+			'*  First\n' +
+			'   \n' +
+			'   Last\n' +
+			'   \n' +
+			'*  Second',
 			'<ul>' +
-			'<li>test</li>' +
-			'</ul>' +
-			'<ul>' +
-			'<li>test</li>' +
-			'</ul>' +
-			'<ul>' +
-			'<li>test</li>' +
+			'<li><p>First</p><p>Last</p></li>' +
+			'<li><p>Second</p></li>' +
 			'</ul>',
-
-			// After converting back list items will be unified.
-			'*   test\n' +
+			'*   First\n' +
 			'\n' +
-			'*   test\n' +
+			'    Last\n' +
 			'\n' +
-			'*   test'
+			'*   Second',
 		);
 	});
 
+	it('should allow empty lines with breaks in lists', () => {
+		testDataProcessor(
+			'*  First\n' +
+			'   \n' +
+			'    <br>\n' +
+			'   \n' +
+			'   Last\n' +
+			'   \n' +
+			'*  Second',
+			'<ul>' +
+			'<li><p>First</p><p></p><p>Last</p></li>' +
+			'<li><p>Second</p></li>' +
+			'</ul>',
+			'*   First\n' +
+			'\n' +
+			'    <br>\n' +
+			'\n' +
+			'    Last\n' +
+			'\n' +
+			'*   Second',
+		);
+	});
 
 	describe('todo lists', () => {
 		it('should process todo lists', () => {
