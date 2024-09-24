@@ -110,7 +110,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 	}
 
 	createMacroViewElement(modelElement, writer) {
-		const type = modelElement.getAttribute('type');
+		// const type = modelElement.getAttribute('type');
 		const classes = modelElement.getAttribute('classes') || '';
 		const label = this.macroLabel(); // TODO: Pass type, it is not updated on coming back from the modal..
 		const placeholder = writer.createText( label );

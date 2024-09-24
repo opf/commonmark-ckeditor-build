@@ -1,6 +1,6 @@
 import {Plugin} from "ckeditor5/src/core";
 import OpContentRevisionsUI from "./ui";
-import {loadFromLocalStorage, saveInLocalStorage} from "./storage";
+import {loadFromLocalStorage} from "./storage";
 import OpContentRevisionsCommand from "./command";
 import {getOPFieldName, getOPResource} from "../op-context/op-context";
 import {Autosave} from "@ckeditor/ckeditor5-autosave";

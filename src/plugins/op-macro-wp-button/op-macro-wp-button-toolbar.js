@@ -7,7 +7,7 @@ import {createEditToolbar} from '../../helpers/create-toolbar';
 import {getPluginContext} from '../op-context/op-context';
 
 
-const balloonClassName = 'ck-toolbar-container';
+// const balloonClassName = 'ck-toolbar-container';
 
 export default class OPMacroWpButtonToolbar extends Plugin {
 	static get requires() {
@@ -20,7 +20,6 @@ export default class OPMacroWpButtonToolbar extends Plugin {
 
 	init() {
 		const editor = this.editor;
-		const model = this.editor.model;
 		const pluginContext = getPluginContext(editor);
 
 		// Add editing button

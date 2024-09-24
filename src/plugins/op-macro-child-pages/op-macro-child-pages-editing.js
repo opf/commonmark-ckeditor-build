@@ -1,9 +1,5 @@
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
-
 import { Plugin } from '@ckeditor/ckeditor5-core';
-
-import { ViewPosition } from '@ckeditor/ckeditor5-engine';
-import { ViewRange } from '@ckeditor/ckeditor5-engine';
 
 import {toChildPagesMacroWidget} from './utils';
 

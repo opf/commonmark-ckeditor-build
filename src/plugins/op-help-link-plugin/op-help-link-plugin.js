@@ -14,7 +14,6 @@ export default class OPHelpLinkPlugin extends Plugin {
 
 	init() {
 		const editor = this.editor;
-		const model = editor.model;
 		const helpURL = editor.config.get('openProject.helpURL');
 
 		editor.ui.componentFactory.add( 'openProjectShowFormattingHelp', locale => {
