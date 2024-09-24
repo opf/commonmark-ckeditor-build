@@ -5,6 +5,9 @@ import jestPlugin from 'eslint-plugin-jest';
 export default [
 	eslint.configs.recommended,
 	{
+		ignores: ["tmp/", "coverage/", "node_modules/"],
+	},
+	{
 		files: ["src/**/*.js"],
 		languageOptions: {
 			globals: {
