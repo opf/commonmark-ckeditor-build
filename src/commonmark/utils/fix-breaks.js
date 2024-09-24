@@ -1,3 +1,5 @@
+import {isPageBreakNode} from "./page-breaks";
+
 /**
  * Remove breaks in empty table paragraphs
  *
@@ -35,6 +37,7 @@ export function fixBreaksInTables(root) {
  * e.g. `<p>Demo<p><br><br><p>End</p>` converted to `<p>Demo</p><p><br><br><br data-ck-filler="true"><p>End</p>`
  * to avoid these, we exchange all root level breaks with paragraphs
  * e.g. `<p>Demo<p><br><br><p>End</p>` will be converted to `<p>Demo</p><p></p><p></p><p>End</p>`
+ * (except for page breaks, which are kept but are wrapped in a paragraph)
  */
 export function fixBreaksOnRootLevel(root) {
 	let walker = document.createNodeIterator(
@@ -55,8 +58,13 @@ export function fixBreaksOnRootLevel(root) {
 		list.push(node);
 	}
 	for (const node of list) {
-		root.insertBefore(document.createElement('p'), node);
-		node.remove();
+		const p = document.createElement('p');
+		root.insertBefore(p, node);
+		if (isPageBreakNode(node)) {
+			p.appendChild(node);
+		} else {
+			node.remove();
+		}
 	}
 }
 

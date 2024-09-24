@@ -41,6 +41,8 @@ FullEditor.defaultConfig.toolbar = {
 			'redo',
 			'openProjectShowFormattingHelp',
 			'|',
+			'pageBreak',
+			'|',
 			'preview',
 			'opShowSource',
 		]
