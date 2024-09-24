@@ -13,6 +13,7 @@ export default [
 			globals: {
 				...globals.browser,
 				"jQuery": true,
+				"I18n": true,
 				"_": true
 			}
 		},
