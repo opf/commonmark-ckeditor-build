@@ -6,7 +6,6 @@ import wysiwygIcon from '../icons/wysiwyg.svg';
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
-import {getOPPath, getOPPreviewContext, getOPService} from './op-context/op-context';
 import {enableItems, disableItems} from '../helpers/button-disabler';
 
 export default class OPSourceCodePlugin extends Plugin {
@@ -35,7 +34,7 @@ export default class OPSourceCodePlugin extends Plugin {
 			} );
 
 
-			let showSource = function(preview) {
+			let showSource = function(_preview) {
 				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
 				let $reference;
 

@@ -3,7 +3,6 @@ import { ButtonView } from '@ckeditor/ckeditor5-ui';
 import { Plugin } from '@ckeditor/ckeditor5-core';
 
 import {toEmbeddedTableWidget} from './utils';
-import { ViewPosition } from '@ckeditor/ckeditor5-engine';
 import {getPluginContext} from '../op-context/op-context';
 
 export default class EmbeddedTableEditing extends Plugin {

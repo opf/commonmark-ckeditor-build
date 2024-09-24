@@ -9,7 +9,7 @@ export function replaceImageAttachmentsByName(resource) {
 		dispatcher.on('attribute:src:imageInline', converter, { priority: 'highest' } );
 	};
 
-	function converter( evt, data, conversionApi ) {
+	function converter( evt, data, _conversionApi ) {
 
 		// We do not consume the attribute since we want the regular attribute
 		// converter to run as well.
