@@ -17,6 +17,7 @@ import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
 import {fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel} from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
+import {isPageBreakNode, PAGE_BREAK_MARKDOWN} from "./utils/page-breaks";
 
 export const originalSrcAttribute = 'data-original-src';
 
@@ -240,22 +241,24 @@ export default class CommonMarkDataProcessor {
 			replacement: (_content, node) => {
 				if (!node.parentElement && !node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
 					return '';
+				} else if (node.childNodes.length === 1 && isPageBreakNode(node.childNodes[0])) {
+					return PAGE_BREAK_MARKDOWN + '\n\n'
 				} else {
 					return '<br>\n\n'
 				}
 			},
 		});
 
-		turndownService.addRule( 'openProjectPageBreak', {
+		turndownService.addRule('openProjectPageBreak', {
 			filter: (node) => {
 				return (
 					node.nodeName === 'DIV' &&
 					node.classList.contains('page-break')
 				)
 			},
-			replacement: ( _content, node ) => {
+			replacement: (_content, _node) => {
 				// return the page break in a format CKEditor detects as page break if rereading it
-				return '<br style="page-break-after:always;"/>';
+				return PAGE_BREAK_MARKDOWN;
 			}
 		});
 
