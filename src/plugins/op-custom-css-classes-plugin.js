@@ -304,8 +304,6 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 		const listType = modelElement.getAttribute('listType');
 		const listTypeClass = config.attributesWithCustomClassesMap[listType];
-		const previousElement = listElement.previousSibling;
-		const nextElement = listElement.nextSibling;
 
 		if (listType === 'todo') {
 			viewWriter.addClass(listTypeClass, listElement);
