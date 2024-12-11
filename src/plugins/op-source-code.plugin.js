@@ -35,15 +35,7 @@ export default class OPSourceCodePlugin extends Plugin {
 
 
 			let showSource = function(_preview) {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
-				let $reference;
-
-				if ($mainEditor.length) {
-					$reference = $mainEditor;
-				} else {
-					$reference = $editable;
-				}
-
+				let $reference = jQuery(editor.ui.getEditableElement()).parent();
 				let $sourceWrapper = jQuery('<div class="ck-editor__source"></div>');
 				$reference.siblings('.ck-editor__source').remove();
 
