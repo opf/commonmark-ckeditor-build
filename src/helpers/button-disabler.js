@@ -1,4 +1,4 @@
-import { FileDialogButtonView }  from '@ckeditor/ckeditor5-ui';
+import {FileDialogButtonView} from '@ckeditor/ckeditor5-ui';
 
 export function getToolbarItems(editor) {
 	editor.__currentlyDisabled = editor.__currentlyDisabled || [];
@@ -11,12 +11,12 @@ export function getToolbarItems(editor) {
 }
 
 export function disableItems(editor, except) {
-	jQuery.each(getToolbarItems(editor), function(index, item) {
+	jQuery.each(getToolbarItems(editor), function (index, item) {
 		let toDisable = item;
 
 		if (item instanceof FileDialogButtonView) {
 			toDisable = item.buttonView;
-		} else if (item === except || !item.hasOwnProperty('isEnabled')) {
+		} else if (item === except || !Object.prototype.hasOwnProperty.call(item, 'isEnabled')) {
 			toDisable = null;
 		}
 
@@ -31,7 +31,7 @@ export function disableItems(editor, except) {
 }
 
 export function enableItems(editor) {
-	jQuery.each(getToolbarItems(editor), function(index, item) {
+	jQuery.each(getToolbarItems(editor), function (index, item) {
 		let toEnable = item;
 
 		if (item instanceof FileDialogButtonView) {

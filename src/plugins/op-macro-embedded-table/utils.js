@@ -1,7 +1,7 @@
 const embeddedTableSymbol = Symbol( 'isOPEmbeddedTable' );
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
 
-export function toEmbeddedTableWidget( viewElement, writer, label ) {
+export function toEmbeddedTableWidget( viewElement, writer, _label ) {
 	writer.setCustomProperty( embeddedTableSymbol, true, viewElement );
 	return toWidget( viewElement, writer, { label: 'your label here' } );
 }

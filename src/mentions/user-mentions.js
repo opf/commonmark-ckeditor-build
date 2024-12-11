@@ -2,7 +2,6 @@ import {
 	getOPResource,
 	getOPPath,
 	getPluginContext,
-	getOPHelper,
 } from "../plugins/op-context/op-context";
 
 export function userMentions(queryText) {
@@ -22,7 +21,7 @@ export function userMentions(queryText) {
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
 
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve, _reject) => {
 		jQuery.getJSON(url, collection => {
 			resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
 				const type = mention._type.toLowerCase();
