@@ -1,4 +1,3 @@
-
 /**
  * Replace whitespace of text nodes within the given parents in the given root element.
  * @param {*} root An HTMLElement to look for text nodes within
@@ -13,15 +12,15 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
 		root,
 		// Only consider text nodes
 		NodeFilter.SHOW_TEXT,
-	  );
+	);
 
 	let node;
-	while(node = walker.nextNode()) {
+	while (node = walker.nextNode()) {
 		// Strip NBSP whitespace in given nodes
-		if ( node.parentElement && allowed_whitespace_nodes.indexOf(node.parentElement.nodeName) >= 0) {
-		node.nodeValue = node.nodeValue
-			.replace(/^[\u00a0]+/g, ' ')
-			.replace(/[\u00a0]+$/g, ' ');
+		if (node.parentElement && allowed_whitespace_nodes.indexOf(node.parentElement.nodeName) >= 0) {
+			node.nodeValue = node.nodeValue
+				.replace(/^[\u00a0]+/g, ' ')
+				.replace(/[\u00a0]+$/g, ' ');
 		}
 
 		// Re-encode < and > that would otherwise be output as HTML by turndown
@@ -39,25 +38,43 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
  * @param {*} allowed_whitespace_nodes
  * @param {*} allowed_raw_nodes
  */
-export function linkPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nodes) {
+export function linkPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw_nodes) {
 	let walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
 		NodeFilter.SHOW_ELEMENT,
 		// Accept only A tags
-		function(node) {
+		function (node) {
 			return node.nodeName.toLowerCase() === 'a' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
 		}
-	  );
+	);
 
 	let node;
-	while(node = walker.nextNode()) {
+	while (node = walker.nextNode()) {
 		// node.href is properly escaped, while the attribute is not
 		// and turndown uses the getAttribute version
 		node.setAttribute('href', node.href);
 	}
 }
 
+export function breaksPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw_nodes) {
+	let walker = document.createNodeIterator(
+		root,
+		NodeFilter.SHOW_ELEMENT,
+		{
+			acceptNode: function (node) {
+				if (node.tagName === 'P' && node.childNodes.length === 0 && (!node.parentElement || node.parentElement.tagName === 'LI')) {
+					return NodeFilter.FILTER_ACCEPT;
+				}
+			}
+		}
+	);
+
+	let node;
+	while (node = walker.nextNode()) {
+		node.appendChild(document.createElement('br'));
+	}
+}
 
 export function hasParentOfType(node, tagNames) {
 	let parent = node.parentElement;

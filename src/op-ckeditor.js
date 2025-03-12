@@ -37,12 +37,15 @@ FullEditor.defaultConfig.toolbar = {
 			'insertTable',
 			'macroList',
 			'|',
+			'opContentRevisions',
 			'undo',
 			'redo',
 			'openProjectShowFormattingHelp',
 			'|',
+			'pageBreak',
+			'|',
 			'preview',
-			'opShowSource'
+			'opShowSource',
 		]
 };
 
@@ -64,6 +67,9 @@ ConstrainedEditor.defaultConfig.toolbar = {
 		'imageUpload',
 		'blockQuote',
 		'|',
+		'opContentRevisions',
+		'undo',
+		'redo',
 		'openProjectShowFormattingHelp',
 		'preview',
 		'opShowSource'

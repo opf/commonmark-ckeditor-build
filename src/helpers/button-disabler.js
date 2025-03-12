@@ -1,4 +1,4 @@
-import { FileDialogButtonView }  from '@ckeditor/ckeditor5-upload';
+import { FileDialogButtonView }  from '@ckeditor/ckeditor5-ui';
 
 export function getToolbarItems(editor) {
 	editor.__currentlyDisabled = editor.__currentlyDisabled || [];
