@@ -43,6 +43,7 @@ import { ImageInline } from '@ckeditor/ckeditor5-image';
 import { PageBreak } from '@ckeditor/ckeditor5-page-break';
 import { Autosave } from '@ckeditor/ckeditor5-autosave';
 import OpContentRevisions from "./plugins/op-content-revisions/op-content-revisions";
+import { Mermaid } from '@ckeditor/ckeditor5-mermaid';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -93,6 +94,7 @@ export const builtinPlugins = [
 	OPSourceCodePlugin,
 	OpContentRevisions,
 	CodeBlockPlugin,
+	Mermaid,
 
 	CommonMark,
 	Table,

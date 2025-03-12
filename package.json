@@ -38,6 +38,7 @@
     "@ckeditor/ckeditor5-list":  "43.0.0",
     "@ckeditor/ckeditor5-media-embed":  "43.0.0",
     "@ckeditor/ckeditor5-mention":  "43.0.0",
+	"@ckeditor/ckeditor5-mermaid": "https://github.com/ckeditor/ckeditor5-mermaid/archive/4cb02b99e6134e6f7363ca35c841a8c452661805.tar.gz",
 	"@ckeditor/ckeditor5-page-break": "43.0.0",
     "@ckeditor/ckeditor5-paragraph":  "43.0.0",
     "@ckeditor/ckeditor5-paste-from-office":  "43.0.0",
