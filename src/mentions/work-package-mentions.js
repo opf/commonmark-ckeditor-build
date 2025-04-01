@@ -8,7 +8,7 @@ export function workPackageMentions(prefix) {
       return [];
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       jQuery.getJSON(url, { q: query, scope: "all" }, collection => {
         resolve(collection.map(wp => {
           const id = `${prefix}${wp.id}`;

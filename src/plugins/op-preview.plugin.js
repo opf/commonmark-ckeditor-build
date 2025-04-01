@@ -30,15 +30,7 @@ export default class OPPreviewPlugin extends Plugin {
 
 
 			let showPreview = function(preview) {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
-				let $reference;
-
-				if ($mainEditor.length) {
-					$reference = $mainEditor;
-				} else {
-					$reference = $editable;
-				}
-
+				let $reference = jQuery(editor.ui.getEditableElement()).parent();
 				let $previewWrapper = jQuery('<div class="ck-editor__preview op-uc-container"></div>');
 				$reference.siblings('.ck-editor__preview').remove();
 
