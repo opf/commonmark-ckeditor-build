@@ -48,7 +48,7 @@ Whenever a new CKEditor release is made, there are a plethora of packages to be 
 
 ### Patch for ckeditor5-mention plugin
 
-We use `patch-package` (https://www.npmjs.com/package/patch-package) to store a patch for the ckeditor5-mention plugin to ensure multiple-hash mentions for work packages (e.g., `###2134`) work correctly. See https://community.openproject.org/work_packages/47084 for context.
+We use `patch-package` (https://www.npmjs.com/package/patch-package) to store a patch for the ckeditor5-mention plugin to ensure multiple-hash mentions for work packages (e.g., `###2134`) work correctly. See https://community.openproject.org/work_packages/47084 for context.
 
 
 
