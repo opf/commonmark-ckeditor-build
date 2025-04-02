@@ -33,7 +33,7 @@ import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin'
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
 import CommonMark from './commonmark/commonmark';
 import OPSourceCodePlugin from './plugins/op-source-code.plugin';
-import { Mention } from "./plugins/op-mentions";
+import { Mention } from "@ckeditor/ckeditor5-mention";
 import {MentionCaster} from './mentions/mentions-caster';
 import { ImageResize } from '@ckeditor/ckeditor5-image';
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";

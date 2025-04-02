@@ -13,7 +13,7 @@
   "files": [
     "build"
   ],
-  "devDependencies":  {
+  "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
     "@babel/preset-env": "^7.26.9",
@@ -38,7 +38,7 @@
     "@ckeditor/ckeditor5-list": "44.3.0",
     "@ckeditor/ckeditor5-media-embed": "44.3.0",
     "@ckeditor/ckeditor5-mention": "44.3.0",
-	"@ckeditor/ckeditor5-page-break": "44.3.0",
+    "@ckeditor/ckeditor5-page-break": "44.3.0",
     "@ckeditor/ckeditor5-paragraph": "44.3.0",
     "@ckeditor/ckeditor5-paste-from-office": "44.3.0",
     "@ckeditor/ckeditor5-remove-format": "44.3.0",
@@ -50,29 +50,29 @@
     "@ckeditor/ckeditor5-upload": "44.3.0",
     "@ckeditor/ckeditor5-watchdog": "44.3.0",
     "@ckeditor/ckeditor5-widget": "44.3.0",
-    "babel-jest":  "^29.7.0",
-    "css-loader":  "^7.1.2",
-    "eslint": "^9.23.0",
     "@eslint/js": "^9.16.0",
+    "babel-jest": "^29.7.0",
+    "css-loader": "^7.1.2",
+    "eslint": "^9.23.0",
     "eslint-plugin-jest": "^28.9.0",
-    "identity-obj-proxy":  "^3.0.0",
     "globals": "^15.9.0",
-    "jest":  "^29.7.0",
-    "jest-environment-jsdom":  "^29.7.0",
-    "lz-string":  "^1.5.0",
-    "markdown-it":  "^14.1.0",
-    "markdown-it-task-lists":  "^2.1.1",
-    "postcss-loader":  "^8.1.1",
-    "raw-loader":  "^4.0.2",
-    "style-loader":  "^4.0.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lz-string": "^1.5.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "postcss-loader": "^8.1.1",
+    "raw-loader": "^4.0.2",
+    "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.3.14",
-    "turndown":  "^7.2.0",
-    "turndown-plugin-gfm":  "^1.0.2",
-    "underscore":  "^1.13.7",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2",
+    "underscore": "^1.13.7",
     "webpack": "^5.98.0",
-    "webpack-bundle-analyzer":  "^4.10.2",
+    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1",
-    "webpack-sources":  "3.2.3"
+    "webpack-sources": "3.2.3"
   },
   "engines": {
     "node": ">=6.9.0",
@@ -91,8 +91,12 @@
     "build": "NODE_ENV=production ./node_modules/.bin/webpack --mode production",
     "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi",
     "prewatch": "sh bin/clean.sh",
+    "postinstall": "patch-package",
     "watch": "NODE_ENV=development ./node_modules/.bin/webpack --watch --stats-error-details",
     "lint": "eslint .",
     "test": "jest ."
+  },
+  "dependencies": {
+    "patch-package": "^8.0.0"
   }
 }

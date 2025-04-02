@@ -1,0 +1,13 @@
+diff --git a/node_modules/@ckeditor/ckeditor5-mention/src/mentionui.js b/node_modules/@ckeditor/ckeditor5-mention/src/mentionui.js
+index cacbcf0..f1345f9 100644
+--- a/node_modules/@ckeditor/ckeditor5-mention/src/mentionui.js
++++ b/node_modules/@ckeditor/ckeditor5-mention/src/mentionui.js
+@@ -530,7 +530,7 @@ function getLastValidMarkerInText(feedsWithPattern, text) {
+ export function createRegExp(marker, minimumCharacters) {
+     const numberOfCharacters = minimumCharacters == 0 ? '*' : `{${minimumCharacters},}`;
+     const openAfterCharacters = env.features.isRegExpUnicodePropertySupported ? '\\p{Ps}\\p{Pi}"\'' : '\\(\\[{"\'';
+-    const mentionCharacters = '.';
++    const mentionCharacters = '[^#@]';
+     // I wanted to make an util out of it, but since this regexp uses "u" flag, it became difficult.
+     // When "u" flag is used, the regexp has "strict" escaping rules, i.e. if you try to escape a character that does not need
+     // to be escaped, RegExp() will throw. It made it difficult to write a generic util, because different characters are
