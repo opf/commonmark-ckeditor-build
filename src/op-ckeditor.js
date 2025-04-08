@@ -19,6 +19,7 @@ FullEditor.builtinPlugins = builtinPlugins;
 FullEditor.defaultConfig = Object.assign({}, defaultConfig);
 FullEditor.defaultConfig.toolbar = {
 		items: [
+			'fullscreen',
 			'heading',
 			'|',
 			'bold',
