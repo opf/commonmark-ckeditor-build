@@ -6,7 +6,14 @@ import {
 
 export function userMentions(queryText) {
 	const editor = this;
-	const resource = getOPResource(editor);
+	let resource = getOPResource(editor);
+
+	if (resource && resource._type === 'Activity::Comment') {
+		const workPackage = resource.$embedded.workPackage;
+		if (workPackage) {
+			resource = workPackage;
+		}
+	}
 
 	// Unsupported context does not allow mentioning
 	if (!(resource && resource._type === 'WorkPackage')) {
