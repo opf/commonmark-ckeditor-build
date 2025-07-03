@@ -416,8 +416,8 @@ describe('CommonMarkProcessor', () => {
 				'*   [x] Item 2',
 
 				'<ul class="contains-task-list">' +
-				'<li class="task-list-item"><label><input class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 1</label></li>' +
-				'<li class="task-list-item"><label><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 2</label></li>' +
+				'<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 1</label></li>' +
+				'<li class="task-list-item"><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 2</label></li>' +
 				'</ul>',
 
 				'*   [ ] Item 1\n' +
@@ -425,12 +425,110 @@ describe('CommonMarkProcessor', () => {
 				{
 					simulatePlugin: () => {
 						return '<ul class="todo-list">' +
-							'<li class="task-list-item"><label><input class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 1</label></li>' +
-							'<li class="task-list-item"><label><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input>Item 2</label></li>' +
+							'<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 1</label></li>' +
+							'<li class="task-list-item"><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 2</label></li>' +
 							'</ul>';
 					}
 				}
 			);
+		});
+	});
+
+	describe('mixed lists', () => {
+		describe('when ul > ol', () => {
+			it('should process mixed lists', () => {
+				testDataProcessor(
+					'*   Item 1\n' +
+					'    1. Item 2\n' +
+					'    2. Item 3\n' +
+					'*   Item 4',
+
+					`<ul><li>Item 1<ol><li>Item 2</li><li>Item 3</li></ol></li><li>Item 4</li></ul>`,
+
+					'*   Item 1\n' +
+					'    1.  Item 2\n' +
+					'    2.  Item 3\n' +
+					'*   Item 4'
+				);
+			});
+		});
+
+		describe('when ol > ul', () => {
+			it('should process mixed lists', () => {
+				testDataProcessor(
+					'1. Item 1\n' +
+					'   * Item 2\n' +
+					'   * Item 3\n' +
+					'2. Item 4',
+
+					`<ol><li>Item 1<ul><li>Item 2</li><li>Item 3</li></ul></li><li>Item 4</li></ol>`,
+
+					'1.  Item 1\n' +
+					'    *   Item 2\n' +
+					'    *   Item 3\n' +
+					'2.  Item 4'
+				);
+			});
+		});
+
+		describe('when todo list > ol', () => {
+			it('should process mixed lists', () => {
+				testDataProcessor(
+					'*   [ ] Item 1\n' +
+					'    1. Item 2\n' +
+					'    2. Item 3\n' +
+					'*   [x] Item 4',
+
+					`<ul class="contains-task-list"><li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 1</label><ol><li>Item 2</li><li>Item 3</li></ol></li><li class="task-list-item"><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 4</label></li></ul>`,
+
+					'*   [ ] Item 1\n' +
+					'    1.  Item 2\n' +
+					'    2.  Item 3\n' +
+					'*   [x] Item 4',
+					{
+						simulatePlugin: () => {
+							return '<ul class="todo-list">' +
+								'<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 1</label>' +
+								'<ol>' +
+								'<li>Item 2</li>' +
+								'<li>Item 3</li>' +
+								'</ol></li>' +
+								'<li class="task-list-item"><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 4</label></li>' +
+								'</ul>';
+						}
+					}
+				);
+			});
+		});
+
+		describe('when todo list > ul', () => {
+			it('should process mixed lists', () => {
+				testDataProcessor(
+					'*   [ ] Item 1\n' +
+					'    * Item 2\n' +
+					'    * Item 3\n' +
+					'*   [x] Item 4',
+
+					`<ul class="contains-task-list"><li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 1</label><ul><li>Item 2</li><li>Item 3</li></ul></li><li class="task-list-item"><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 4</label></li></ul>`,
+
+					'*   [ ] Item 1\n' +
+					'    *   Item 2\n' +
+					'    *   Item 3\n' +
+					'*   [x] Item 4',
+					{
+						simulatePlugin: () => {
+							return '<ul class="todo-list">' +
+								'<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 1</label>' +
+								'<ul>' +
+								'<li>Item 2</li>' +
+								'<li>Item 3</li>' +
+								'</ul></li>' +
+								'<li class="task-list-item"><input checked="" class="task-list-item-checkbox" disabled="" type="checkbox"></input><label>Item 4</label></li>' +
+								'</ul>';
+						}
+					}
+				);
+			});
 		});
 	});
 });
