@@ -14,6 +14,7 @@ import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
 import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
+import {hoistTaskListCheckboxes} from './utils/hoist-task-list-checkboxes';
 import {fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel} from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
@@ -74,9 +75,12 @@ export default class CommonMarkDataProcessor {
 		// Fix for multiple empty lines in markdown lists
 		fixBreaksInLists(domFragment)
 
-		const viewFragment = this._domConverter.domToView(domFragment);
+		// Preprocess task list checkboxes to ensure they are direct children of <li>
+		hoistTaskListCheckboxes(domFragment);
 
 		// Convert DOM DocumentFragment to view DocumentFragment.
+		const viewFragment = this._domConverter.domToView(domFragment);
+
 		return viewFragment;
 	}
 
@@ -132,30 +136,25 @@ export default class CommonMarkDataProcessor {
 			highlightedCodeBlock,
 		]);
 
-		// Replace todolist with markdown representation
-		turndownService.addRule('todolist', {
+		/**
+		 * This rule is used to convert task list items with checkboxes to markdown.
+		 * 
+		 * This is based on the turndown-plugin-gfm taskListItems rule, but modified to
+		 * support list items with checkboxes that are not direct children of a ul or ol.
+		 *
+		 * @see
+		 */
+		turndownService.addRule('taskListItems', {
 			filter: function (node) {
-				// check if we're a todo list item
-				if (node.nodeName !== 'LI') {
-					return false;
-				}
-
-				// Check for a parent ul, this LI might however be in an OL item
-				const parentUl = node.closest('ul');
-				return parentUl && parentUl.classList.contains('todo-list');
+				const nodeIsCheckbox = node.type === "checkbox";
+				const parentIsListItem = node.parentNode && node.parentNode.nodeName === 'LI';
+				const grandparentIsListItem = node.parentNode && node.parentNode.parentNode && node.parentNode.parentNode.nodeName === 'LI';
+				return nodeIsCheckbox && (parentIsListItem || grandparentIsListItem);
 			},
-			replacement: function (content, node, options) {
-				content = content
-					.replace(/^\n+/, '') // remove leading newlines
-					.replace(/\n+$/, '\n') // replace trailing newlines with just a single one
-					.replace(/\n/gm, '\n    '); // indent
-
-				const prefix = options.bulletListMarker + '   ';
-				const input = node.querySelector('input[type=checkbox]');
-				const tasklist = (input && input.checked) ? '[x] ' : '[ ] ';
-				return prefix + tasklist + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '');
+			replacement: function (content, node) {
+				return (node.checked ? '[x]' : '[ ]') + ' '
 			}
-		});
+		})
 
 		turndownService.addRule('imageFigure', {
 			filter: 'img',
@@ -196,8 +195,11 @@ export default class CommonMarkDataProcessor {
 			},
 			replacement: function (_content, node) {
 				// Remove filler attribute, but keep empty lines
-				node.querySelectorAll('td br[data-cke-filler]')
-					.forEach((node) => node.removeAttribute('data-cke-filler'));
+				node.querySelectorAll('td br[data-cke-filler]').forEach((node) => {
+						if (node.nextElementSibling) {
+							node.removeAttribute('data-cke-filler');
+						}
+					});
 
 				return node.outerHTML;
 			}
