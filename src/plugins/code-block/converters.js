@@ -74,11 +74,13 @@ export function viewCodeBlockToModel() {
 
 			// Convert text child of codeblock
 			const child = codeBlock.getChild(0);
-			conversionApi.consumable.consume( child, { name: true } );
-			// Replace last newline since that text is incorrectly mapped
-			// Regression OP#28609
-			const content = child.data.replace(/\n$/, "");
-			conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
+			if (child) {
+				conversionApi.consumable.consume(child, { name: true });
+				// Replace last newline since that text is incorrectly mapped
+				// Regression OP#28609
+				const content = child.data.replace(/\n$/, "");
+				conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
+			}
 
 			// Set as conversion result, attribute converters may use this property.
 			data.modelRange = new Range(
