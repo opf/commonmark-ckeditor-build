@@ -156,6 +156,56 @@ export default class CommonMarkDataProcessor {
 			}
 		})
 
+		/**
+		 * This rule is used to convert ordered list items to markdown.
+		 * 
+		 * This is based on he turndownService rule for listItems, but modified to
+		 * indent ordered list items with the appropriate amount of indentation spaces.
+		 * This fixes an issue with the indentation of ordered list items with more
+		 * than 10 items.
+		 * 
+		 * 1. item
+		 *     - subitem # four spaces is enough
+		 * ...
+		 * 10. item
+		 *      - subitem # five spaces are necessary because `10.` is three digits, and wider than `#.`
+		 * 
+		 * @see
+		 */
+		turndownService.addRule('orderedListItems', {
+			filter: function(node) {
+				if (node.nodeName !== 'LI') {
+					return false;
+				}
+
+				return !!node.closest('ol');
+			},
+			replacement: function (content, node, options) {
+			   content = content
+				   .replace(/^\n+/, '') // remove leading newlines
+				   .replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
+
+			   var parent = node.parentNode;
+			   var prefix = options.bulletListMarker + '   ';
+			   var number = 1;
+			   if (parent.nodeName === 'OL') {
+				   var start = parent.getAttribute('start');
+				   var index = Array.prototype.indexOf.call(parent.children, node);
+				   number = start ? Number(start) + index : index + 1;
+				   prefix = number + '.  ';
+			   }
+
+			   // Calculate indentation based on the width of the number prefix
+			   var indentWidth = prefix.length;
+			   var indent = ' '.repeat(indentWidth);
+			   content = content.replace(/\n/gm, '\n' + indent);
+
+			   return (
+				   prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
+			   );
+			}
+		});
+
 		turndownService.addRule('imageFigure', {
 			filter: 'img',
 			replacement: function (content, node) {
