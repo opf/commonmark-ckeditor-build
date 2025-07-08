@@ -250,6 +250,134 @@ describe('CommonMarkProcessor', () => {
 			);
 		});
 
+		it('should process long nested ordered list with tabs', () => {
+			testDataProcessor(
+				'1.	item 1\n' +
+				'2.	item 2\n' +
+				'3.	item 3\n' +
+				'4.	item 4\n' +
+				'5.	item 5\n' +
+				'6.	item 6\n' +
+				'7.	item 7\n' +
+				'8.	item 8\n' +
+				'9.	item 9\n' +
+				'10.	item 10\n' +
+				'	- item 10.1\n' +
+				'	- item 10.2\n' +
+				'11.	item 11\n' +
+				'	- item 11.1\n' +
+				'	- item 11.2\n' +
+				'12.	item 12',
+
+				'<ol>' +
+				'<li>item 1</li>' +
+				'<li>item 2</li>' +
+				'<li>item 3</li>' +
+				'<li>item 4</li>' +
+				'<li>item 5</li>' +
+				'<li>item 6</li>' +
+				'<li>item 7</li>' +
+				'<li>item 8</li>' +
+				'<li>item 9</li>' +
+				'<li>item 10' +
+				'<ul>' +
+				'<li>item 10.1</li>' +
+				'<li>item 10.2</li>' +
+				'</ul>' +
+				'</li>' +
+				'<li>item 11' +
+				'<ul>' +
+				'<li>item 11.1</li>' +
+				'<li>item 11.2</li>' +
+				'</ul>' +
+				'</li>' +
+				'<li>item 12</li>' +
+				'</ol>',
+
+				// List will be normalized to 2-space representation.
+				'1.  item 1\n' +
+				'2.  item 2\n' +
+				'3.  item 3\n' +
+				'4.  item 4\n' +
+				'5.  item 5\n' +
+				'6.  item 6\n' +
+				'7.  item 7\n' +
+				'8.  item 8\n' +
+				'9.  item 9\n' +
+				'10.  item 10\n' +
+				'     *   item 10.1\n' +
+				'     *   item 10.2\n' +
+				'11.  item 11\n' +
+				'     *   item 11.1\n' +
+				'     *   item 11.2\n' +
+				'12.  item 12'
+			);
+		});
+
+		it('should process ordered list with spaces', () => {
+			testDataProcessor(
+				'1. item 1\n' +
+				'2. item 2\n' +
+				'3. item 3\n' +
+				'4. item 4\n' +
+				'5. item 5\n' +
+				'6. item 6\n' +
+				'7. item 7\n' +
+				'8. item 8\n' +
+				'9. item 9\n' +
+				'10. item 10\n' +
+				'     - item 10.1\n' +
+				'     - item 10.2\n' +
+				'11. item 11\n' +
+				'     - item 11.1\n' +
+				'     - item 11.2\n' +
+				'12. item 12',
+
+				'<ol>' +
+				'<li>item 1</li>' +
+				'<li>item 2</li>' +
+				'<li>item 3</li>' +
+				'<li>item 4</li>' +
+				'<li>item 5</li>' +
+				'<li>item 6</li>' +
+				'<li>item 7</li>' +
+				'<li>item 8</li>' +
+				'<li>item 9</li>' +
+				'<li>item 10' +
+				'<ul>' +
+				'<li>item 10.1</li>' +
+				'<li>item 10.2</li>' +
+				'</ul>' +
+				'</li>' +
+				'<li>item 11' +
+				'<ul>' +
+				'<li>item 11.1</li>' +
+				'<li>item 11.2</li>' +
+				'</ul>' +
+				'</li>' +
+				'<li>item 12</li>' +
+				'</ol>',
+
+				// List will be normalized to 2-space representation.
+				'1.  item 1\n' +
+				'2.  item 2\n' +
+				'3.  item 3\n' +
+				'4.  item 4\n' +
+				'5.  item 5\n' +
+				'6.  item 6\n' +
+				'7.  item 7\n' +
+				'8.  item 8\n' +
+				'9.  item 9\n' +
+				'10.  item 10\n' +
+				'     *   item 10.1\n' +
+				'     *   item 10.2\n' +
+				'11.  item 11\n' +
+				'     *   item 11.1\n' +
+				'     *   item 11.2\n' +
+				'12.  item 12'
+			);
+		});
+
 		it('should process nested and mixed lists', () => {
 			testDataProcessor(
 				'1. First\n' +
@@ -363,7 +491,16 @@ describe('CommonMarkProcessor', () => {
 			'<li><p>Second</p></li>' +
 			'<li><p>Third<br></br>Fluppy<br></br>End</p></li>' +
 			'<li><p>Fourth</p></li>' +
-			'</ol>'
+			'</ol>',
+
+			'1.  First\n' +
+			'    Flup\n' +
+			'    End\n\n' +
+			'2.  Second\n\n' +
+			'3.  Third\n' +
+			'    Fluppy\n' +
+			'    End\n\n' +
+			'4.  Fourth',
 		);
 	});
 
