@@ -7,6 +7,7 @@ import {Autosave} from "@ckeditor/ckeditor5-autosave";
 
 export const OP_CONTENT_REVISION_KEY = "opContentRevisionKey";
 export const OP_CONTENT_REVISION_PREFIX = "op_ckeditor_rev";
+export const STORAGE_KEY_OVERRIDE = "storageKey";
 
 export default class OpContentRevisions extends Plugin {
 
@@ -22,7 +23,7 @@ export default class OpContentRevisions extends Plugin {
     super(editor);
 
     // Define a storage key for this instance
-    const revisionKey = this.createLocalStorageKey(editor);
+    const revisionKey = this.getStorageKey(editor);
     editor.config.define(OP_CONTENT_REVISION_KEY, revisionKey);
   }
 
@@ -54,6 +55,21 @@ export default class OpContentRevisions extends Plugin {
           }
         });
     });
+  }
+
+  /**
+   * Get the storage key for the current editor instance.
+   * If a StorageKey is defined in the editor configuration,
+   * use that instead of the default key.
+   */
+  getStorageKey(editor) {
+    const storageKey = editor.config.get(STORAGE_KEY_OVERRIDE);
+
+	if (storageKey) {
+	  return storageKey;
+	}
+
+    return this.createLocalStorageKey(editor)
   }
 
   /**
