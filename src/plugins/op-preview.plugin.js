@@ -75,7 +75,9 @@ export default class OPPreviewPlugin extends Plugin {
 				const editableElement = editor.ui.getEditableElement();
 				const mainEditor = editableElement.parentElement;
 
-				unregisterPreview();
+				if (unregisterPreview) {
+					unregisterPreview();
+				}
 				
 				// Remove existing preview elements
 				const existingPreviews = mainEditor.parentElement.querySelectorAll('.ck-editor__preview');
