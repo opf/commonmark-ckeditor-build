@@ -35,12 +35,17 @@ export default class OPSourceCodePlugin extends Plugin {
 
 
 			let showSource = function(_preview) {
-				let $reference = jQuery(editor.ui.getEditableElement()).parent();
-				let $sourceWrapper = jQuery('<div class="ck-editor__source"></div>');
-				$reference.siblings('.ck-editor__source').remove();
+				const editableElement = editor.ui.getEditableElement();
+				const reference = editableElement.parentElement;
+				const sourceWrapper = document.createElement('div');
+				sourceWrapper.className = 'ck-editor__source';
+				
+				// Remove existing source elements
+				const existingSources = reference.parentElement.querySelectorAll('.ck-editor__source');
+				existingSources.forEach(el => el.remove());
 
-				$reference.hide();
-				$reference.after($sourceWrapper);
+				reference.style.display = 'none';
+				reference.parentElement.insertBefore(sourceWrapper, reference.nextSibling);
 
 				disableItems(editor, view);
 
@@ -56,12 +61,16 @@ export default class OPSourceCodePlugin extends Plugin {
 			};
 
 			let hideSource = function() {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
+				const editableElement = editor.ui.getEditableElement();
+				const mainEditor = editableElement.parentElement;
 
 				editor.fire('op:source-code-disabled');
 
-				$mainEditor.siblings('.ck-editor__source').remove();
-				$mainEditor.show();
+				// Remove existing source elements
+				const existingSources = mainEditor.parentElement.querySelectorAll('.ck-editor__source');
+				existingSources.forEach(el => el.remove());
+				
+				mainEditor.style.display = '';
 
 				enableItems(editor);
 

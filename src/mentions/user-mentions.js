@@ -28,18 +28,29 @@ export function userMentions(queryText) {
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
 
-	return new Promise((resolve, _reject) => {
-		jQuery.getJSON(url, collection => {
-			resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
-				const type = mention._type.toLowerCase();
-				const text = `@${mention.name}`;
-				const id = `@${mention.id}`;
-				const idNumber = mention.id;
-				const typeSegment = pluginContext.services.apiV3Service[`${type}s`].segment;
-				const link = `${base}/${typeSegment}/${idNumber}`;
+	return new Promise((resolve, reject) => {
+		fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				return response.json();
+			})
+			.then(collection => {
+				resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
+					const type = mention._type.toLowerCase();
+					const text = `@${mention.name}`;
+					const id = `@${mention.id}`;
+					const idNumber = mention.id;
+					const typeSegment = pluginContext.services.apiV3Service[`${type}s`].segment;
+					const link = `${base}/${typeSegment}/${idNumber}`;
 
-				return {type, id, text, link, idNumber, name: mention.name};
-			}));
-		});
-	})
+					return {type, id, text, link, idNumber, name: mention.name};
+				}));
+			})
+			.catch(error => {
+				console.error('Error fetching user mentions:', error);
+				reject(error);
+			});
+	});
 }

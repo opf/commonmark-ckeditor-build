@@ -60,3 +60,13 @@ Now the webpack development mode is building the files and outputting them to `a
 
 
 
+## Migration Notes
+
+### jQuery Removal
+
+As of version 11.2.0, this library no longer uses jQuery internally. All jQuery dependencies have been replaced with vanilla JavaScript equivalents using the Fetch API and native DOM manipulation.
+
+**Important for downstream consumers (e.g., OpenProject):** While this library no longer uses jQuery internally, downstream applications should continue to expose the jQuery global if other parts of the application depend on it. Do not remove the jQuery global from the downstream application (OpenProject) yet until all components have been migrated.
+
+For more details on the downstream migration, see: https://github.com/opf/openproject/pull/19429
+
