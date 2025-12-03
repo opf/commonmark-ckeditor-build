@@ -36,12 +36,18 @@ export default class OPSourceCodePlugin extends Plugin {
 
 			let showSource = function(_preview) {
 				const editableElement = editor.ui.getEditableElement();
-				const reference = editableElement.parentElement;
+				const reference = editableElement?.parentElement;
+				if (!reference?.parentElement) {
+					console.error('Cannot show source: invalid editor structure');
+					return;
+				}
+
 				const sourceWrapper = document.createElement('div');
 				sourceWrapper.className = 'ck-editor__source';
 				
-				// Remove existing source elements
-				const existingSources = reference.parentElement.querySelectorAll('.ck-editor__source');
+				// Remove existing source elements (only direct siblings)
+				const existingSources = Array.from(reference.parentElement.children)
+					.filter(el => el !== reference && el.classList.contains('ck-editor__source'));
 				existingSources.forEach(el => el.remove());
 
 				reference.style.display = 'none';
@@ -62,11 +68,15 @@ export default class OPSourceCodePlugin extends Plugin {
 
 			let hideSource = function() {
 				const editableElement = editor.ui.getEditableElement();
-				const mainEditor = editableElement.parentElement;
+				const mainEditor = editableElement?.parentElement;
+				if (!mainEditor?.parentElement) {
+					console.error('Cannot hide source: invalid editor structure');
+					return;
+				}
 
 				editor.fire('op:source-code-disabled');
 
-				// Remove existing source elements
+				// Remove existing source elements (only direct siblings)
 				const existingSources = Array.from(mainEditor.parentElement.children)
 					.filter(el => el.classList.contains('ck-editor__source'));
 				existingSources.forEach(el => el.remove());

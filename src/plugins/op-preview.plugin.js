@@ -31,7 +31,12 @@ export default class OPPreviewPlugin extends Plugin {
 
 			let showPreview = function(preview) {
 				const editableElement = editor.ui.getEditableElement();
-				const reference = editableElement.parentElement;
+				const reference = editableElement?.parentElement;
+				if (!reference?.parentElement) {
+					console.error('Cannot show preview: invalid editor structure');
+					return;
+				}
+
 				const previewWrapper = document.createElement('div');
 				previewWrapper.className = 'ck-editor__preview op-uc-container';
 				
@@ -76,7 +81,11 @@ export default class OPPreviewPlugin extends Plugin {
 
 			let disablePreviewing = function() {
 				const editableElement = editor.ui.getEditableElement();
-				const mainEditor = editableElement.parentElement;
+				const mainEditor = editableElement?.parentElement;
+				if (!mainEditor?.parentElement) {
+					console.error('Cannot disable preview: invalid editor structure');
+					return;
+				}
 
 				if (unregisterPreview) {
 					unregisterPreview();
