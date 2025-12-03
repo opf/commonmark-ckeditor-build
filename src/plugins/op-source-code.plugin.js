@@ -78,7 +78,7 @@ export default class OPSourceCodePlugin extends Plugin {
 
 				// Remove existing source elements (only direct siblings)
 				const existingSources = Array.from(mainEditor.parentElement.children)
-					.filter(el => el.classList.contains('ck-editor__source'));
+					.filter(el => el !== mainEditor && el.classList.contains('ck-editor__source'));
 				existingSources.forEach(el => el.remove());
 				
 				mainEditor.style.display = '';

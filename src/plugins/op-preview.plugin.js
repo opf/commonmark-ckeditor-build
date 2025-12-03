@@ -93,7 +93,7 @@ export default class OPPreviewPlugin extends Plugin {
 				
 				// Remove existing preview elements (only direct siblings)
 				const existingPreviews = Array.from(mainEditor.parentElement.children)
-					.filter(el => el.classList.contains('ck-editor__preview'));
+					.filter(el => el !== mainEditor && el.classList.contains('ck-editor__preview'));
 				existingPreviews.forEach(el => el.remove());
 				
 				mainEditor.style.display = '';
