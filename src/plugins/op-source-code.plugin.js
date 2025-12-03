@@ -67,7 +67,8 @@ export default class OPSourceCodePlugin extends Plugin {
 				editor.fire('op:source-code-disabled');
 
 				// Remove existing source elements
-				const existingSources = mainEditor.parentElement.querySelectorAll('.ck-editor__source');
+				const existingSources = Array.from(mainEditor.parentElement.children)
+					.filter(el => el.classList.contains('ck-editor__source'));
 				existingSources.forEach(el => el.remove());
 				
 				mainEditor.style.display = '';

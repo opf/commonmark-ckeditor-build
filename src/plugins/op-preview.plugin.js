@@ -35,8 +35,9 @@ export default class OPPreviewPlugin extends Plugin {
 				const previewWrapper = document.createElement('div');
 				previewWrapper.className = 'ck-editor__preview op-uc-container';
 				
-				// Remove existing preview elements
-				const existingPreviews = reference.parentElement.querySelectorAll('.ck-editor__preview');
+				// Remove existing preview elements (only direct siblings)
+				const existingPreviews = Array.from(reference.parentElement.children)
+					.filter(el => el !== reference && el.classList.contains('ck-editor__preview'));
 				existingPreviews.forEach(el => el.remove());
 
 				const previewService = getOPService(editor, 'ckEditorPreview');
@@ -68,6 +69,8 @@ export default class OPPreviewPlugin extends Plugin {
 					.then(showPreview)
 					.catch(error => {
 						console.error('Error fetching preview:', error);
+						previewing = false;
+						enableItems(editor);
 					});
 			};
 
@@ -79,8 +82,9 @@ export default class OPPreviewPlugin extends Plugin {
 					unregisterPreview();
 				}
 				
-				// Remove existing preview elements
-				const existingPreviews = mainEditor.parentElement.querySelectorAll('.ck-editor__preview');
+				// Remove existing preview elements (only direct siblings)
+				const existingPreviews = Array.from(mainEditor.parentElement.children)
+					.filter(el => el.classList.contains('ck-editor__preview'));
 				existingPreviews.forEach(el => el.remove());
 				
 				mainEditor.style.display = '';
