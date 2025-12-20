@@ -30,15 +30,26 @@ export default class OPPreviewPlugin extends Plugin {
 
 
 			let showPreview = function(preview) {
-				let $reference = jQuery(editor.ui.getEditableElement()).parent();
-				let $previewWrapper = jQuery('<div class="ck-editor__preview op-uc-container"></div>');
-				$reference.siblings('.ck-editor__preview').remove();
+				const editableElement = editor.ui.getEditableElement();
+				const reference = editableElement?.parentElement;
+				if (!reference?.parentElement) {
+					console.error('Cannot show preview: invalid editor structure');
+					return;
+				}
+
+				const previewWrapper = document.createElement('div');
+				previewWrapper.className = 'ck-editor__preview op-uc-container';
+				
+				// Remove existing preview elements (only direct siblings)
+				const existingPreviews = Array.from(reference.parentElement.children)
+					.filter(el => el !== reference && el.classList.contains('ck-editor__preview'));
+				existingPreviews.forEach(el => el.remove());
 
 				const previewService = getOPService(editor, 'ckEditorPreview');
-				unregisterPreview = previewService.render($previewWrapper[0], preview);
+				unregisterPreview = previewService.render(previewWrapper, preview);
 
-				$reference.hide();
-				$reference.after($previewWrapper);
+				reference.style.display = 'none';
+				reference.parentElement.insertBefore(previewWrapper, reference.nextSibling);
 
 				disableItems(editor, view);
 			};
@@ -47,22 +58,45 @@ export default class OPPreviewPlugin extends Plugin {
 				let link = getOPPreviewContext(editor);
 				let url = getOPPath(editor).api.v3.previewMarkup(link);
 
-				jQuery
-					.ajax({
-						data: editor.getData(),
-						url: url,
-						response_type: 'text',
-						contentType: 'text/plain; charset=UTF-8',
-						method: 'POST',
-					}).done(showPreview);
+				fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'text/plain; charset=UTF-8'
+					},
+					body: editor.getData()
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error(`HTTP error! status: ${response.status}`);
+						}
+						return response.text();
+					})
+					.then(showPreview)
+					.catch(error => {
+						console.error('Error fetching preview:', error);
+						previewing = false;
+						enableItems(editor);
+					});
 			};
 
 			let disablePreviewing = function() {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
+				const editableElement = editor.ui.getEditableElement();
+				const mainEditor = editableElement?.parentElement;
+				if (!mainEditor?.parentElement) {
+					console.error('Cannot disable preview: invalid editor structure');
+					return;
+				}
 
-				unregisterPreview();
-				$mainEditor.siblings('.ck-editor__preview').remove();
-				$mainEditor.show();
+				if (unregisterPreview) {
+					unregisterPreview();
+				}
+				
+				// Remove existing preview elements (only direct siblings)
+				const existingPreviews = Array.from(mainEditor.parentElement.children)
+					.filter(el => el !== mainEditor && el.classList.contains('ck-editor__preview'));
+				existingPreviews.forEach(el => el.remove());
+				
+				mainEditor.style.display = '';
 
 				enableItems(editor);
 			};

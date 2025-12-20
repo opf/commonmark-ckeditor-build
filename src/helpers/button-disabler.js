@@ -11,7 +11,7 @@ export function getToolbarItems(editor) {
 }
 
 export function disableItems(editor, except) {
-	jQuery.each(getToolbarItems(editor), function (index, item) {
+	getToolbarItems(editor).forEach((item) => {
 		let toDisable = item;
 
 		if (item instanceof FileDialogButtonView) {
@@ -31,7 +31,7 @@ export function disableItems(editor, except) {
 }
 
 export function enableItems(editor) {
-	jQuery.each(getToolbarItems(editor), function (index, item) {
+	getToolbarItems(editor).forEach((item) => {
 		let toEnable = item;
 
 		if (item instanceof FileDialogButtonView) {
