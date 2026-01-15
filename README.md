@@ -27,17 +27,15 @@ export OPENPROJECT_CORE=/path/to/openproject/root
 ## Building
 
 
-
 Building into the core is easy, just run
 
 `npm run build`
 
 
-
 This will override the `app/assets/javascripts/vendor/ckeditor/*` contents with the newest webpack build. You need to run this before opening a pull request.
 
-Please also ensure you always create a pull request on this repository that gets merged whenever the core counterpart gets merged to ensure the master of this branch is always the latest built version in OpenProject
-
+> [!important]
+>  Please ensure that for any changes in this repository, you have a core repository with the output of `npm run build`, so that all core tests can run and confirm your changes. Both pull requests should _always_ be merged at the same time, never alone
 
 
 ### Updating CKEditor
