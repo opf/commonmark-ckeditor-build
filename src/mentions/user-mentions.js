@@ -3,6 +3,7 @@ import {
 	getOPPath,
 	getPluginContext,
 } from "../plugins/op-context/op-context";
+import { get } from '@rails/request.js';
 
 export function userMentions(queryText) {
 	const editor = this;
@@ -24,18 +25,13 @@ export function userMentions(queryText) {
 		return [];
 	}
 
-	const url = getOPPath(editor).api.v3.principals(resource, queryText) + '&select=elements/_type,elements/id,elements/name';
+	const url = getOPPath(editor).api.v3.principals(resource, queryText);
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
 
 	return new Promise((resolve, reject) => {
-		fetch(url)
-			.then(response => {
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
-				return response.json();
-			})
+		get(url, { responseKind: 'json', query: { select: 'elements/_type,elements/id,elements/name' } })
+			.then(response => response.json)
 			.then(collection => {
 				resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
 					const type = mention._type.toLowerCase();

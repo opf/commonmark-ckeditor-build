@@ -6,8 +6,8 @@
 
 - Removed jQuery dependency from the CKEditor build. All jQuery usage has been replaced with vanilla JavaScript equivalents:
   - `jQuery.each()` replaced with native `Array.forEach()`
-  - `jQuery.getJSON()` replaced with `fetch()` API
-  - `jQuery.ajax()` replaced with `fetch()` API
+  - `jQuery.getJSON()` replaced with Request.JS
+  - `jQuery.ajax()` replaced with Request.JS
   - jQuery DOM manipulation replaced with native DOM APIs (`document.createElement()`, `element.parentElement`, `element.style`, etc.)
 
 ### Migration Notes

@@ -7,6 +7,7 @@ import { ButtonView } from '@ckeditor/ckeditor5-ui';
 import { Plugin } from '@ckeditor/ckeditor5-core';
 import {getOPPath, getOPPreviewContext, getOPService} from './op-context/op-context';
 import {enableItems, disableItems} from '../helpers/button-disabler';
+import { post } from '@rails/request.js';
 
 export default class OPPreviewPlugin extends Plugin {
 
@@ -39,7 +40,7 @@ export default class OPPreviewPlugin extends Plugin {
 
 				const previewWrapper = document.createElement('div');
 				previewWrapper.className = 'ck-editor__preview op-uc-container';
-				
+
 				// Remove existing preview elements (only direct siblings)
 				const existingPreviews = Array.from(reference.parentElement.children)
 					.filter(el => el !== reference && el.classList.contains('ck-editor__preview'));
@@ -58,19 +59,12 @@ export default class OPPreviewPlugin extends Plugin {
 				let link = getOPPreviewContext(editor);
 				let url = getOPPath(editor).api.v3.previewMarkup(link);
 
-				fetch(url, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'text/plain; charset=UTF-8'
-					},
-					body: editor.getData()
+				post(url, {
+					contentType: 'text/plain; charset=UTF-8',
+					responseKind: 'html',
+					body: editor.getData(),
 				})
-					.then(response => {
-						if (!response.ok) {
-							throw new Error(`HTTP error! status: ${response.status}`);
-						}
-						return response.text();
-					})
+					.then(response => response.html)
 					.then(showPreview)
 					.catch(error => {
 						console.error('Error fetching preview:', error);
@@ -90,12 +84,12 @@ export default class OPPreviewPlugin extends Plugin {
 				if (unregisterPreview) {
 					unregisterPreview();
 				}
-				
+
 				// Remove existing preview elements (only direct siblings)
 				const existingPreviews = Array.from(mainEditor.parentElement.children)
 					.filter(el => el !== mainEditor && el.classList.contains('ck-editor__preview'));
 				existingPreviews.forEach(el => el.remove());
-				
+
 				mainEditor.style.display = '';
 
 				enableItems(editor);

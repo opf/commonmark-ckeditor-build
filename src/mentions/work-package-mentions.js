@@ -1,3 +1,5 @@
+import { get } from '@rails/request.js';
+
 export function workPackageMentions(prefix) {
   return function (query) {
     let editor = this;
@@ -9,14 +11,8 @@ export function workPackageMentions(prefix) {
     }
 
     return new Promise((resolve, reject) => {
-      const params = new URLSearchParams({ q: query, scope: "all" });
-      fetch(`${url}?${params.toString()}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
+      get(url, { responseKind: 'json', query: { q: query, scope: "all" } })
+        .then(response => response.json)
         .then(collection => {
           resolve(collection.map(wp => {
             const id = `${prefix}${wp.id}`;
