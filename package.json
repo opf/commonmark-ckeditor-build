@@ -51,6 +51,7 @@
     "@ckeditor/ckeditor5-watchdog": "44.3.0",
     "@ckeditor/ckeditor5-widget": "44.3.0",
     "@eslint/js": "^9.16.0",
+    "@rails/request.js": "^0.0.13",
     "babel-jest": "^29.7.0",
     "css-loader": "^7.1.2",
     "eslint": "^9.23.0",
@@ -98,5 +99,8 @@
   },
   "dependencies": {
     "patch-package": "^8.0.0"
+  },
+  "peerDependencies": {
+    "@rails/request.js": "^0.0.13"
   }
 }
