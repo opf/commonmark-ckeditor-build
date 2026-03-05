@@ -44,6 +44,10 @@ The generated output is written to:
 ### TypeScript types for downstream
 
 This package now emits declaration files into `build/types`.
+During `npm run build`, those declarations are also copied into:
+
+- `frontend/src/vendor/ckeditor/types.d.ts`
+- `frontend/src/vendor/ckeditor/op-ckeditor.d.ts`
 
 Downstream consumers can import shared editor interfaces from:
 

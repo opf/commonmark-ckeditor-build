@@ -105,7 +105,7 @@
   "scripts": {
     "prebuild": "sh bin/clean.sh",
     "build": "NODE_ENV=production ./node_modules/.bin/webpack --mode production && npm run build:types",
-    "build:types": "tsc -p tsconfig.json",
+    "build:types": "tsc -p tsconfig.json && sh bin/copy-types.sh",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "preversion": "npm run build; if [ -n \"$(git status src/op-ckeditor.ts build/ --porcelain)\" ]; then git add -u src/op-ckeditor.ts build/ && git commit -m 'Internal: Build.'; fi",
     "prewatch": "sh bin/clean.sh",
