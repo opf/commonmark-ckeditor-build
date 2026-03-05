@@ -25,7 +25,7 @@ module.exports = {
 	devtool: 'source-map',
 	performance: { hints: false },
 
-	entry: path.resolve( __dirname, 'src', 'op-ckeditor.js' ),
+	entry: path.resolve( __dirname, 'src', 'op-ckeditor.ts' ),
 
 	mode: mode,
 
@@ -35,6 +35,10 @@ module.exports = {
 		filename: 'ckeditor.js',
 		libraryTarget: 'umd',
 		libraryExport: 'default',
+	},
+
+	resolve: {
+		extensions: [ '.ts', '.js' ]
 	},
 
 	optimization: {
@@ -68,6 +72,18 @@ module.exports = {
 
 	module: {
 		rules: [
+			{
+				test: /\.ts$/,
+				exclude: /node_modules/,
+				use: [
+					{
+						loader: 'ts-loader',
+						options: {
+							transpileOnly: true
+						}
+					}
+				]
+			},
 			{
 				test: /\.svg$/,
 				use: [ 'raw-loader' ]

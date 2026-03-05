@@ -32,10 +32,30 @@ Building into the core is easy, just run
 `npm run build`
 
 
-This will override the `app/assets/javascripts/vendor/ckeditor/*` contents with the newest webpack build. You need to run this before opening a pull request.
+This will override the `frontend/src/vendor/ckeditor/*` contents with the newest webpack build. You need to run this before opening a pull request.
 
 > [!important]
 >  Please ensure that for any changes in this repository, you have a core repository with the output of `npm run build`, so that all core tests can run and confirm your changes. Both pull requests should _always_ be merged at the same time, never alone
+
+The generated output is written to:
+
+`frontend/src/vendor/ckeditor/*`
+
+### TypeScript types for downstream
+
+This package now emits declaration files into `build/types`.
+During `npm run build`, those declarations are also copied into:
+
+- `frontend/src/vendor/ckeditor/types.d.ts`
+- `frontend/src/vendor/ckeditor/op-ckeditor.d.ts`
+
+Downstream consumers can import shared editor interfaces from:
+
+```ts
+import type { ICKEditorInstance, ICKEditorStatic } from '@openproject/commonmark-ckeditor-build/types';
+```
+
+The main package entry also exports these interfaces.
 
 
 ### Updating CKEditor
@@ -54,7 +74,7 @@ We use `patch-package` (https://www.npmjs.com/package/patch-package) to store a
 
 - Run `npm run watch`
 
-Now the webpack development mode is building the files and outputting them to `app/assets/javascripts/vendor/ckeditor/*`, overriding anything in there.
+Now the webpack development mode is building the files and outputting them to `frontend/src/vendor/ckeditor/*`, overriding anything in there.
 
 
 
@@ -67,4 +87,3 @@ As of version 11.2.0, this library no longer uses jQuery internally. All jQuery 
 **Important for downstream consumers (e.g., OpenProject):** While this library no longer uses jQuery internally, downstream applications should continue to expose the jQuery global if other parts of the application depend on it. Do not remove the jQuery global from the downstream application (OpenProject) yet until all components have been migrated.
 
 For more details on the downstream migration, see: https://github.com/opf/openproject/pull/19429
-
