@@ -4,11 +4,17 @@
  */
 
 import CommonMarkDataProcessor from './commonmarkdataprocessor';
+import OpenProjectGFMDataProcessor from './op-gfm-data-processor';
+
+interface CommonMarkEditorConfig {
+	get(path:string):unknown;
+}
 
 interface CommonMarkEditor {
 	data:{
 		processor:unknown;
 	};
+	config?:CommonMarkEditorConfig;
 	editing:{
 		view:{
 			document:unknown;
@@ -16,7 +22,13 @@ interface CommonMarkEditor {
 	};
 }
 
+function useExperimentalGfmProcessor(editor:CommonMarkEditor):boolean {
+	return editor.config?.get('openProject.useExperimentalGfmDataProcessor') === true;
+}
+
 // Simple plugin which loads the data processor.
 export default function CommonMarkPlugin(editor:CommonMarkEditor) {
-	editor.data.processor = new CommonMarkDataProcessor(editor.editing.view.document);
+	editor.data.processor = useExperimentalGfmProcessor(editor)
+		? new OpenProjectGFMDataProcessor(editor.editing.view.document as never)
+		: new CommonMarkDataProcessor(editor.editing.view.document);
 }
