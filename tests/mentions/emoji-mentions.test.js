@@ -1,4 +1,4 @@
-import { emojiMentions } from "../../src/mentions/emoji-mentions.js";
+import { emojiMentions } from "../../src/mentions/emoji-mentions";
 
 describe('emojiMentions', () => {
 	test('it matches a full emoji name', () => {

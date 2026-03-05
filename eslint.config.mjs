@@ -8,7 +8,7 @@ export default [
 		ignores: ["tmp/", "coverage/", "node_modules/"],
 	},
 	{
-		files: ["src/**/*.js"],
+		files: ["src/**/*.ts"],
 		languageOptions: {
 			globals: {
 				...globals.browser,
