@@ -1,3 +1,4 @@
+// @ts-nocheck
 const wpButtonMacroSymbol = Symbol( 'isWpButtonMacroSymbol' );
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
 

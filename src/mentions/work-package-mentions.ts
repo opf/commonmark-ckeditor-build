@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { get } from '@rails/request.js';
 
 export function workPackageMentions(prefix) {

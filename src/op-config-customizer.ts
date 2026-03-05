@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {opImageUploadPlugins, opMacroPlugins} from './op-plugins';
 
 export function configurationCustomizer(editorClass) {

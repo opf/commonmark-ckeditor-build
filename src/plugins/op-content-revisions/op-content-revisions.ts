@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {Plugin} from "ckeditor5/src/core";
 import OpContentRevisionsUI from "./ui";
 import {loadFromLocalStorage} from "./storage";

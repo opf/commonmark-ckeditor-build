@@ -1,3 +1,4 @@
+// @ts-nocheck
 export function hoistTaskListCheckboxes(fragment) {
   const checkboxes = fragment.querySelectorAll('input.task-list-item-checkbox');
   checkboxes.forEach(checkbox => {

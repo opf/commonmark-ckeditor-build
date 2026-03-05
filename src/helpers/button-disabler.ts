@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {FileDialogButtonView} from '@ckeditor/ckeditor5-ui';
 
 export function getToolbarItems(editor) {

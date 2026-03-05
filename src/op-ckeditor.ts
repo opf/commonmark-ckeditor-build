@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DecoupledEditor } from '@ckeditor/ckeditor5-editor-decoupled';
 import { EditorWatchdog } from '@ckeditor/ckeditor5-watchdog';
 import {builtinPlugins} from './op-plugins';

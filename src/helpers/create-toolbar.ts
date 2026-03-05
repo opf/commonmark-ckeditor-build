@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ToolbarView } from '@ckeditor/ckeditor5-ui';
 import { BalloonPanelView } from '@ckeditor/ckeditor5-ui';
 

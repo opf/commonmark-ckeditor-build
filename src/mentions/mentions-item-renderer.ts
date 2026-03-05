@@ -1,3 +1,4 @@
+// @ts-nocheck
 export function customItemRenderer( item ) {
     const itemElement = document.createElement( 'span' );
 

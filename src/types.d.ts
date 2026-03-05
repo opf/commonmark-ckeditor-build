@@ -7,12 +7,10 @@ declare const jQuery: any;
 declare const I18n: any;
 declare const _: any;
 
-declare global {
-  interface Window {
-    OPConstrainedEditor: any;
-    OPClassicEditor: any;
-    OPEditorWatchdog: any;
-  }
+interface Window {
+  OPConstrainedEditor: any;
+  OPClassicEditor: any;
+  OPEditorWatchdog: any;
+  OpenProject: any;
+  I18n: any;
 }
-
-export {};

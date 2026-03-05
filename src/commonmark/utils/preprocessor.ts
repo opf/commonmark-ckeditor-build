@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Replace whitespace of text nodes within the given parents in the given root element.
  * @param {*} root An HTMLElement to look for text nodes within

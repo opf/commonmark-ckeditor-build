@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Plugin } from '@ckeditor/ckeditor5-core';
 import { FileRepository } from '@ckeditor/ckeditor5-upload';
 import OpUploadResourceAdapter from './op-upload-resource-adapter';

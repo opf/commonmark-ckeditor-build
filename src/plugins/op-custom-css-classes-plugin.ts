@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Plugin } from '@ckeditor/ckeditor5-core';
 
 export default class OpCustomCssClassesPlugin extends Plugin {

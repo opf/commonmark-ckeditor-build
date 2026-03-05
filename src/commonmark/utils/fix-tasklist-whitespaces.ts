@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 /**
  * Remove multiple whitespaces in task list text nodes

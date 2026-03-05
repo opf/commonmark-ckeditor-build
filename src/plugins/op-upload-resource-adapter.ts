@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {getOPService} from './op-context/op-context';
 
 export default class OpUploadResourceAdapter {

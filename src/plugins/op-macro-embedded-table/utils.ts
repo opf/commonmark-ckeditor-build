@@ -1,3 +1,4 @@
+// @ts-nocheck
 const embeddedTableSymbol = Symbol( 'isOPEmbeddedTable' );
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
 

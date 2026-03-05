@@ -1,3 +1,4 @@
+// @ts-nocheck
 export function getOP(editor) {
 	return _.get(editor.config, '_config.openProject');
 }

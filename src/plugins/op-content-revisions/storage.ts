@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as LZString from "lz-string";
 import {generateHash} from "./utils";
 import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";

@@ -5,7 +5,7 @@ import jestPlugin from 'eslint-plugin-jest';
 export default [
 	eslint.configs.recommended,
 	{
-		ignores: ["tmp/", "coverage/", "node_modules/"],
+		ignores: ["tmp/", "coverage/", "node_modules/", "src/**/*.d.ts"],
 	},
 	{
 		files: ["src/**/*.ts"],

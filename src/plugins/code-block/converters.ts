@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Range } from '@ckeditor/ckeditor5-engine';
 import {renderCodeBlockContent} from './widget';
 

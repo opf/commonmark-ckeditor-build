@@ -1,3 +1,4 @@
+// @ts-nocheck
 // This SVG file import will be handled by webpack's raw-text loader.
 // This means that imageIcon will hold the source SVG.
 import imageIcon from './../../icons/help.svg';

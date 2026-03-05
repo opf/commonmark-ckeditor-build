@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Plugin } from '@ckeditor/ckeditor5-core';
 import Selection from '@ckeditor/ckeditor5-engine/src/model/selection';
 

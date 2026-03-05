@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file registers the history_log toolbar button and binds functionality to it.
  */

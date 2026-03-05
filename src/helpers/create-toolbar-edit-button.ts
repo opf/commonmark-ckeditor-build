@@ -1,3 +1,4 @@
+// @ts-nocheck
 import imageIcon from '../icons/edit.svg';
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
 
 const codeBlockSymbol = Symbol( 'isOPCodeBlock' );

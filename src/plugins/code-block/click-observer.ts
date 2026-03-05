@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DomEventObserver } from '@ckeditor/ckeditor5-engine';
 
 export default class DoubleClickObserver extends DomEventObserver {

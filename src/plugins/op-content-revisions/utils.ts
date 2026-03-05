@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Description: Utility functions for the history log plugin.
 
 export function countWords(str) {

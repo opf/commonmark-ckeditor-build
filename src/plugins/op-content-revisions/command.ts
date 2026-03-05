@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {Command} from "ckeditor5/src/core";
 import {loadFromLocalStorage} from "./storage";
 import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";

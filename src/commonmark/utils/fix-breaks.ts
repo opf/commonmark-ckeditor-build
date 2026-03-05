@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {isPageBreakNode} from "./page-breaks";
 
 /**

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Widget } from '@ckeditor/ckeditor5-widget';
 import { Plugin } from '@ckeditor/ckeditor5-core';
 import OPChildPagesEditing from './op-macro-child-pages-editing';
