@@ -14,3 +14,7 @@ interface Window {
   OpenProject: any;
   I18n: any;
 }
+
+interface HTMLElement {
+  ckeditorInstance?:import("./op-ckeditor").ICKEditorInstance;
+}

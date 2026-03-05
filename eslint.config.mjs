@@ -1,6 +1,7 @@
 import globals from "globals";
 import eslint from '@eslint/js';
 import jestPlugin from 'eslint-plugin-jest';
+import tsParser from '@typescript-eslint/parser';
 
 export default [
 	eslint.configs.recommended,
@@ -10,6 +11,7 @@ export default [
 	{
 		files: ["src/**/*.ts"],
 		languageOptions: {
+			parser: tsParser,
 			globals: {
 				...globals.browser,
 				"jQuery": true,
@@ -19,18 +21,7 @@ export default [
 		},
 		rules: {
 			"no-cond-assign": "off",
-			"no-unused-vars": [
-				"error",
-				{
-					// "args": "all",
-					"argsIgnorePattern": "^_",
-					// "caughtErrors": "all",
-					"caughtErrorsIgnorePattern": "^_",
-					// "destructuredArrayIgnorePattern": "^_",
-					"varsIgnorePattern": "^_",
-					// "ignoreRestSiblings": true
-				}
-			],
+			"no-unused-vars": "off",
 			"no-undef": "error"
 		}
 	},
