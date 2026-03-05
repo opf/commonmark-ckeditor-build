@@ -21,8 +21,8 @@ function roundTripViaView(markdown) {
   };
 }
 
-describe('OpenProject GFM spike known gaps', () => {
-  it('still differs on table markdown-vs-html round-trip strategy', () => {
+describe('OpenProject GFM spike gap closure', () => {
+  it('matches table markdown-vs-html round-trip via transitional shim', () => {
     const markdown =
       '| Heading 1 | Heading 2\n' +
       '| --- | ---\n' +
@@ -30,7 +30,7 @@ describe('OpenProject GFM spike known gaps', () => {
 
     const { legacyOut, gfmOut } = roundTripViaView(markdown);
 
-    expect(gfmOut).not.toEqual(legacyOut);
+    expect(gfmOut).toEqual(legacyOut);
     expect(legacyOut).toContain('<table>');
   });
 });
