@@ -17,7 +17,7 @@ module.exports = {
 	],
 	// A map from regular expressions to paths to transformers
 	transform: {
-		'^.+\\.js$': 'babel-jest',
+		'^.+\\.[jt]s$': 'babel-jest',
 	},
 	// A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
 	moduleNameMapper: {
@@ -25,6 +25,11 @@ module.exports = {
 	},
 	// The test environment that will be used for testing
 	testEnvironment: "jsdom",
+	moduleFileExtensions: [
+		"ts",
+		"js",
+		"json"
+	],
 	// The paths to modules that run some code to configure or set up the testing environment before each test
 	setupFiles: ['<rootDir>/jest.setup.js'],
 	// An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

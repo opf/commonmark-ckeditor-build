@@ -1,11 +1,31 @@
 {
-	"compilerOptions": {
-		"lib": [
-			"DOM",
-			"DOM.Iterable"
-		],
-		"module": "es6",
-		"target": "es2019",
-		"moduleResolution": "node"
-	}
+  "compilerOptions": {
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2019"
+    ],
+    "module": "ESNext",
+    "target": "ES2019",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "build/types",
+    "rootDir": "src",
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests"
+  ]
 }
