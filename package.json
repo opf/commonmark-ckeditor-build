@@ -11,6 +11,16 @@
   ],
   "main": "./build/ckeditor.js",
   "types": "./build/types/op-ckeditor.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/types/op-ckeditor.d.ts",
+      "default": "./build/ckeditor.js"
+    },
+    "./types": {
+      "types": "./build/types/ckeditor-types.d.ts",
+      "default": "./build/types/ckeditor-types.d.ts"
+    }
+  },
   "files": [
     "build"
   ],
