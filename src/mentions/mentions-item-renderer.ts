@@ -1,5 +1,11 @@
-// @ts-nocheck
-export function customItemRenderer( item ) {
+interface MentionItem {
+	type?:string;
+	link?:string;
+	name?:string;
+	text?:string;
+}
+
+export function customItemRenderer( item:MentionItem ) {
     const itemElement = document.createElement( 'span' );
 
 	if (item.type === 'user' || item.type === 'work_package') {
@@ -8,16 +14,16 @@ export function customItemRenderer( item ) {
 	}
 
 	itemElement.classList.add( 'mention-list-item' );
-	itemElement.textContent = item.name;
+	itemElement.textContent = item.name || '';
 
     return itemElement;
 }
 
-export function emojiItemRenderer( item ) {
+export function emojiItemRenderer( item:MentionItem ) {
 	const itemElement = document.createElement( 'span' );
 
 	itemElement.classList.add('mention-list-item' );
-	itemElement.textContent = `${item.text} ${item.name}`;
+	itemElement.textContent = `${item.text || ''} ${item.name || ''}`;
 
 	return itemElement;
 }

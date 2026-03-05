@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {getPluginContext} from "../plugins/op-context/op-context";
 import { ClickObserver } from '@ckeditor/ckeditor5-engine';
 

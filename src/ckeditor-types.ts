@@ -1,3 +1,8 @@
+import type { Editor, EditorConfig, PluginConstructor } from '@ckeditor/ckeditor5-core';
+import type EditorWatchdog from '@ckeditor/ckeditor5-watchdog/src/editorwatchdog';
+import type { WatchdogState } from '@ckeditor/ckeditor5-watchdog/src/watchdog';
+import type { CKEditorError } from '@ckeditor/ckeditor5-utils';
+
 export interface CKEditorEvent {
   stop: () => void;
 }
@@ -14,75 +19,29 @@ export interface CKEditorDomEventData {
   keyCode: number;
 }
 
-export interface ICKEditorInstance {
-  id: string;
-  state: string;
-  getData(options?: { trim: boolean }): string;
-  setData(content: string): void;
-  destroy(): void;
-  enableReadOnlyMode(lockId: string): void;
-  disableReadOnlyMode(lockId: string): void;
-  on(event: string, callback: () => unknown): void;
-  listenTo(
-    node: unknown,
-    key: string,
-    callback: (evt: CKEditorEvent, data: CKEditorDomEventData) => unknown,
-    options?: CKEditorListenOptions
-  ): void;
-  model: {
-    on(ev: string, callback: () => unknown): void;
-    fire(ev: string, data: unknown): void;
-    document: {
-      on(ev: string, callback: () => unknown): void;
-    };
-  };
-  editing: {
-    view: {
-      focus(): void;
-      document: Document;
-    };
-  };
-  config: any;
-  ui: any;
-  element: HTMLElement;
-}
+export type ICKEditorInstance = Editor;
 
 export interface ICKEditorStatic {
-  create(el: HTMLElement, config?: any): Promise<ICKEditorInstance>;
-  createCustomized(el: string | HTMLElement, config?: any): Promise<ICKEditorInstance>;
-  builtinPlugins: unknown[];
-  defaultConfig: any;
+  create(el: HTMLElement, config?: EditorConfig): Promise<ICKEditorInstance>;
+  createCustomized(el: string | HTMLElement, config?: EditorConfig): Promise<ICKEditorInstance>;
+  builtinPlugins: PluginConstructor<Editor>[];
+  defaultConfig?: EditorConfig;
 }
 
-export type ICKEditorState =
-  | "initializing"
-  | "ready"
-  | "crashed"
-  | "crashedPermanently"
-  | "destroyed";
+export type ICKEditorState = WatchdogState;
 
-export interface ICKEditorError {
-  message: string;
-  stack: any;
-}
+export type ICKEditorError = CKEditorError;
 
-export interface ICKEditorWatchdog {
-  setCreator(callback: (elementOrData: any, editorConfig: any) => Promise<ICKEditorInstance>): void;
-  setDestructor(callback: (editor: ICKEditorInstance) => void): void;
-  create(elementOrData: any, editorConfig: any): Promise<ICKEditorInstance>;
-  destroy(): void;
-  on(listener: "stateChange", callback: () => void): void;
-  on(listener: "error", callback: (evt: Event, args: { error: ICKEditorError }) => void): void;
-  editor: ICKEditorInstance;
-  state: ICKEditorState;
-}
+export type ICKEditorWatchdog = typeof EditorWatchdog;
 
 export type ICKEditorMentionType = "user" | "work_package";
+
+type OpenProjectContextValue = string | number | boolean | null | undefined | string[];
 
 export interface ICKEditorContext {
   resource?: {
     canAddAttachments?: boolean;
-    [key: string]: unknown;
+    [key: string]: OpenProjectContextValue;
   };
   field?: string;
   removePlugins?: string[];

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // This SVG file import will be handled by webpack's raw-text loader.
 // This means that imageIcon will hold the source SVG.
 import imageIcon from './../../icons/help.svg';
@@ -15,7 +14,7 @@ export default class OPHelpLinkPlugin extends Plugin {
 
 	init() {
 		const editor = this.editor;
-		const helpURL = editor.config.get('openProject.helpURL');
+		const helpURL = String(editor.config.get('openProject.helpURL') || '');
 
 		editor.ui.componentFactory.add( 'openProjectShowFormattingHelp', locale => {
 			const view = new ButtonView( locale );

@@ -1,42 +1,63 @@
-// @ts-nocheck
 import {FileDialogButtonView} from '@ckeditor/ckeditor5-ui';
+import type {Editor} from '@ckeditor/ckeditor5-core';
 
-export function getToolbarItems(editor) {
+interface ToggleableView {
+	isEnabled:boolean;
+}
+
+type ToolbarItem = FileDialogButtonView | ToggleableView;
+
+interface EditorUIViewWithToolbar {
+	toolbar?:{
+		items:Iterable<ToolbarItem>;
+	};
+}
+
+interface ToolbarEditor extends Editor {
+	__currentlyDisabled?:ToggleableView[];
+}
+
+export function getToolbarItems(editor:ToolbarEditor):ToolbarItem[] {
 	editor.__currentlyDisabled = editor.__currentlyDisabled || [];
+	const editorUIView = editor.ui.view as EditorUIViewWithToolbar;
 
-	if (!editor.ui.view.toolbar) {
+	if (!editorUIView.toolbar) {
 		return [];
 	}
 
-	return editor.ui.view.toolbar.items._items;
+	return Array.from(editorUIView.toolbar.items);
 }
 
-export function disableItems(editor, except) {
+export function disableItems(editor:ToolbarEditor, except:ToolbarItem | null) {
 	getToolbarItems(editor).forEach((item) => {
-		let toDisable = item;
+		let toDisable:ToggleableView | null = null;
 
 		if (item instanceof FileDialogButtonView) {
-			toDisable = item.buttonView;
-		} else if (item === except || !Object.prototype.hasOwnProperty.call(item, 'isEnabled')) {
-			toDisable = null;
+			toDisable = item.buttonView as ToggleableView;
+		} else if (item !== except && typeof item === 'object' && item !== null && 'isEnabled' in item) {
+			toDisable = item as ToggleableView;
 		}
 
-		if (!toDisable) {
-			// do nothing
-		} else if (toDisable.isEnabled) {
+		if (toDisable?.isEnabled) {
 			toDisable.isEnabled = false;
-		} else {
+		} else if (toDisable) {
 			editor.__currentlyDisabled.push(toDisable);
 		}
 	});
 }
 
-export function enableItems(editor) {
+export function enableItems(editor:ToolbarEditor) {
 	getToolbarItems(editor).forEach((item) => {
-		let toEnable = item;
+		let toEnable:ToggleableView | null = null;
 
 		if (item instanceof FileDialogButtonView) {
-			toEnable = item.buttonView;
+			toEnable = item.buttonView as ToggleableView;
+		} else if (typeof item === 'object' && item !== null && 'isEnabled' in item) {
+			toEnable = item as ToggleableView;
+		}
+
+		if (!toEnable) {
+			return;
 		}
 
 		if (editor.__currentlyDisabled.indexOf(toEnable) < 0) {

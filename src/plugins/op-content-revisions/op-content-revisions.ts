@@ -1,5 +1,5 @@
-// @ts-nocheck
 import {Plugin} from "ckeditor5/src/core";
+import type {Editor} from "@ckeditor/ckeditor5-core";
 import OpContentRevisionsUI from "./ui";
 import {loadFromLocalStorage} from "./storage";
 import OpContentRevisionsCommand from "./command";
@@ -9,6 +9,12 @@ import {Autosave} from "@ckeditor/ckeditor5-autosave";
 export const OP_CONTENT_REVISION_KEY = "opContentRevisionKey";
 export const OP_CONTENT_REVISION_PREFIX = "op_ckeditor_rev";
 export const STORAGE_KEY_OVERRIDE = "storageKey";
+
+interface AutosavePluginWithDomEmitter {
+  _domEmitter?: {
+    stopListening(target:Window, event:string):void;
+  };
+}
 
 export default class OpContentRevisions extends Plugin {
 
@@ -20,7 +26,7 @@ export default class OpContentRevisions extends Plugin {
     return "OpContentRevisions";
   }
 
-  constructor(editor) {
+  constructor(editor:Editor) {
     super(editor);
 
     // Define a storage key for this instance
@@ -41,7 +47,9 @@ export default class OpContentRevisions extends Plugin {
       const now = Date.now();
 
       // disable beforeunload hook, we have our own
-      editor.plugins.get("Autosave")._domEmitter.stopListening(window, "beforeunload");
+      const autosavePlugin = editor.plugins.get("Autosave") as Autosave;
+      const autosaveDomEmitter = Reflect.get(autosavePlugin, "_domEmitter") as AutosavePluginWithDomEmitter["_domEmitter"];
+      autosaveDomEmitter?.stopListening(window, "beforeunload");
 
       Object
         .keys(localStorage)
@@ -63,8 +71,8 @@ export default class OpContentRevisions extends Plugin {
    * If a StorageKey is defined in the editor configuration,
    * use that instead of the default key.
    */
-  getStorageKey(editor) {
-    const storageKey = editor.config.get(STORAGE_KEY_OVERRIDE);
+  getStorageKey(editor:Editor):string {
+    const storageKey = editor.config.get(STORAGE_KEY_OVERRIDE) as string | undefined;
 
 	if (storageKey) {
 	  return storageKey;
@@ -77,7 +85,7 @@ export default class OpContentRevisions extends Plugin {
    * Create a storage key from the given resource, if available.
    * Fall back to using the current URL path.
    */
-  createLocalStorageKey(editor) {
+  createLocalStorageKey(editor:Editor):string {
     const resource = getOPResource(editor);
     const field = getOPFieldName(editor);
 

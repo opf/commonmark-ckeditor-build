@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
@@ -102,7 +101,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		} );
 	}
 
-	macroLabel(type) {
+	macroLabel(type?:string) {
 		if (type) {
 			return window.I18n.t('js.editor.macro.work_package_button.with_type', { typename: type });
 		} else {

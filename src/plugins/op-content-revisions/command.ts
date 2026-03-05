@@ -1,13 +1,13 @@
-// @ts-nocheck
 import {Command} from "ckeditor5/src/core";
+import type {Editor} from "@ckeditor/ckeditor5-core";
 import {loadFromLocalStorage} from "./storage";
 import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";
 
 export default class OpContentRevisionsCommand extends Command {
 
-  async execute (timestamp) {
-    const editor = this.editor;
-    const key = editor.config.get(OP_CONTENT_REVISION_KEY);
+  async execute (timestamp:number) {
+    const editor = this.editor as Editor;
+    const key = editor.config.get(OP_CONTENT_REVISION_KEY) as string;
 
     const record = await loadFromLocalStorage(key);
     if (!record) {

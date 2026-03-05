@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
@@ -29,7 +28,10 @@ export const originalSrcAttribute = 'data-original-src';
  * @implements module:engine/dataprocessor/dataprocessor~DataProcessor
  */
 export default class CommonMarkDataProcessor {
-	constructor(document) {
+	_htmlDP:any;
+	_domConverter:any;
+
+	constructor(document:any) {
 		this._htmlDP = new HtmlDataProcessor(document);
 		this._domConverter = new DomConverter(document);
 	}
@@ -40,7 +42,7 @@ export default class CommonMarkDataProcessor {
 	 * @param {String} data A CommonMark string.
 	 * @returns {module:engine/view/documentfragment~DocumentFragment} The converted view element.
 	 */
-	toView(data) {
+	toView(data:any) {
 		const md = markdownIt({
 			// Output html
 			html: true,
@@ -92,7 +94,7 @@ export default class CommonMarkDataProcessor {
 	 * @param {module:engine/view/documentfragment~DocumentFragment} viewFragment
 	 * @returns {String} CommonMark string.
 	 */
-	toData(viewFragment) {
+	toData(viewFragment:any) {
 		// Convert view DocumentFragment to DOM DocumentFragment.
 		const domFragment = this._domConverter.viewToDom(viewFragment, document);
 
@@ -103,14 +105,15 @@ export default class CommonMarkDataProcessor {
 			['strong', 'em'],
 			// Ensure tables are allowed to have HTML contents
 			// OP#29457
-			['pre', 'code', 'table']
+			['pre', 'code', 'table'],
+			[]
 		);
 
 		// Replace link attributes with their computed href attribute
-		linkPreprocessor(domFragment);
+		linkPreprocessor(domFragment, [], []);
 
 		// Turndown is filtering out empty paragraphs <p></p>, so we need to fix that with <p><br></p>
-		breaksPreprocessor(domFragment);
+		breaksPreprocessor(domFragment, [], []);
 
 		const blankReplacement = function (content, node) {
 			if (node.tagName === 'CODE') {
@@ -147,13 +150,13 @@ export default class CommonMarkDataProcessor {
 		 */
 		turndownService.addRule('taskListItems', {
 			filter: function (node) {
-				const nodeIsCheckbox = node.type === "checkbox";
+				const nodeIsCheckbox = (node as any).type === "checkbox";
 				const parentIsListItem = node.parentNode && node.parentNode.nodeName === 'LI';
 				const grandparentIsListItem = node.parentNode && node.parentNode.parentNode && node.parentNode.parentNode.nodeName === 'LI';
 				return nodeIsCheckbox && (parentIsListItem || grandparentIsListItem);
 			},
 			replacement: function (content, node) {
-				return (node.checked ? '[x]' : '[ ]') + ' '
+					return ((node as any).checked ? '[x]' : '[ ]') + ' '
 			}
 		})
 
@@ -186,7 +189,7 @@ export default class CommonMarkDataProcessor {
 				   .replace(/^\n+/, '') // remove leading newlines
 				   .replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
 
-			   var parent = node.parentNode;
+				   const parent:any = node.parentNode;
 			   var prefix = options.bulletListMarker + '   ';
 			   var number = 1;
 			   if (parent.nodeName === 'OL') {
@@ -210,12 +213,12 @@ export default class CommonMarkDataProcessor {
 		turndownService.addRule('imageFigure', {
 			filter: 'img',
 			replacement: function (content, node) {
-				const parent = node.parentElement;
+					const parent:any = node.parentElement;
 				if (parent && parent.classList.contains('op-uc-figure--content')) {
 					return parent.parentElement.outerHTML;
 				}
 
-				return node.outerHTML;
+					return (node as any).outerHTML;
 			}
 		});
 
@@ -233,13 +236,13 @@ export default class CommonMarkDataProcessor {
 				return node.nodeName === 'TABLE' && (!node.parentElement || node.parentElement.nodeName !== 'FIGURE');
 			},
 			replacement: function (_content, node) {
-				return node.outerHTML; // we do not convert back to markdown, but use HTML for tables
+					return (node as any).outerHTML; // we do not convert back to markdown, but use HTML for tables
 			}
 		});
 
 		// Keep HTML tables and remove filler elements
-		turndownService.addRule('htmlTables', {
-			filter: function (node) {
+			turndownService.addRule('htmlTables', {
+				filter: function (node:any) {
 				const tables = node.getElementsByTagName('table');
 				// check if we're a todo list item
 				return node.nodeName === 'FIGURE' && tables.length;
@@ -252,22 +255,22 @@ export default class CommonMarkDataProcessor {
 						}
 					});
 
-				return node.outerHTML;
+					return (node as any).outerHTML;
 			}
 		});
 
 		turndownService.addRule('strikethrough', {
-			filter: ['del', 's', 'strike'],
+			filter: ['del', 's', 'strike'] as any,
 			replacement: function (content) {
 				return '~~' + content + '~~'
 			}
 		});
 
 		turndownService.addRule('openProjectMacros', {
-			filter: ['macro'],
+			filter: ['macro'] as any,
 			replacement: (_content, node) => {
-				node.innerHTML = '';
-				const outer = node.outerHTML;
+					(node as any).innerHTML = '';
+					const outer = (node as any).outerHTML;
 				return outer.replace("</macro>", "\n</macro>")
 			}
 		});
@@ -279,7 +282,7 @@ export default class CommonMarkDataProcessor {
 					node.classList.contains('mention')
 				)
 			},
-			replacement: (_content, node) => node.outerHTML,
+			replacement: (_content, node) => (node as any).outerHTML,
 		});
 
 		turndownService.addRule('emptyParagraphs', {
@@ -294,7 +297,7 @@ export default class CommonMarkDataProcessor {
 			replacement: (_content, node) => {
 				if (!node.parentElement && !node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
 					return '';
-				} else if (node.childNodes.length === 1 && isPageBreakNode(node.childNodes[0])) {
+					} else if (node.childNodes.length === 1 && isPageBreakNode(node.childNodes[0] as any)) {
 					return PAGE_BREAK_MARKDOWN + '\n\n'
 				} else {
 					return '<br>\n\n'

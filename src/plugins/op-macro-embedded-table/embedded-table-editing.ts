@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
@@ -6,7 +5,14 @@ import { Plugin } from '@ckeditor/ckeditor5-core';
 import {toEmbeddedTableWidget} from './utils';
 import {getPluginContext} from '../op-context/op-context';
 
+interface EmbeddedTableI18n {
+	button:string;
+	macro_text:string;
+}
+
 export default class EmbeddedTableEditing extends Plugin {
+	text:EmbeddedTableI18n = { button: '', macro_text: '' };
+	label = '';
 
 	static get pluginName() {
 		return 'EmbeddedTableEditing';

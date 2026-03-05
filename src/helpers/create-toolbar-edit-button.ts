@@ -1,8 +1,11 @@
-// @ts-nocheck
 import imageIcon from '../icons/edit.svg';
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
+import type {Editor} from '@ckeditor/ckeditor5-core';
+import type ModelElement from '@ckeditor/ckeditor5-engine/src/model/element';
 
-export function createToolbarEditButton(editor, name, callback) {
+type EditToolbarCallback = (widget:ModelElement) => void;
+
+export function createToolbarEditButton(editor:Editor, name:string, callback:EditToolbarCallback) {
 	// Add editing button
 	editor.ui.componentFactory.add( name, locale => {
 		const view = new ButtonView( locale );

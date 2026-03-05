@@ -1,7 +1,5 @@
-// @ts-nocheck
-
 export const PAGE_BREAK_MARKDOWN = '<br style="page-break-after:always;">';
-export function isPageBreakNode(node) {
+export function isPageBreakNode(node:Element) {
 	const style = node.getAttribute('style') || '';
 	return style.includes('page-break-');
 }

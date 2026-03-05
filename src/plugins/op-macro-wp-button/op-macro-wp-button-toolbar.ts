@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Plugin } from '@ckeditor/ckeditor5-core';
 import { ContextualBalloon } from '@ckeditor/ckeditor5-ui';
 

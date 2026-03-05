@@ -1,7 +1,8 @@
-// @ts-nocheck
 import { Range } from '@ckeditor/ckeditor5-engine';
+import type ViewElement from '@ckeditor/ckeditor5-engine/src/view/element';
+import type ViewNode from '@ckeditor/ckeditor5-engine/src/view/node';
+import type ViewText from '@ckeditor/ckeditor5-engine/src/view/text';
 import {renderCodeBlockContent} from './widget';
-
 
 export function modelCodeBlockToView() {
 	return dispatcher => {
@@ -53,7 +54,10 @@ export function viewCodeBlockToModel() {
 		}
 
 		// Find an code element inside the pre element.
-		const codeBlock = Array.from( data.viewItem.getChildren() ).find( viewChild => viewChild.is('element', 'code'));
+		const viewItem = data.viewItem as ViewElement;
+		const codeBlock = Array.from(viewItem.getChildren()).find((viewChild:ViewNode) => {
+			return viewChild.is('element', 'code');
+		}) as ViewElement | undefined;
 
 		// Do not convert if code block is absent
 		if ( !codeBlock || !conversionApi.consumable.consume( codeBlock, { name: true } ) ) {
@@ -75,11 +79,12 @@ export function viewCodeBlockToModel() {
 
 			// Convert text child of codeblock
 			const child = codeBlock.getChild(0);
-			if (child) {
-				conversionApi.consumable.consume(child, { name: true });
+			if (child && child.is('$text')) {
+				const textChild = child as ViewText;
+				conversionApi.consumable.consume(textChild, { name: true });
 				// Replace last newline since that text is incorrectly mapped
 				// Regression OP#28609
-				const content = child.data.replace(/\n$/, "");
+				const content = textChild.data.replace(/\n$/, "");
 				conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
 			}
 
@@ -109,7 +114,7 @@ export function codeBlockContentToView() {
         conversionApi.consumable.consume( data.item, evt.name );
 
         // Get mapped view element to update.
-        const viewElement = conversionApi.mapper.toViewElement( modelElement );
+        const viewElement = conversionApi.mapper.toViewElement( modelElement ) as ViewElement;
 
         // Remove current <div> element contents.
         conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 1 ) ) );

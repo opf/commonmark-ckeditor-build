@@ -1,8 +1,7 @@
-// @ts-nocheck
 import emojis from './emojis.json';
 
-export function emojiMentions(query) {
-	function isNameOrKeywords( query, name, keywords ) {
+export function emojiMentions(query:string) {
+	function isNameOrKeywords( query:string, name:string, keywords:string[] ) {
 		if ( name.includes(query) ) {
 			return true;
 		}
@@ -16,7 +15,7 @@ export function emojiMentions(query) {
 		return false;
 	}
 
-	return new Promise((resolve, _reject) => {
+	return new Promise((resolve) => {
 		const emojiStore = emojis;
 		const matches = emojiStore
 			.filter((emoji) => isNameOrKeywords(query, emoji.id, emoji.keywords))

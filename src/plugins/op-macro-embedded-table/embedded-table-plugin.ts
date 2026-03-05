@@ -1,4 +1,3 @@
-// @ts-nocheck
 import EmbeddedTableEditing from './embedded-table-editing';
 import { Widget } from '@ckeditor/ckeditor5-widget';
 import { Plugin } from '@ckeditor/ckeditor5-core';

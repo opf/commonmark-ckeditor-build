@@ -1,13 +1,14 @@
-// @ts-nocheck
 import { get } from '@rails/request.js';
+import type {Editor} from "@ckeditor/ckeditor5-core";
 
-export function workPackageMentions(prefix) {
-  return function (query) {
-    let editor = this;
+export function workPackageMentions(prefix:string) {
+  return function (this:Editor, query:string) {
+    const editor = this;
     const url = window.OpenProject.urlRoot + `/work_packages/auto_complete.json`;
-    let base = window.OpenProject.urlRoot + `/work_packages/`;
+    const base = window.OpenProject.urlRoot + `/work_packages/`;
 
-    if (editor.config.get("disabledMentions").includes("work_package")) {
+    const disabledMentions = editor.config.get("disabledMentions") as string[] | undefined;
+    if (disabledMentions?.includes("work_package")) {
       return [];
     }
 

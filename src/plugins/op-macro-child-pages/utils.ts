@@ -1,4 +1,3 @@
-// @ts-nocheck
 const childPagesMacroSymbol = Symbol( 'isWpButtonMacroSymbol' );
 import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
 

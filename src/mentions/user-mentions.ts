@@ -1,12 +1,18 @@
-// @ts-nocheck
 import {
 	getOPResource,
 	getOPPath,
 	getPluginContext,
 } from "../plugins/op-context/op-context";
 import { get } from '@rails/request.js';
+import type {Editor} from "@ckeditor/ckeditor5-core";
 
-export function userMentions(queryText) {
+interface MentionablePrincipal {
+	_type:string;
+	id:string|number;
+	name:string;
+}
+
+export function userMentions(this:Editor, queryText:string) {
 	const editor = this;
 	let resource = getOPResource(editor);
 
@@ -22,7 +28,8 @@ export function userMentions(queryText) {
 		return [];
 	}
 
-	if (editor.config.get('disabledMentions').includes('user')) {
+	const disabledMentions = editor.config.get('disabledMentions') as string[] | undefined;
+	if (disabledMentions?.includes('user')) {
 		return [];
 	}
 
@@ -34,7 +41,10 @@ export function userMentions(queryText) {
 		get(url, { responseKind: 'json', query: { select: 'elements/_type,elements/id,elements/name' } })
 			.then(response => response.json)
 			.then(collection => {
-				resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
+				const mentions = _.uniqBy(
+					(collection._embedded.elements || []) as MentionablePrincipal[],
+					(el:MentionablePrincipal) => el.id
+				).map((mention:MentionablePrincipal) => {
 					const type = mention._type.toLowerCase();
 					const text = `@${mention.name}`;
 					const id = `@${mention.id}`;
@@ -43,7 +53,9 @@ export function userMentions(queryText) {
 					const link = `${base}/${typeSegment}/${idNumber}`;
 
 					return {type, id, text, link, idNumber, name: mention.name};
-				}));
+				});
+
+				resolve(mentions);
 			})
 			.catch(error => {
 				console.error('Error fetching user mentions:', error);

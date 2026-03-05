@@ -1,4 +1,3 @@
-// @ts-nocheck
 import OPMacroTocPlugin from './plugins/op-macro-toc-plugin';
 import OPMacroEmbeddedTable from './plugins/op-macro-embedded-table/embedded-table-plugin';
 import OPMacroWpButtonPlugin from './plugins/op-macro-wp-button/op-macro-wp-button-plugin';
@@ -43,22 +42,29 @@ import { ImageInline } from '@ckeditor/ckeditor5-image';
 import { PageBreak } from '@ckeditor/ckeditor5-page-break';
 import { Autosave } from '@ckeditor/ckeditor5-autosave';
 import OpContentRevisions from "./plugins/op-content-revisions/op-content-revisions";
+import type { Editor, PluginConstructor } from '@ckeditor/ckeditor5-core';
+
+export type OpenProjectPluginConstructor = PluginConstructor<Editor>;
+export type OpenProjectNamedPluginConstructor = OpenProjectPluginConstructor & {
+	pluginName:string;
+	buttonName?:string;
+};
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
-export const opMacroPlugins = [
+export const opMacroPlugins:OpenProjectNamedPluginConstructor[] = [
 	OPMacroTocPlugin,
 	OPMacroEmbeddedTable,
 	OPMacroWpButtonPlugin,
 	OPChildPagesPlugin,
 ];
 
-export const opImageUploadPlugins = [
+export const opImageUploadPlugins:OpenProjectNamedPluginConstructor[] = [
 	OpUploadPlugin,
 	OPAttachmentListenerPlugin
 ];
 
-export const builtinPlugins = [
+const coreBuiltinPlugins:OpenProjectPluginConstructor[] = [
 	Essentials,
 	CKFinderUploadAdapter,
 	Autoformat,
@@ -101,12 +107,11 @@ export const builtinPlugins = [
 	TableCellProperties,
 
 	OPMacroListPlugin,
-
 	OpCustomCssClassesPlugin,
-].concat(
-	// OpenProject Macro plugin group
-	opMacroPlugins,
+];
 
-	// OpenProject image upload plugins
-	opImageUploadPlugins,
-);
+export const builtinPlugins:OpenProjectPluginConstructor[] = [
+	...coreBuiltinPlugins,
+	...opMacroPlugins,
+	...opImageUploadPlugins,
+];

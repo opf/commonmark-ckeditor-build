@@ -1,14 +1,9 @@
-// @ts-nocheck
 import { DomEventObserver } from '@ckeditor/ckeditor5-engine';
 
-export default class DoubleClickObserver extends DomEventObserver {
-	constructor( view ) {
-		super( view );
+export default class DoubleClickObserver extends DomEventObserver<'dblclick'> {
+	public readonly domEventType = 'dblclick';
 
-		this.domEventType = 'dblclick';
-	}
-
-	onDomEvent( domEvent ) {
+	onDomEvent( domEvent:MouseEvent ) {
 		this.fire( domEvent.type, domEvent );
 	}
 }

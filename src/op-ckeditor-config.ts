@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {userMentions} from "./mentions/user-mentions";
 import {workPackageMentions} from "./mentions/work-package-mentions";
 import {customItemRenderer, emojiItemRenderer} from './mentions/mentions-item-renderer';

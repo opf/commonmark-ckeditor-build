@@ -1,10 +1,12 @@
-// @ts-nocheck
 import { DecoupledEditor } from '@ckeditor/ckeditor5-editor-decoupled';
 import { EditorWatchdog } from '@ckeditor/ckeditor5-watchdog';
 import {builtinPlugins} from './op-plugins';
 import {defaultConfig} from "./op-ckeditor-config";
 import {configurationCustomizer} from './op-config-customizer';
+import type { Editor, EditorConfig } from '@ckeditor/ckeditor5-core';
 import type { ICKEditorWatchdog } from './ckeditor-types';
+import type { OpenProjectEditorConfig, OpenProjectEditorClass } from './op-config-customizer';
+import type { OpenProjectPluginConstructor } from './op-plugins';
 export type {
 	CKEditorEvent,
 	CKEditorListenOptions,
@@ -21,7 +23,19 @@ export type {
 export class ConstrainedEditor extends DecoupledEditor {}
 export class FullEditor extends DecoupledEditor {}
 
-export const OPEditorWatchdog = EditorWatchdog as unknown as ICKEditorWatchdog;
+export const OPEditorWatchdog:ICKEditorWatchdog = EditorWatchdog;
+
+type OpenProjectEditorDefaultConfig = EditorConfig & {
+	toolbar?:{
+		items?:string[];
+	};
+};
+
+type OpenProjectEditorStatics = typeof DecoupledEditor & OpenProjectEditorClass & {
+	createCustomized:(wrapper:string|HTMLElement, configuration:OpenProjectEditorConfig) => Promise<Editor>;
+	builtinPlugins:OpenProjectPluginConstructor[];
+	defaultConfig:OpenProjectEditorDefaultConfig;
+};
 
 // Export the two common interfaces
 window.OPConstrainedEditor = ConstrainedEditor;
@@ -30,10 +44,11 @@ window.OPClassicEditor = FullEditor;
 // Export the Watchdog feature
 window.OPEditorWatchdog = OPEditorWatchdog;
 
-FullEditor.createCustomized = configurationCustomizer(FullEditor);
-FullEditor.builtinPlugins = builtinPlugins;
-FullEditor.defaultConfig = Object.assign({}, defaultConfig);
-FullEditor.defaultConfig.toolbar = {
+const fullEditorClass = FullEditor as OpenProjectEditorStatics;
+fullEditorClass.createCustomized = configurationCustomizer(fullEditorClass);
+fullEditorClass.builtinPlugins = builtinPlugins;
+fullEditorClass.defaultConfig = Object.assign({}, defaultConfig) as OpenProjectEditorDefaultConfig;
+fullEditorClass.defaultConfig.toolbar = {
 		items: [
 			'heading',
 			'|',
@@ -64,10 +79,11 @@ FullEditor.defaultConfig.toolbar = {
 		]
 };
 
-ConstrainedEditor.createCustomized = configurationCustomizer(ConstrainedEditor);
-ConstrainedEditor.builtinPlugins = builtinPlugins;
-ConstrainedEditor.defaultConfig = Object.assign({}, defaultConfig);
-ConstrainedEditor.defaultConfig.toolbar = {
+const constrainedEditorClass = ConstrainedEditor as OpenProjectEditorStatics;
+constrainedEditorClass.createCustomized = configurationCustomizer(constrainedEditorClass);
+constrainedEditorClass.builtinPlugins = builtinPlugins;
+constrainedEditorClass.defaultConfig = Object.assign({}, defaultConfig) as OpenProjectEditorDefaultConfig;
+constrainedEditorClass.defaultConfig.toolbar = {
 	items: [
 		'bold',
 		'italic',

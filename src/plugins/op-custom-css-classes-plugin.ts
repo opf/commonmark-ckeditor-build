@@ -1,5 +1,10 @@
-// @ts-nocheck
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type ViewNode from '@ckeditor/ckeditor5-engine/src/view/node';
+import type ViewElement from '@ckeditor/ckeditor5-engine/src/view/element';
+
+function isViewElement(value:ViewNode | null):value is ViewElement {
+	return !!value && value.is('element');
+}
 
 export default class OpCustomCssClassesPlugin extends Plugin {
 
@@ -87,7 +92,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		this.editor
 				.conversion
 				.for('upcast')
-				.add(dispatcher => dispatcher.on(`element:table`, this._manageTableUpcast(config)), {priority: 'high'});
+				.add(dispatcher => dispatcher.on(`element:table`, this._manageTableUpcast(config)));
 
 		this.editor
 				.conversion
@@ -164,16 +169,22 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					viewElements = this._manageListItems(viewWriter, modelElement, viewElement, viewElements, config);
 				} else {
 					const figureViewElement = viewElement;
-					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
+						const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewNode[];
 
 					if (elementName === 'imageBlock') {
-						const image = viewChildren.find(item => item.is('element', 'img'));
+							const image = viewChildren.find((item) => isViewElement(item) && item.is('element', 'img'));
+
+						if (!image) {
+							return;
+						}
 
 						this._wrapInFigureContentContainer(image, figureViewElement, config, viewWriter);
 
 						viewElements = [...viewElements, image];
 					} else if (elementName === 'table' || elementName === 'tableRow') {
-						const childrenToAdd = viewChildren.filter(viewChild => elementsWithCustomClasses.includes(viewChild.name));
+							const childrenToAdd = viewChildren.filter((viewChild) => {
+								return isViewElement(viewChild) && elementsWithCustomClasses.includes(viewChild.name);
+							});
 
 						viewElements = [...viewElements, ...childrenToAdd];
 
@@ -256,8 +267,10 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				});
 			} else if (attributeName === 'headingColumns') {
 				const addHeadingColumns = data.attributeNewValue;
-				const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
-				const viewElements = viewChildren.filter(viewChild => Object.keys(config.elementsWithCustomClassesMap).includes(viewChild.name));
+					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewNode[];
+						const viewElements = viewChildren.filter((viewChild): viewChild is ViewElement => {
+							return isViewElement(viewChild) && Object.keys(config.elementsWithCustomClassesMap).includes(viewChild.name);
+						});
 
 				if (addHeadingColumns) {
 					viewElements.forEach(viewElement => {
@@ -267,15 +280,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						viewWriter.addClass(elementClasses, viewElement);
 					});
 				} else {
-					viewElements
-						.filter(viewElement => viewElement.hasClass(config.elementsWithCustomClassesMap.th[1]))
-						.forEach(viewElement => {
-							const nextSibling = viewElement.nextSibling;
+						viewElements
+							.filter((headingCell) => headingCell.hasClass(config.elementsWithCustomClassesMap.th[1]))
+							.forEach((headingCell) => {
+								const nextSibling = headingCell.nextSibling;
 
-							if (nextSibling && nextSibling.name !== 'th') {
-								viewWriter.removeClass(config.elementsWithCustomClassesMap.th[1], viewElement);
-							}
-						});
+								if (isViewElement(nextSibling) && nextSibling.name !== 'th') {
+									viewWriter.removeClass(config.elementsWithCustomClassesMap.th[1], headingCell);
+								}
+							});
 				}
 			} else if (attributeName === 'width') {
 				if (viewElement.hasClass('image_resized')) {
@@ -283,8 +296,10 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 			} else if (attributeName === 'uploadStatus') {
 				if (data.attributeNewValue === 'complete') {
-					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
-					let placeholderElement = viewChildren.find(viewChild => viewChild.hasClass('ck-upload-placeholder-loader'));
+					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewNode[];
+					const placeholderElement = viewChildren.find((viewChild) => {
+						return isViewElement(viewChild) && viewChild.hasClass('ck-upload-placeholder-loader');
+					});
 
 					if (placeholderElement) {
 						viewWriter.remove(viewWriter.createRangeOn(placeholderElement));

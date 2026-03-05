@@ -1,9 +1,17 @@
-// @ts-nocheck
 import { Plugin } from '@ckeditor/ckeditor5-core';
 
 import { createDropdown, addToolbarToDropdown } from '@ckeditor/ckeditor5-ui/src/dropdown/utils';
 
 import {opMacroPlugins} from "../op-plugins";
+import type { PluginConstructor, Editor } from '@ckeditor/ckeditor5-core';
+
+function pluginNameOf(plugin:string|PluginConstructor<Editor>):string {
+	if (typeof plugin === 'string') {
+		return plugin;
+	}
+
+	return (plugin as { pluginName?:string }).pluginName || '';
+}
 
 /**
  * Adding a drop down list of macros to the toolbar.
@@ -13,7 +21,8 @@ import {opMacroPlugins} from "../op-plugins";
 export default class OPMacroListPlugin extends Plugin {
 	init() {
 		const editor = this.editor;
-		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => p.pluginName);
+		const removePlugins = editor.config.get('removePlugins') || [];
+		const disabledPluginNames = removePlugins.map(pluginNameOf);
 		const dropdownTooltip = window.I18n.t('js.editor.macro.dropdown.chose_macro');
 
 		// Skip if we don't have any macros here

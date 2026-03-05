@@ -1,8 +1,46 @@
-// @ts-nocheck
+import type { Editor, EditorConfig, PluginConstructor } from '@ckeditor/ckeditor5-core';
 import {opImageUploadPlugins, opMacroPlugins} from './op-plugins';
+import type { ICKEditorMentionType } from './ckeditor-types';
 
-export function configurationCustomizer(editorClass) {
-	return (wrapper, configuration) => {
+interface OpenProjectContext {
+	resource?:{
+		canAddAttachments?:boolean;
+	};
+	macros?:false|string[];
+	disabledMentions?:ICKEditorMentionType[];
+}
+
+type OpenProjectConfigValue =
+	| string
+	| number
+	| boolean
+	| null
+	| undefined
+	| string[]
+	| {
+		context:OpenProjectContext;
+		disableAllMacros?:boolean;
+	}
+	| OpenProjectContext
+	| Array<string|PluginConstructor<Editor>>
+	| ICKEditorMentionType[];
+
+export interface OpenProjectEditorConfig {
+	openProject:{
+		context:OpenProjectContext;
+		disableAllMacros?:boolean;
+	};
+	removePlugins?:Array<string|PluginConstructor<Editor>>;
+	disabledMentions?:ICKEditorMentionType[];
+	[key:string]:OpenProjectConfigValue;
+}
+
+export interface OpenProjectEditorClass {
+	create(wrapper:string|HTMLElement, configuration?:EditorConfig):Promise<Editor>;
+}
+
+export function configurationCustomizer(editorClass:OpenProjectEditorClass) {
+	return (wrapper:string|HTMLElement, configuration:OpenProjectEditorConfig) => {
 		const context = configuration.openProject.context;
 
 		// We're going to remove some plugins from the default configuration
@@ -22,8 +60,9 @@ export function configurationCustomizer(editorClass) {
 		}
 
 		// Enable selective macros
-		if (Array.isArray(context.macros)) {
-			const disabledMacros = opMacroPlugins.filter(plugin => context.macros.indexOf(plugin.pluginName) === -1);
+		const macros = context.macros;
+		if (Array.isArray(macros)) {
+			const disabledMacros = opMacroPlugins.filter(plugin => macros.indexOf(plugin.pluginName) === -1);
 			configuration.removePlugins.push(...disabledMacros);
 		}
 
@@ -35,7 +74,7 @@ export function configurationCustomizer(editorClass) {
 		}
 
 		// Return the original promise for instance creation
-		return editorClass.create(wrapper, configuration).then(editor => {
+		return editorClass.create(wrapper, configuration as EditorConfig).then((editor:Editor) => {
 			return editor;
 		});
 	};

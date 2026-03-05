@@ -1,14 +1,13 @@
-// @ts-nocheck
 // Description: Utility functions for the history log plugin.
 
-export function countWords(str) {
+export function countWords(str:string) {
   return str.trim().split(/\s+/).length;
 }
 
 /**
  * Basic hash function based on DJB "33-times" algorithm.
  */
-export function generateHash(str) {
+export function generateHash(str:string) {
   const len = str.length;
   let h = 5381;
 

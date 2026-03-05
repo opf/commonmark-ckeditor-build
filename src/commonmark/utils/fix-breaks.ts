@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {isPageBreakNode} from "./page-breaks";
 
 /**
@@ -8,26 +7,30 @@ import {isPageBreakNode} from "./page-breaks";
  * e.g. `<td><p>Demo<p><p><br></p><p>End</p></td>` converted to `<td><p>Demo<p><p><br><br data-ck-filler="true"></p><p>End</p></td>`
  * to avoid this, we remove the breaks, so CKEditor can add `<br data-ck-filler="true">`
  * e.g. `<td><p>Demo<p><p><br></p><p>End</p></td>` converted to `<td><p>Demo<p><p><br data-ck-filler="true"></p><p>End</p></td>` */
-export function fixBreaksInTables(root) {
+export function fixBreaksInTables(root:Node) {
 	const walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
 		NodeFilter.SHOW_ELEMENT,
-		// Only except text nodes whose parent is one of parents
 		{
-			acceptNode: function (node) {
-				if (node.tagName === 'P' && node.parentElement &&
-					node.parentElement.tagName === 'TD' &&
-					(node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR')) {
+			acceptNode: function (node:Node) {
+				if (!(node instanceof Element)) {
+					return NodeFilter.FILTER_REJECT;
+				}
+
+				const onlyBreak = node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR';
+				if (node.tagName === 'P' && node.parentElement?.tagName === 'TD' && onlyBreak) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
+
+				return NodeFilter.FILTER_REJECT;
 			}
 		}
 	);
 
-	let node;
-	while (node = walker.nextNode()) {
-		node.childNodes[0].remove();
+	let node:Node | null;
+	while ((node = walker.nextNode())) {
+		node.firstChild?.remove();
 	}
 }
 
@@ -40,31 +43,33 @@ export function fixBreaksInTables(root) {
  * e.g. `<p>Demo<p><br><br><p>End</p>` will be converted to `<p>Demo</p><p></p><p></p><p>End</p>`
  * (except for page breaks, which are kept but are wrapped in a paragraph)
  */
-export function fixBreaksOnRootLevel(root) {
-	let walker = document.createNodeIterator(
+export function fixBreaksOnRootLevel(root:Node) {
+	const walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,
 		{
-			acceptNode: function (node) {
-				if (node.tagName === 'BR' && !node.parentElement) {
+			acceptNode: function (node:Node) {
+				if (node instanceof Element && node.tagName === 'BR' && !node.parentElement) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
+
+				return NodeFilter.FILTER_REJECT;
 			}
 		}
 	);
 
-	let node;
-	let list = []
-	while (node = walker.nextNode()) {
+	const list:Node[] = [];
+	let node:Node | null;
+	while ((node = walker.nextNode())) {
 		list.push(node);
 	}
-	for (const node of list) {
-		const p = document.createElement('p');
-		root.insertBefore(p, node);
-		if (isPageBreakNode(node)) {
-			p.appendChild(node);
+	for (const breakNode of list) {
+		const paragraph = document.createElement('p');
+		root.insertBefore(paragraph, breakNode);
+		if (breakNode instanceof Element && isPageBreakNode(breakNode)) {
+			paragraph.appendChild(breakNode);
 		} else {
-			node.remove();
+			breakNode.parentNode?.removeChild(breakNode);
 		}
 	}
 }
@@ -79,26 +84,28 @@ export function fixBreaksOnRootLevel(root) {
  * e.g. `<li><p>Start</p><br><br><p>End</p></li>` will be converted to
  * `<li><p>Start</p><p></p><p></p><p>End</p></li>>`
  */
-export function fixBreaksInLists(root) {
+export function fixBreaksInLists(root:Node) {
 	const walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,
 		{
-			acceptNode: function (node) {
-				if (node.tagName === 'BR' && node.parentElement && node.parentElement.tagName === 'LI') {
+			acceptNode: function (node:Node) {
+				if (node instanceof Element && node.tagName === 'BR' && node.parentElement?.tagName === 'LI') {
 					return NodeFilter.FILTER_ACCEPT;
 				}
+
+				return NodeFilter.FILTER_REJECT;
 			}
 		}
 	);
 
-	let node;
-	let list = []
-	while (node = walker.nextNode()) {
+	const list:Node[] = [];
+	let node:Node | null;
+	while ((node = walker.nextNode())) {
 		list.push(node);
 	}
-	for (const node of list) {
-		node.parentElement.insertBefore(document.createElement('p'), node);
-		node.remove();
+	for (const breakNode of list) {
+		breakNode.parentElement?.insertBefore(document.createElement('p'), breakNode);
+		breakNode.parentNode?.removeChild(breakNode);
 	}
 }

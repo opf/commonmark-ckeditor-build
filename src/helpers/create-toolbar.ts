@@ -1,28 +1,32 @@
-// @ts-nocheck
 import { ToolbarView } from '@ckeditor/ckeditor5-ui';
 import { BalloonPanelView } from '@ckeditor/ckeditor5-ui';
+import { ContextualBalloon } from '@ckeditor/ckeditor5-ui';
+import type {Editor, Plugin} from '@ckeditor/ckeditor5-core';
+import type DocumentSelection from '@ckeditor/ckeditor5-engine/src/view/documentselection';
 
 const balloonClassName = 'ck-toolbar-container';
 
+type IsWidgetSelected = (selection:DocumentSelection) => boolean;
+
 export function createEditToolbar(
 	// Plugin instance
-	plugin,
+	plugin:Plugin,
 	// Editor instance
-	editor,
+	editor:Editor,
 	// Configuration namespace in op-ckeditor.js
-	config_namespace,
+	config_namespace:string,
 	// Callback to check if widget is selected
-	isWidgetSelected
+	isWidgetSelected:IsWidgetSelected
 ) {
 
-	const toolbarConfig = editor.config.get( config_namespace + '.toolbar' );
+	const toolbarConfig = editor.config.get( config_namespace + '.toolbar' ) as string[] | undefined;
 
 	// Don't add the toolbar if there is no configuration.
 	if ( !toolbarConfig || !toolbarConfig.length ) {
 		return;
 	}
 
-	const _balloon = editor.plugins.get( 'ContextualBalloon' );
+	const _balloon = editor.plugins.get( 'ContextualBalloon' ) as ContextualBalloon;
 	const _toolbar = new ToolbarView( editor.locale );
 
 	function _checkIsVisible() {
@@ -80,8 +84,8 @@ export function createEditToolbar(
  *
  * @param {module:core/editor/editor~Editor} editor The editor instance.
  */
-function repositionContextualBalloon( editor, selectionCallback ) {
-	const balloon = editor.plugins.get( 'ContextualBalloon' );
+function repositionContextualBalloon( editor:Editor, selectionCallback:IsWidgetSelected ) {
+	const balloon = editor.plugins.get( 'ContextualBalloon' ) as ContextualBalloon;
 
 	if ( selectionCallback( editor.editing.view.document.selection ) ) {
 		const position = getBalloonPositionData( editor );
@@ -99,7 +103,7 @@ function repositionContextualBalloon( editor, selectionCallback ) {
  * @param {module:core/editor/editor~Editor} editor The editor instance.
  * @returns {module:utils/dom/position~Options}
  */
-function getBalloonPositionData( editor ) {
+function getBalloonPositionData( editor:Editor ) {
 	const editingView = editor.editing.view;
 	const defaultPositions = BalloonPanelView.defaultPositions;
 
