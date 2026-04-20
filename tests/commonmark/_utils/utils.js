@@ -4,7 +4,7 @@
  */
 
 import MarkdownDataProcessor from '../../../src/commonmark/commonmarkdataprocessor';
-import {stringify} from "@ckeditor/ckeditor5-engine/src/dev-utils/view";
+import {_stringifyView as stringify} from "@ckeditor/ckeditor5-engine";
 import {StylesProcessor, ViewDocument} from "@ckeditor/ckeditor5-engine";
 
 /**

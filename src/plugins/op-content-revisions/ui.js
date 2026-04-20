@@ -1,9 +1,9 @@
 /**
  * @file registers the history_log toolbar button and binds functionality to it.
  */
-import {Plugin} from "ckeditor5/src/core";
-import {addListToDropdown, createDropdown} from "ckeditor5/src/ui";
-import {Collection} from "ckeditor5/src/utils";
+import {Plugin} from "@ckeditor/ckeditor5-core";
+import {addListToDropdown, createDropdown} from "@ckeditor/ckeditor5-ui";
+import {Collection} from "@ckeditor/ckeditor5-utils";
 import {loadFromLocalStorage} from "./storage";
 import {countWords, generateHash} from "./utils";
 

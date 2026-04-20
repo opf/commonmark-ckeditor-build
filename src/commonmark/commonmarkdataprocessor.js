@@ -9,7 +9,7 @@
 
 /* eslint-env browser */
 
-import {HtmlDataProcessor, DomConverter} from '@ckeditor/ckeditor5-engine';
+import {HtmlDataProcessor, ViewDomConverter} from '@ckeditor/ckeditor5-engine';
 import {highlightedCodeBlock} from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
@@ -30,7 +30,7 @@ export const originalSrcAttribute = 'data-original-src';
 export default class CommonMarkDataProcessor {
 	constructor(document) {
 		this._htmlDP = new HtmlDataProcessor(document);
-		this._domConverter = new DomConverter(document);
+		this._domConverter = new ViewDomConverter(document);
 	}
 
 	/**

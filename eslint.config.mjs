@@ -63,4 +63,16 @@ export default [
 			"no-undef": "error"
 		}
 	},
+	{
+		files: ["bin/**/*.mjs"],
+		languageOptions: {
+			globals: {
+				...globals.node
+			}
+		},
+		rules: {
+			"no-unused-vars": "error",
+			"no-undef": "error"
+		}
+	},
 ];

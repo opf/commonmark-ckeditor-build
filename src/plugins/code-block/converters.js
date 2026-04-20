@@ -1,4 +1,3 @@
-import { Range } from '@ckeditor/ckeditor5-engine';
 import {renderCodeBlockContent} from './widget';
 
 
@@ -83,7 +82,7 @@ export function viewCodeBlockToModel() {
 			}
 
 			// Set as conversion result, attribute converters may use this property.
-			data.modelRange = new Range(
+			data.modelRange = conversionApi.writer.createRange(
 				conversionApi.writer.createPositionBefore( modelCodeBlock ),
 				conversionApi.writer.createPositionAfter( modelCodeBlock )
 			);

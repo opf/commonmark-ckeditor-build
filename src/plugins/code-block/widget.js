@@ -1,4 +1,4 @@
-import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
+import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget';
 
 const codeBlockSymbol = Symbol( 'isOPCodeBlock' );
 

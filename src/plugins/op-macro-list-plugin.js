@@ -1,6 +1,6 @@
 import { Plugin } from '@ckeditor/ckeditor5-core';
 
-import { createDropdown, addToolbarToDropdown } from '@ckeditor/ckeditor5-ui/src/dropdown/utils';
+import { createDropdown, addToolbarToDropdown } from '@ckeditor/ckeditor5-ui';
 
 import {opMacroPlugins} from "../op-plugins";
 
