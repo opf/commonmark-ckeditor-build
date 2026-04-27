@@ -2,7 +2,7 @@ import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
 
-import { toWidget } from '@ckeditor/ckeditor5-widget/src/utils';
+import { toWidget } from '@ckeditor/ckeditor5-widget';
 
 export default class OPMacroTocPlugin extends Plugin {
 

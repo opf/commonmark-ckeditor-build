@@ -1,5 +1,5 @@
 const wpButtonMacroSymbol = Symbol( 'isWpButtonMacroSymbol' );
-import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
+import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget';
 
 export function toWpButtonMacroWidget( viewElement, writer, label ) {
 	writer.setCustomProperty( wpButtonMacroSymbol, true, viewElement );

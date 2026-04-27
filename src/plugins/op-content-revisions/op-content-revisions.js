@@ -1,4 +1,4 @@
-import {Plugin} from "ckeditor5/src/core";
+import {Plugin} from "@ckeditor/ckeditor5-core";
 import OpContentRevisionsUI from "./ui";
 import {loadFromLocalStorage} from "./storage";
 import OpContentRevisionsCommand from "./command";

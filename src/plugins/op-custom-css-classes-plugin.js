@@ -57,6 +57,8 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		const alignmentValuesMap = {
 			'left': 'start',
 			'right': 'end',
+			'blockLeft': 'start',
+			'blockRight': 'end',
 			'center': 'center',
 			'default': 'center',
 		};
@@ -124,7 +126,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 
 			const alignmentClass = parentFigureClasses.filter(figureClass => figureClass.startsWith(config.attributesWithCustomClassesMap.alignment))[0];
 			const alignmentAlias = alignmentClass && alignmentClass.replace(config.attributesWithCustomClassesMap.alignment, '') || config.alignmentValuesMap.default;
-			const alignmentToApply = Object.keys(config.alignmentValuesMap).find(alignmentKey => config.alignmentValuesMap[alignmentKey] === alignmentAlias);
+			const alignmentToApply = Object.keys(config.alignmentValuesMap).find(alignmentKey => config.alignmentValuesMap[alignmentKey] === alignmentAlias) || 'center';
 
 			if (!alignmentClass) {
 				const defaultAlignClass = `${config.attributesWithCustomClassesMap.alignment}${alignmentAlias}`;
@@ -228,9 +230,9 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			} else if (attributeName === 'tableAlignment') {
 				const figureViewElement = viewElement;
 				// When the selected align is 'center', data.attributeNewValue is null
-				const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue || config.alignmentValuesMap.default];
-				const alignmentClasses = Object
-					.values(config.alignmentValuesMap)
+				const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue] || config.alignmentValuesMap.default;
+				const alignmentClasses = Array.from(new Set(Object
+					.values(config.alignmentValuesMap)))
 					.map(alignmentValue => `${config.attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
 
 				alignmentClasses
