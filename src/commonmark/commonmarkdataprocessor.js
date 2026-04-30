@@ -22,6 +22,38 @@ import {isPageBreakNode, PAGE_BREAK_MARKDOWN} from "./utils/page-breaks";
 
 export const originalSrcAttribute = 'data-original-src';
 
+const WP_REF_RE = /^(#{1,3})(\d+)(?!\w)/;
+
+function workPackageRefInlineRule(state, silent) {
+	const start = state.pos;
+	const src = state.src;
+
+	if (src.charCodeAt(start) !== 0x23 /* # */) return false;
+	// Left boundary: refuse if preceded by a word char or another '#'
+	// (preventing partial matches inside ####+ states)
+	if (start > 0 && /[\w#]/.test(src[start - 1])) return false;
+
+	const match = WP_REF_RE.exec(src.slice(start));
+	if (!match) return false;
+	// If we are in markdown-it silent mode, don't do anything and return true.
+	if (silent) return true;
+
+	const hashes = match[1].length;
+	const id = match[2];
+	const ref = match[0];
+	// Convert to CKEditor structures
+	// # results in <mention> model
+	// ##/### results in <opce-macro-wp-quickinfo> custom element
+	const html = hashes === 1
+		? `<mention class="mention" data-id="${id}" data-type="work_package" data-text="${ref}">${ref}</mention>`
+		: `<opce-macro-wp-quickinfo data-id="${id}" data-detailed="${hashes === 3}">${ref}</opce-macro-wp-quickinfo>`;
+
+	const token = state.push('html_inline', '', 0);
+	token.content = html;
+	state.pos = start + match[0].length;
+	return true;
+}
+
 /**
  * This data processor implementation uses CommonMark as input/output data.
  *
@@ -50,6 +82,8 @@ export default class CommonMarkDataProcessor {
 
 		// Use tasklist plugin
 		let parser = md.use(markdownItTaskLists, {label: true});
+
+		parser.inline.ruler.before('text', 'op_workpackage_ref', workPackageRefInlineRule);
 
 		const previousRenderer = parser.renderer.rules.code_block;
 		md.renderer.rules.code_block = function (tokens, idx, options, env, self) {
@@ -138,7 +172,7 @@ export default class CommonMarkDataProcessor {
 
 		/**
 		 * This rule is used to convert task list items with checkboxes to markdown.
-		 * 
+		 *
 		 * This is based on the turndown-plugin-gfm taskListItems rule, but modified to
 		 * support list items with checkboxes that are not direct children of a ul or ol.
 		 *
@@ -158,18 +192,18 @@ export default class CommonMarkDataProcessor {
 
 		/**
 		 * This rule is used to convert ordered list items to markdown.
-		 * 
+		 *
 		 * This is based on he turndownService rule for listItems, but modified to
 		 * indent ordered list items with the appropriate amount of indentation spaces.
 		 * This fixes an issue with the indentation of ordered list items with more
 		 * than 10 items.
-		 * 
+		 *
 		 * 1. item
 		 *     - subitem # four spaces is enough
 		 * ...
 		 * 10. item
 		 *      - subitem # five spaces are necessary because `10.` is three digits, and wider than `#.`
-		 * 
+		 *
 		 * @see
 		 */
 		turndownService.addRule('orderedListItems', {
@@ -262,6 +296,16 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
+		turndownService.addRule('workPackageQuickinfo', {
+			filter: (node) => node.nodeName === 'OPCE-MACRO-WP-QUICKINFO',
+			replacement: (_content, node) => {
+				const id = node.getAttribute('data-id') || '';
+				if (!id) return '';
+				const detailed = node.getAttribute('data-detailed') === 'true';
+				return detailed ? `###${id}` : `##${id}`;
+			},
+		});
+
 		turndownService.addRule('openProjectMacros', {
 			filter: ['macro'],
 			replacement: (_content, node) => {
@@ -278,7 +322,13 @@ export default class CommonMarkDataProcessor {
 					node.classList.contains('mention')
 				)
 			},
-			replacement: (_content, node) => node.outerHTML,
+			replacement: (_content, node) => {
+				// Serialize work package mentions serialize to plain #ID / ##ID / ###ID
+				if (node.getAttribute('data-type') === 'work_package') {
+					return node.getAttribute('data-text') || node.textContent || '';
+				}
+				return node.outerHTML;
+			},
 		});
 
 		turndownService.addRule('emptyParagraphs', {
