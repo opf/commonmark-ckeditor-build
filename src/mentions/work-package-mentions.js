@@ -15,10 +15,18 @@ export function workPackageMentions(prefix) {
         .then(response => response.json)
         .then(collection => {
           resolve(collection.map(wp => {
-            const id = `${prefix}${wp.id}`;
-            const idNumber = wp.id;
+            const displayId = wp.displayId || wp.id;
+            const id = `${prefix}${displayId}`;
 
-            return { id, idNumber, type: "work_package", text: id, name: wp.to_s, link: base + wp.id };
+            return {
+              id,
+              dataId: wp.id,
+              dataDisplayId: displayId,
+              type: "work_package",
+              text: id,
+              name: wp.to_s,
+              link: base + displayId,
+            };
           }));
         })
         .catch(error => {

@@ -1,5 +1,6 @@
 import {getPluginContext} from "../plugins/op-context/op-context";
 import { ClickObserver } from '@ckeditor/ckeditor5-engine';
+import { isWorkPackageQuickinfoMention } from '../plugins/op-macro-wp-quickinfo/predicate';
 
 export function MentionCaster( editor ) {
 	const pluginContext = getPluginContext(editor);
@@ -32,22 +33,29 @@ export function MentionCaster( editor ) {
 			model: {
 				key: 'mention',
 				value: viewItem => {
-					const idNumber = viewItem.getAttribute( 'data-id' );
+					const dataId = viewItem.getAttribute( 'data-id' );
+					const dataDisplayId = viewItem.getAttribute( 'data-display-id' );
 					const type = viewItem.getAttribute( 'data-type' );
 					const text = viewItem.getAttribute( 'data-text' );
-					const link = getMentionLink(idNumber, type);
-					// The mention feature expects that the mention attribute value
-					// in the model is a plain object with a set of additional attributes.
-					// In order to create a proper object use the toMentionAttribute() helper method:
-					const mentionAttribute = editor.plugins.get( 'Mention' ).toMentionAttribute( viewItem, {
-						// Pass the properties we'll need for the editing and data downcast.
-						idNumber,
+
+					// Multi-hash work-package mentions are routed to the
+					// quickinfo widget model (`op-macro-wp-quickinfo`) by
+					// that plugin's upcast. Returning `null` here keeps the
+					// mention attribute off the text node so the widget
+					// model is the sole representation.
+					if (isWorkPackageQuickinfoMention(viewItem)) {
+						return null;
+					}
+
+					const link = getMentionLink( dataDisplayId || dataId, type );
+
+					return editor.plugins.get( 'Mention' ).toMentionAttribute( viewItem, {
+						dataId,
+						dataDisplayId,
 						link,
 						text,
 						type,
 					} );
-
-					return mentionAttribute;
 				}
 			},
 			converterPriority: 'high'
@@ -124,15 +132,16 @@ export function MentionCaster( editor ) {
 					return writer.createAttributeElement('span');
 				}
 
-				const element = writer.createAttributeElement(
-					'mention',
-					{
-						'class': 'mention',
-						'data-id': modelAttributeValue.idNumber,
-						'data-type': modelAttributeValue.type,
-						'data-text': modelAttributeValue.text,
-					}
-				);
+				const attrs = {
+					'class': 'mention',
+					'data-id': modelAttributeValue.dataId,
+					'data-type': modelAttributeValue.type,
+					'data-text': modelAttributeValue.text,
+				};
+				if (modelAttributeValue.dataDisplayId) {
+					attrs['data-display-id'] = modelAttributeValue.dataDisplayId;
+				}
+				const element = writer.createAttributeElement('mention', attrs);
 
 				return element;
 			}
@@ -144,4 +153,5 @@ export function MentionCaster( editor ) {
 
 		return `${base}/${typePath}/${id}`;
 	}
+
 }

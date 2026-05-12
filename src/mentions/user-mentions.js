@@ -37,11 +37,10 @@ export function userMentions(queryText) {
 					const type = mention._type.toLowerCase();
 					const text = `@${mention.name}`;
 					const id = `@${mention.id}`;
-					const idNumber = mention.id;
 					const typeSegment = pluginContext.services.apiV3Service[`${type}s`].segment;
-					const link = `${base}/${typeSegment}/${idNumber}`;
+					const link = `${base}/${typeSegment}/${mention.id}`;
 
-					return {type, id, text, link, idNumber, name: mention.name};
+					return {type, id, text, link, dataId: mention.id, name: mention.name};
 				}));
 			})
 			.catch(error => {
