@@ -3,6 +3,7 @@ import { Widget, toWidget } from '@ckeditor/ckeditor5-widget';
 
 import { isWorkPackageQuickinfoMention } from './predicate';
 
+const QUICKINFO_MODEL = 'op-macro-wp-quickinfo';
 const QUICKINFO_TAG = 'opce-macro-wp-quickinfo';
 
 // Renders OpenProject's ##/### work-package quickinfo references as inline
@@ -23,7 +24,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 		const model = editor.model;
 		const conversion = editor.conversion;
 
-		model.schema.register( 'op-macro-wp-quickinfo', {
+		model.schema.register( QUICKINFO_MODEL, {
 			allowWhere: '$text',
 			isInline: true,
 			isObject: true,
@@ -41,7 +42,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				if (dataId && dataId !== wpDisplayId) {
 					attrs.wpId = dataId;
 				}
-				return writer.createElement( 'op-macro-wp-quickinfo', attrs );
+				return writer.createElement( QUICKINFO_MODEL, attrs );
 			},
 			converterPriority: 'high',
 		} );
@@ -60,13 +61,13 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				const detailed = markerText.startsWith('###');
 				const wpId = viewElement.getAttribute( 'data-id' ) || '';
 				const wpDisplayId = viewElement.getAttribute( 'data-display-id' ) || wpId;
-				return writer.createElement( 'op-macro-wp-quickinfo', { wpId, wpDisplayId, detailed, markerText } );
+				return writer.createElement( QUICKINFO_MODEL, { wpId, wpDisplayId, detailed, markerText } );
 			},
 			converterPriority: 'highest',
 		} );
 
 		conversion.for( 'editingDowncast' ).elementToElement( {
-			model: 'op-macro-wp-quickinfo',
+			model: QUICKINFO_MODEL,
 			view: ( modelElement, { writer } ) => {
 				const wpDisplayId = modelElement.getAttribute( 'wpDisplayId' ) || '';
 				const detailed = !!modelElement.getAttribute( 'detailed' );
@@ -91,7 +92,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 		} );
 
 		conversion.for( 'dataDowncast' ).elementToElement( {
-			model: 'op-macro-wp-quickinfo',
+			model: QUICKINFO_MODEL,
 			view: ( modelElement, { writer } ) => {
 				const wpDisplayId = modelElement.getAttribute( 'wpDisplayId' ) || '';
 				const detailed = !!modelElement.getAttribute( 'detailed' );
@@ -156,7 +157,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				}
 				const attrs = { wpDisplayId, detailed, markerText };
 				if (wpId) attrs.wpId = wpId;
-				const el = writer.createElement( 'op-macro-wp-quickinfo', attrs );
+				const el = writer.createElement( QUICKINFO_MODEL, attrs );
 				editor.model.insertContent( el, editor.model.document.selection );
 				writer.setSelection( writer.createPositionAfter( el ) );
 			} );
