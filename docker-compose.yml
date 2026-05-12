@@ -5,7 +5,7 @@ x-op-node: &op-node
     - ./:/home/node/app
     # The absolute path to the core repository MUST be set in the `.env`,
     # otherwise the build won't replace the code in there.
-    - ${OPENPROJECT_CORE}/frontend/src/vendor/ckeditor:/openproject/frontend/src/vendor/ckeditor
+    - ${OPENPROJECT_CORE:-/tmp}/frontend/src/vendor/ckeditor:/openproject/frontend/src/vendor/ckeditor
   environment:
     OPENPROJECT_CORE: /openproject
 

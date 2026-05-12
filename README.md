@@ -32,10 +32,9 @@ To build for the OpenProject core, run `npm run build` or `docker compose run --
 before opening a pull request.
 
 > [!IMPORTANT]
-> Please ensure that for any changes in this repository, you have a core repository with the output of `npm run build`,
-> so that all core tests can run and confirm your changes. Both pull requests should _always_ be merged at the same
-> time,
-> never alone
+> Please ensure that for any changes in this repository, you have a core repository pull request with the output
+> of `npm run build`, so that all core tests can run and confirm your changes. Both pull requests should _always_ be
+> merged at the same time, never alone.
 
 ### Updating CKEditor
 
