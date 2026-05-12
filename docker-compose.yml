@@ -1,0 +1,23 @@
+x-op-node: &op-node
+  image: node:lts
+  working_dir: /home/node/app
+  volumes:
+    - ./:/home/node/app
+    # The absolute path to the core repository MUST be set in the `.env`,
+    # otherwise the build won't replace the code in there.
+    - ${OPENPROJECT_CORE:-/tmp}/frontend/src/vendor/ckeditor:/openproject/frontend/src/vendor/ckeditor
+  environment:
+    OPENPROJECT_CORE: /openproject
+
+services:
+  install:
+    <<: *op-node
+    command: npm install
+
+  build:
+    <<: *op-node
+    command: npm run build
+
+  watch:
+    <<: *op-node
+    command: npm run watch
