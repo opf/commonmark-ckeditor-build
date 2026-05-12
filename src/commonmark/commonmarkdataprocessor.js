@@ -23,6 +23,10 @@ import { getOPPath } from "../plugins/op-context/op-context";
 
 export const originalSrcAttribute = 'data-original-src';
 
+// `#` / `##` / `###` followed by either a numeric id (`6217`) or a
+// semantic identifier (`PROJ-7`, `MY_PROJ-1`, `MACROPROJ-42`). The
+// trailing `(?!\w)` rejects mid-word continuations like `#PROJ-1abc`.
+// Group 1 is the marker, group 2 is the id.
 const WP_REF_RE = /^(#{1,3})(\d+|[A-Z][A-Z0-9_]*-\d+)(?!\w)/;
 
 // Stored `<mention>X</mention>` envelopes round-trip through markdown-it

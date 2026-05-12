@@ -47,6 +47,8 @@ export function MentionCaster( editor ) {
 						return null;
 					}
 
+					// `link` populates the editor-view `<a href>` only; the
+					// data downcast doesn't persist it.
 					const link = getMentionLink( dataDisplayId || dataId, type );
 
 					return editor.plugins.get( 'Mention' ).toMentionAttribute( viewItem, {
@@ -153,5 +155,4 @@ export function MentionCaster( editor ) {
 
 		return `${base}/${typePath}/${id}`;
 	}
-
 }
