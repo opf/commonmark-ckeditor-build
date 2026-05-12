@@ -3,9 +3,10 @@
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
+import { _stringifyView as stringify } from "@ckeditor/ckeditor5-engine";
+import { EditingView, StylesProcessor } from "@ckeditor/ckeditor5-engine";
+
 import MarkdownDataProcessor from '../../../src/commonmark/commonmarkdataprocessor';
-import {_stringifyView as stringify} from "@ckeditor/ckeditor5-engine";
-import {StylesProcessor, ViewDocument} from "@ckeditor/ckeditor5-engine";
 
 /**
  * Tests MarkdownDataProcessor.
@@ -20,9 +21,9 @@ import {StylesProcessor, ViewDocument} from "@ckeditor/ckeditor5-engine";
  * @returns {module:engine/view/documentfragment~DocumentFragment}
  */
 export function testDataProcessor(markdown, viewString, normalizedMarkdown, options) {
-	const viewDocument = new ViewDocument(new StylesProcessor());
+	const editor = createTestEditor();
 
-	const dataProcessor = new MarkdownDataProcessor(viewDocument);
+	const dataProcessor = new MarkdownDataProcessor(editor);
 
 	if (options && options.setup) {
 		options.setup(dataProcessor);
@@ -44,6 +45,12 @@ export function testDataProcessor(markdown, viewString, normalizedMarkdown, opti
 	expect(cleanMarkdown(dataProcessor.toData(viewFragment))).toEqual(normalized);
 
 	return viewFragment;
+}
+
+export function createTestEditor() {
+	const view = new EditingView(new StylesProcessor());
+
+	return { editing: { view } };
 }
 
 function cleanHtml(html) {

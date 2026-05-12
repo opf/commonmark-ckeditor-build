@@ -4,25 +4,24 @@
  */
 
 import MarkdownDataProcessor from '../../src/commonmark/commonmarkdataprocessor';
-import {_stringifyView as stringify} from '@ckeditor/ckeditor5-engine';
-import {testDataProcessor} from './_utils/utils.js';
-import {StylesProcessor, ViewDocument} from "@ckeditor/ckeditor5-engine";
+import { _stringifyView as stringify } from '@ckeditor/ckeditor5-engine';
+import { testDataProcessor, createTestEditor } from './_utils/utils.js';
 
 const testCases = {
-	'backslash': {test: '\\\\', result: '\\'},
-	'underscore': {test: '\\_', result: '_'},
-	'left brace': {test: '\\{', result: '{'},
-	'right brace': {test: '\\}', result: '}'},
-	'left bracket': {test: '\\[', result: '['},
-	'right bracket': {test: '\\]', result: ']'},
-	'left paren': {test: '\\(', result: '('},
-	'right paren': {test: '\\)', result: ')'},
-	'greater than': {test: '\\>', result: '>'},
-	'hash': {test: '\\#', result: '#'},
-	'period': {test: '\\.', result: '.'},
-	'exclamation mark': {test: '\\!', result: '!'},
-	'plus': {test: '\\+', result: '+'},
-	'minus': {test: '\\-', result: '-'}
+	'backslash': { test: '\\\\', result: '\\' },
+	'underscore': { test: '\\_', result: '_' },
+	'left brace': { test: '\\{', result: '{' },
+	'right brace': { test: '\\}', result: '}' },
+	'left bracket': { test: '\\[', result: '[' },
+	'right bracket': { test: '\\]', result: ']' },
+	'left paren': { test: '\\(', result: '(' },
+	'right paren': { test: '\\)', result: ')' },
+	'greater than': { test: '\\>', result: '>' },
+	'hash': { test: '\\#', result: '#' },
+	'period': { test: '\\.', result: '.' },
+	'exclamation mark': { test: '\\!', result: '!' },
+	'plus': { test: '\\+', result: '+' },
+	'minus': { test: '\\-', result: '-' }
 };
 
 describe('Commonmark', () => {
@@ -31,8 +30,7 @@ describe('Commonmark', () => {
 			let dataProcessor;
 
 			beforeEach(() => {
-				const viewDocument = new ViewDocument(new StylesProcessor());
-				dataProcessor = new MarkdownDataProcessor(viewDocument);
+				dataProcessor = new MarkdownDataProcessor(createTestEditor());
 			});
 
 			for (const key in testCases) {
