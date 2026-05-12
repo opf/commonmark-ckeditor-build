@@ -23,7 +23,21 @@ import { getOPPath } from "../plugins/op-context/op-context";
 
 export const originalSrcAttribute = 'data-original-src';
 
-const WP_REF_RE = /^(#{1,3})(\d+)(?!\w)/;
+const WP_REF_RE = /^(#{1,3})(\d+|[A-Z][A-Z0-9_]*-\d+)(?!\w)/;
+
+// Stored `<mention>X</mention>` envelopes round-trip through markdown-it
+// as three independent `html_inline` tokens; `#`-leading text between
+// the open and close must not be re-promoted by this rule.
+function isInsideStoredMention(tokens) {
+	for (let i = tokens.length - 1; i >= 0; i--) {
+		const token = tokens[i];
+		if (token.type !== 'html_inline') continue;
+		const c = token.content;
+		if (c.startsWith('</mention')) return false;
+		if (c.startsWith('<mention')) return true;
+	}
+	return false;
+}
 
 function workPackageRefInlineRule(state, silent) {
 	const start = state.pos;
@@ -39,6 +53,8 @@ function workPackageRefInlineRule(state, silent) {
 	// If we are in markdown-it silent mode, don't do anything and return true.
 	if (silent) return true;
 
+	if (isInsideStoredMention(state.tokens)) return false;
+
 	const hashes = match[1].length;
 	const id = match[2];
 	const ref = match[0];
@@ -47,7 +63,7 @@ function workPackageRefInlineRule(state, silent) {
 	// ##/### results in <opce-macro-wp-quickinfo> custom element
 	const html = hashes === 1
 		? `<mention class="mention" data-id="${id}" data-type="work_package" data-text="${ref}">${ref}</mention>`
-		: `<opce-macro-wp-quickinfo data-id="${id}" data-detailed="${hashes === 3}">${ref}</opce-macro-wp-quickinfo>`;
+		: `<opce-macro-wp-quickinfo data-id="${id}" data-display-id="${id}" data-detailed="${hashes === 3}">${ref}</opce-macro-wp-quickinfo>`;
 
 	const token = state.push('html_inline', '', 0);
 	token.content = html;
@@ -341,7 +357,7 @@ export default class CommonMarkDataProcessor {
 		turndownService.addRule('workPackageQuickinfo', {
 			filter: (node) => node.nodeName === 'OPCE-MACRO-WP-QUICKINFO',
 			replacement: (_content, node) => {
-				const id = node.getAttribute('data-id') || '';
+				const id = node.getAttribute('data-display-id') || node.getAttribute('data-id') || '';
 				if (!id) return '';
 				const detailed = node.getAttribute('data-detailed') === 'true';
 				return detailed ? `###${id}` : `##${id}`;
@@ -374,8 +390,14 @@ export default class CommonMarkDataProcessor {
 				)
 			},
 			replacement: (_content, node) => {
-				// Serialize work package mentions serialize to plain #ID / ##ID / ###ID
 				if (node.getAttribute('data-type') === 'work_package') {
+					// `data-display-id` signals an autocomplete-picked or
+					// round-tripped envelope; preserve those intact.
+					// Parser-emitted single-hash shorthand has no
+					// `data-display-id` and collapses to bare markdown.
+					if (node.getAttribute('data-display-id')) {
+						return node.outerHTML;
+					}
 					return node.getAttribute('data-text') || node.textContent || '';
 				}
 				return node.outerHTML;
