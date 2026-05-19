@@ -9,16 +9,17 @@
 
 /* eslint-env browser */
 
-import {HtmlDataProcessor, ViewDomConverter} from '@ckeditor/ckeditor5-engine';
-import {highlightedCodeBlock} from 'turndown-plugin-gfm';
+import { HtmlDataProcessor, ViewDomConverter } from '@ckeditor/ckeditor5-engine';
+import { highlightedCodeBlock } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
-import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
-import {hoistTaskListCheckboxes} from './utils/hoist-task-list-checkboxes';
-import {fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel} from "./utils/fix-breaks";
+import { textNodesPreprocessor, linkPreprocessor, breaksPreprocessor } from './utils/preprocessor';
+import { fixTasklistWhitespaces } from './utils/fix-tasklist-whitespaces';
+import { hoistTaskListCheckboxes } from './utils/hoist-task-list-checkboxes';
+import { fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel } from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
-import {isPageBreakNode, PAGE_BREAK_MARKDOWN} from "./utils/page-breaks";
+import { isPageBreakNode, PAGE_BREAK_MARKDOWN } from "./utils/page-breaks";
+import { getOPPath } from "../plugins/op-context/op-context";
 
 export const originalSrcAttribute = 'data-original-src';
 
@@ -54,15 +55,51 @@ function workPackageRefInlineRule(state, silent) {
 	return true;
 }
 
+const WIKI_PAGE_LINK_RE = /(?:\\\[){3}([0-9]+):([^\\\n]+)(?:\\\]){3}/;
+
+function wikiPageLinkInlineRule(state, silent, editor) {
+	const start = state.pos;
+	const src = state.src;
+
+	if (src.charCodeAt(start) !== 0x5c /* \ */) return false;
+
+	const word = src.slice(start);
+	const match = WIKI_PAGE_LINK_RE.exec(word);
+	if (!match) return false;
+	if (silent) return true;
+
+	const providerId = match[1];
+	const pageIdentifier = match[2];
+
+	const frameId = crypto.randomUUID();
+	const frameSrc = getOPPath(editor).wikiPageLinkMacro(providerId, pageIdentifier, frameId)
+
+	const html = `
+<turbo-frame
+  id="${frameId}"
+  src="${frameSrc}"
+  data-provider-id="${providerId}"
+  data-page-identifier="${pageIdentifier}"
+  data-type="wiki-page-link"
+></turbo-frame>`
+
+	const token = state.push('html_inline', '', 0);
+	token.content = html;
+	state.pos = start + match[0].length;
+	return true;
+}
+
 /**
  * This data processor implementation uses CommonMark as input/output data.
  *
  * @implements module:engine/dataprocessor/dataprocessor~DataProcessor
  */
 export default class CommonMarkDataProcessor {
-	constructor(document) {
+	constructor(editor) {
+		const document = editor.editing.view.document;
 		this._htmlDP = new HtmlDataProcessor(document);
 		this._domConverter = new ViewDomConverter(document);
+		this.editor = editor;
 	}
 
 	/**
@@ -81,9 +118,14 @@ export default class CommonMarkDataProcessor {
 		});
 
 		// Use tasklist plugin
-		let parser = md.use(markdownItTaskLists, {label: true});
+		let parser = md.use(markdownItTaskLists, { label: true });
 
 		parser.inline.ruler.before('text', 'op_workpackage_ref', workPackageRefInlineRule);
+		parser.inline.ruler.before(
+			'text',
+			'op_wiki_page_link',
+			(state, silent) => wikiPageLinkInlineRule(state, silent, this.editor)
+		);
 
 		const previousRenderer = parser.renderer.rules.code_block;
 		md.renderer.rules.code_block = function (tokens, idx, options, env, self) {
@@ -207,7 +249,7 @@ export default class CommonMarkDataProcessor {
 		 * @see
 		 */
 		turndownService.addRule('orderedListItems', {
-			filter: function(node) {
+			filter: function (node) {
 				if (node.nodeName !== 'LI') {
 					return false;
 				}
@@ -215,28 +257,28 @@ export default class CommonMarkDataProcessor {
 				return !!node.closest('ol');
 			},
 			replacement: function (content, node, options) {
-			   content = content
-				   .replace(/^\n+/, '') // remove leading newlines
-				   .replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
+				content = content
+					.replace(/^\n+/, '') // remove leading newlines
+					.replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
 
-			   var parent = node.parentNode;
-			   var prefix = options.bulletListMarker + '   ';
-			   var number = 1;
-			   if (parent.nodeName === 'OL') {
-				   var start = parent.getAttribute('start');
-				   var index = Array.prototype.indexOf.call(parent.children, node);
-				   number = start ? Number(start) + index : index + 1;
-				   prefix = number + '.  ';
-			   }
+				var parent = node.parentNode;
+				var prefix = options.bulletListMarker + '   ';
+				var number = 1;
+				if (parent.nodeName === 'OL') {
+					var start = parent.getAttribute('start');
+					var index = Array.prototype.indexOf.call(parent.children, node);
+					number = start ? Number(start) + index : index + 1;
+					prefix = number + '.  ';
+				}
 
-			   // Calculate indentation based on the width of the number prefix
-			   var indentWidth = prefix.length;
-			   var indent = ' '.repeat(indentWidth);
-			   content = content.replace(/\n/gm, '\n' + indent);
+				// Calculate indentation based on the width of the number prefix
+				var indentWidth = prefix.length;
+				var indent = ' '.repeat(indentWidth);
+				content = content.replace(/\n/gm, '\n' + indent);
 
-			   return (
-				   prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
-			   );
+				return (
+					prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
+				);
 			}
 		});
 
@@ -280,10 +322,10 @@ export default class CommonMarkDataProcessor {
 			replacement: function (_content, node) {
 				// Remove filler attribute, but keep empty lines
 				node.querySelectorAll('td br[data-cke-filler]').forEach((node) => {
-						if (node.nextElementSibling) {
-							node.removeAttribute('data-cke-filler');
-						}
-					});
+					if (node.nextElementSibling) {
+						node.removeAttribute('data-cke-filler');
+					}
+				});
 
 				return node.outerHTML;
 			}
@@ -303,6 +345,15 @@ export default class CommonMarkDataProcessor {
 				if (!id) return '';
 				const detailed = node.getAttribute('data-detailed') === 'true';
 				return detailed ? `###${id}` : `##${id}`;
+			},
+		});
+
+		turndownService.addRule('wikiPageLink', {
+			filter: (node) => node.nodeName === 'TURBO-FRAME' && node.getAttribute('data-type') === 'wiki-page-link',
+			replacement: (_content, node) => {
+				const providerId = node.getAttribute('data-provider-id') || '';
+				const pageIdentifier = node.getAttribute('data-page-identifier') || '';
+				return `\\[\\[\\[${providerId}:${pageIdentifier}\\]\\]\\]`;
 			},
 		});
 

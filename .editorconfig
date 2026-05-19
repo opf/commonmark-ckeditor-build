@@ -18,3 +18,10 @@ indent_size = 4
 [*.yml]
 indent_style = space
 indent_size = 2
+
+[*.js]
+ij_javascript_spaces_within_object_literal_braces = true
+ij_javascript_keep_simple_blocks_in_one_line = true
+ij_javascript_keep_simple_methods_in_one_line = true
+ij_javascript_spaces_within_imports = true
+
