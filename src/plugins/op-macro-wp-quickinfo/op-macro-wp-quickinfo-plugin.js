@@ -72,6 +72,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				const wpDisplayId = modelElement.getAttribute( 'wpDisplayId' ) || '';
 				const detailed = !!modelElement.getAttribute( 'detailed' );
 				const wpId = modelElement.getAttribute( 'wpId' ) || wpDisplayId;
+				const markerText = modelElement.getAttribute( 'markerText' ) || `${detailed ? '###' : '##'}${wpDisplayId}`;
 
 				const wrapper = writer.createContainerElement( 'span', {
 					class: 'op-macro-wp-quickinfo-widget',
@@ -87,7 +88,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				);
 				writer.insert( writer.createPositionAt( wrapper, 0 ), raw );
 
-				return toWidget( wrapper, writer, { label: `#${wpDisplayId}` } );
+				return toWidget( wrapper, writer, { label: markerText } );
 			},
 		} );
 
