@@ -33,6 +33,9 @@ const WP_REF_RE = /^(#{1,3})(\d+|[A-Z][A-Z0-9_]*-\d+)(?!\w)/;
 // as three independent `html_inline` tokens; `#`-leading text between
 // the open and close must not be re-promoted by this rule.
 function isInsideStoredMention(tokens) {
+	if (!tokens.some(t => t.type === 'html_inline' && t.content.startsWith('<mention'))) {
+		return false;
+	}
 	for (let i = tokens.length - 1; i >= 0; i--) {
 		const token = tokens[i];
 		if (token.type !== 'html_inline') continue;
