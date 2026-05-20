@@ -57,7 +57,12 @@ function workPackageRefInlineRule(state, silent) {
 
 	const match = WP_REF_RE.exec(src.slice(start));
 	if (!match) return false;
-	// If we are in markdown-it silent mode, don't do anything and return true.
+
+	// If we are in markdown-it silent mode, do not actually perform the replacement.
+	// However, we need to update state.pos when we match as markdown-it skipToken
+	// calls rules in silent mode and requires pos to advance even when no token is pushed.
+	// otherwise, we will break the parsing chain when a link is involved.
+	state.pos = start + match[0].length;
 	if (silent) return true;
 
 	if (isInsideStoredMention(state.tokens)) return false;
@@ -74,7 +79,6 @@ function workPackageRefInlineRule(state, silent) {
 
 	const token = state.push('html_inline', '', 0);
 	token.content = html;
-	state.pos = start + match[0].length;
 	return true;
 }
 
