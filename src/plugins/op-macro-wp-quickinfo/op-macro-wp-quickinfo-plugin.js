@@ -133,9 +133,10 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 		const mentionCommand = editor.commands.get( 'mention' );
 		if (!mentionCommand) return;
 
-		// Take over ##/### work_package mentions as a widget; the data
-		// downcast chooses bare quickinfo or `<mention>` envelope at save
-		// time based on whether the id matches the displayed identifier.
+		// Take over ##/### work_package mentions as a widget; `wpId`
+		// presence on the model is the discriminator that keeps
+		// autocomplete picks as a `<mention>` envelope at save time so
+		// identity survives display-id renames.
 		mentionCommand.on( 'execute', ( evt, args ) => {
 			const opts = args && args[0];
 			if (!opts || !opts.mention) return;
