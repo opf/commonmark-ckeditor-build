@@ -58,14 +58,20 @@ function workPackageRefInlineRule(state, silent) {
 	const match = WP_REF_RE.exec(src.slice(start));
 	if (!match) return false;
 
-	// If we are in markdown-it silent mode, do not actually perform the replacement.
-	// However, we need to update state.pos when we match as markdown-it skipToken
-	// calls rules in silent mode and requires pos to advance even when no token is pushed.
-	// otherwise, we will break the parsing chain when a link is involved.
-	state.pos = start + match[0].length;
-	if (silent) return true;
+	// Silent mode: advance pos so markdown-it's skipToken (used by parseLinkLabel)
+	// can measure the token extent without emitting anything.
+	if (silent) {
+		state.pos = start + match[0].length;
+		return true;
+	}
 
+	// Don't re-promote refs already inside a stored <mention> envelope.
+	// The check must happen before advancing pos: returning false with pos already
+	// advanced would silently swallow the text content (tokenize adds src[pos++]
+	// to pending on a false return, but pos is already past the match).
 	if (isInsideStoredMention(state.tokens)) return false;
+
+	state.pos = start + match[0].length;
 
 	const hashes = match[1].length;
 	const id = match[2];
