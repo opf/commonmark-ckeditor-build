@@ -71,6 +71,13 @@ describe('CommonMarkProcessor', () => {
 					'<h2>title</h2>'
 				);
 			});
+
+			it('does not crash when a WP ref appears inside a link label', () => {
+				testDataProcessor(
+					'[#123 text](https://example.com/)',
+					'<p><a href="https://example.com/"><mention class="mention" data-id="123" data-text="#123" data-type="work_package">#123</mention> text</a></p>'
+				);
+			});
 		});
 
 		describe('semantic identifier shorthand', () => {
