@@ -21,7 +21,6 @@ import { Paragraph } from '@ckeditor/ckeditor5-paragraph';
 import { Typing } from '@ckeditor/ckeditor5-typing';
 import OPHelpLinkPlugin from "./plugins/op-help-link-plugin/op-help-link-plugin";
 import CodeBlockPlugin from "./plugins/code-block/code-block";
-import OPPreviewPlugin from "./plugins/op-preview.plugin";
 import { Table } from '@ckeditor/ckeditor5-table';
 import { TableToolbar } from '@ckeditor/ckeditor5-table';
 import { TableProperties } from '@ckeditor/ckeditor5-table';
@@ -90,7 +89,6 @@ export const builtinPlugins = [
 	PasteFromOffice,
 
 	OPHelpLinkPlugin,
-	OPPreviewPlugin,
 	OPSourceCodePlugin,
 	OpContentRevisions,
 	OPMacroWpQuickinfoPlugin,
