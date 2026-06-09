@@ -10,10 +10,6 @@ export function getOPFieldName(editor) {
 	return _.get(editor.config, '_config.openProject.context.field');
 }
 
-export function getOPPreviewContext(editor) {
-	return _.get(editor.config, '_config.openProject.context.previewContext');
-}
-
 export function getPluginContext(editor) {
 	return _.get(editor.config, '_config.openProject.pluginContext');
 }
