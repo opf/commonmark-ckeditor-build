@@ -1,12 +1,17 @@
 import { Plugin } from "@ckeditor/ckeditor5-core";
 import { toWidget } from "@ckeditor/ckeditor5-widget";
-import { getOPPath } from "../op-context/op-context";
+
+import { macroUrl } from "./macro-url";
 
 const MODEL_ELEMENT_NAME = 'op-macro-wiki-page-link';
 
 export default class OpMacroWikiPageLinkPlugin extends Plugin {
 	static get pluginName() {
 		return 'OpMacroWikiPageLink';
+	}
+
+	static get modelElementName() {
+		return MODEL_ELEMENT_NAME;
 	}
 
 	init() {
@@ -40,7 +45,7 @@ export default class OpMacroWikiPageLinkPlugin extends Plugin {
 					'turbo-frame',
 					{
 						id: frameId,
-						src: this.macroUrl(providerId, pageIdentifier, frameId),
+						src: macroUrl(editor, providerId, pageIdentifier, frameId),
 						'data-provider-id': providerId,
 						'data-page-identifier': pageIdentifier,
 						'data-type': 'wiki-page-link',
@@ -67,7 +72,7 @@ export default class OpMacroWikiPageLinkPlugin extends Plugin {
 					'turbo-frame',
 					{
 						id: frameId,
-						src: this.macroUrl(providerId, pageIdentifier, frameId),
+						src: macroUrl(editor, providerId, pageIdentifier, frameId),
 						'data-provider-id': providerId,
 						'data-page-identifier': pageIdentifier,
 						'data-type': 'wiki-page-link',
@@ -79,9 +84,5 @@ export default class OpMacroWikiPageLinkPlugin extends Plugin {
 				return toWidget(wrapper, writer, { label: `[[[${providerId}:${pageIdentifier}]]]` });
 			}
 		});
-	}
-
-	macroUrl(providerId, pageIdentifier, frameId) {
-		return getOPPath(this.editor).wikiPageLinkMacro(providerId, pageIdentifier, frameId)
 	}
 }
