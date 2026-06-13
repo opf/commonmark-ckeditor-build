@@ -25,8 +25,6 @@ module.exports = {
 	},
 	// The test environment that will be used for testing
 	testEnvironment: "jsdom",
-	// The paths to modules that run some code to configure or set up the testing environment before each test
-	setupFiles: ['<rootDir>/jest.setup.js'],
 	// An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
 	transformIgnorePatterns: []
 };

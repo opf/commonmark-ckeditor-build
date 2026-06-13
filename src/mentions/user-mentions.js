@@ -5,6 +5,18 @@ import {
 } from "../plugins/op-context/op-context";
 import { get } from '@rails/request.js';
 
+function uniqBy(items, keyFn) {
+	const seen = new Set();
+	return items.filter(item => {
+		const key = keyFn(item);
+		if (seen.has(key)) {
+			return false;
+		}
+		seen.add(key);
+		return true;
+	});
+}
+
 export function userMentions(queryText) {
 	const editor = this;
 	let resource = getOPResource(editor);
@@ -33,7 +45,7 @@ export function userMentions(queryText) {
 		get(url, { responseKind: 'json', query: { select: 'elements/_type,elements/id,elements/name' } })
 			.then(response => response.json)
 			.then(collection => {
-				resolve(_.uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
+				resolve(uniqBy(collection._embedded.elements, (el) => el.id).map(mention => {
 					const type = mention._type.toLowerCase();
 					const text = `@${mention.name}`;
 					const id = `@${mention.id}`;
