@@ -51,12 +51,16 @@ export default class OpMacroWikiPageLinkAddExisting extends Plugin {
 	}
 
 	insertWikiPageLink(providerId, pageIdentifier) {
+		if (!providerId || !pageIdentifier) {
+			return;
+		}
+
 		const model = this.editor.model;
 
 		model.change(writer => {
 			const linkElement = writer.createElement(
 				OpMacroWikiPageLinkPlugin.modelElementName,
-				{ providerId, pageIdentifier, }
+				{ providerId, pageIdentifier }
 			);
 
 			model.insertContent(linkElement, model.document.selection);
