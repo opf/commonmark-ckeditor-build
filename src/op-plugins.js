@@ -43,6 +43,7 @@ import { Autosave } from '@ckeditor/ckeditor5-autosave';
 import OpContentRevisions from "./plugins/op-content-revisions/op-content-revisions";
 import OPMacroWpQuickinfoPlugin from "./plugins/op-macro-wp-quickinfo/op-macro-wp-quickinfo-plugin";
 import OpMacroWikiPageLinkPlugin from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-plugin";
+import OpMacroWikiPageLinkAddExisting from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-add-existing";
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -51,6 +52,7 @@ export const opMacroPlugins = [
 	OPMacroEmbeddedTable,
 	OPMacroWpButtonPlugin,
 	OPChildPagesPlugin,
+	OpMacroWikiPageLinkAddExisting,
 ];
 
 export const opImageUploadPlugins = [
