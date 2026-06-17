@@ -34,13 +34,13 @@ export default class OpMacroWikiPageLinkAddExisting extends Plugin {
 		document.addEventListener('dialog:close', this.closeDialogHandler);
 
 		const turboRequests = getOPService(editor, 'turboRequests');
-		const path = getOPPath(editor).inlineExistingWikiPageDialog();
+		const path = getOPPath(editor).openExistingWikiPageDialog();
 
 		void turboRequests.request(path, { method: 'GET' });
 	}
 
 	handleCloseDialog(event) {
-		if (event.detail.additional?.action !== 'close_dialog_and_inline') {
+		if (event.detail.additional?.action !== 'close_existing_page_dialog') {
 			// A previous step was closed, not the final stage of the dialog we expect.
 			return;
 		}
