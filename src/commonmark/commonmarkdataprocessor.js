@@ -107,20 +107,23 @@ function wikiPageLinkInlineRule(state, silent, editor) {
 	const frameId = crypto.randomUUID();
 	const frameSrc = getOPPath(editor).wikiPageLinkMacro(providerId, pageIdentifier, frameId)
 
-	const html = `
-<turbo-frame
-  id="${frameId}"
-  src="${frameSrc}"
-  data-provider-id="${providerId}"
-  data-page-identifier="${pageIdentifier}"
-  data-type="wiki-page-link"
-></turbo-frame>`
-
 	const token = state.push('html_inline', '', 0);
-	token.content = html;
+	token.content = pageLinkTurboFrame(frameId, frameSrc, providerId, pageIdentifier).outerHTML;
 	state.pos = start + match[0].length;
 	return true;
 }
+
+function pageLinkTurboFrame(frameId, frameSrc, providerId, pageIdentifier) {
+	const frame = document.createElement('turbo-frame');
+	frame.id = frameId;
+	frame.src = frameSrc;
+	frame.dataset.providerId = providerId;
+	frame.dataset.pageIdentifier = pageIdentifier;
+	frame.dataset.type = 'wiki-page-link';
+
+	return frame;
+}
+
 
 /**
  * This data processor implementation uses CommonMark as input/output data.
