@@ -45,6 +45,7 @@ import OPMacroWpQuickinfoPlugin from "./plugins/op-macro-wp-quickinfo/op-macro-w
 import OpMacroWikiPageLinkPlugin from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-plugin";
 import OpMacroWikiPageLinkAddExisting from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-add-existing";
 import OpMacroWikiPageLinkCreateNew from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-create-new";
+import OPPasteGuard from "./plugins/op-paste-guard/op-paste-guard-plugin";
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -91,6 +92,7 @@ export const builtinPlugins = [
 	Mention,
 	MentionCaster,
 	PasteFromOffice,
+	OPPasteGuard,
 
 	OPHelpLinkPlugin,
 	OPSourceCodePlugin,

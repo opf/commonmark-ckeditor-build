@@ -71,13 +71,18 @@ export function viewCodeBlockToModel() {
 			// Insert codeblock in allowed position.
 			conversionApi.writer.insert( modelCodeBlock, splitResult.position );
 
-			// Convert text child of codeblock
+			// Convert text content of codeblock. Pasted rich text can wrap
+			// the code in syntax-highlight markup (e.g. <span>s), so the
+			// <code> child is not necessarily a single text node. Collect
+			// the text from the whole subtree instead of assuming
+			// `getChild(0)` is text (which crashed with "can't access
+			// property 'replace', e.data is undefined" – COMMS-572).
 			const child = codeBlock.getChild(0);
 			if (child) {
 				conversionApi.consumable.consume(child, { name: true });
 				// Replace last newline since that text is incorrectly mapped
 				// Regression OP#28609
-				const content = child.data.replace(/\n$/, "");
+				const content = textContentOf( codeBlock ).replace(/\n$/, "");
 				conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
 			}
 
@@ -91,6 +96,28 @@ export function viewCodeBlockToModel() {
 			data.modelCursor = data.modelRange.end;
 		}
 	}
+}
+
+
+// Recursively collect the text of a view node, tolerating element
+// children. A pasted code block may contain syntax-highlight markup
+// (e.g. nested <span>s) rather than a single text node, in which case
+// reading `.data` off the first child yields `undefined` and throws.
+export function textContentOf( viewNode ) {
+	if ( viewNode.is( '$text' ) || viewNode.is( '$textProxy' ) ) {
+		return viewNode.data;
+	}
+
+	if ( typeof viewNode.getChildren !== 'function' ) {
+		return '';
+	}
+
+	let text = '';
+	for ( const childNode of viewNode.getChildren() ) {
+		text += textContentOf( childNode );
+	}
+
+	return text;
 }
 
 
