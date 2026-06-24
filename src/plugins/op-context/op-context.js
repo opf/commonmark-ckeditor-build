@@ -1,17 +1,17 @@
 export function getOP(editor) {
-	return _.get(editor.config, '_config.openProject');
+	return editor.config?._config?.openProject;
 }
 
 export function getOPResource(editor) {
-	return _.get(editor.config, '_config.openProject.context.resource');
+	return editor.config?._config?.openProject?.context?.resource;
 }
 
 export function getOPFieldName(editor) {
-	return _.get(editor.config, '_config.openProject.context.field');
+	return editor.config?._config?.openProject?.context?.field;
 }
 
 export function getPluginContext(editor) {
-	return _.get(editor.config, '_config.openProject.pluginContext');
+	return editor.config?._config?.openProject?.pluginContext;
 }
 
 export function getOPService(editor, name) {
