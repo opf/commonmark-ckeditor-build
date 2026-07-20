@@ -2,7 +2,7 @@ import { textContentOf } from '../../src/plugins/code-block/converters';
 
 // Minimal stand-ins for CKEditor view nodes. `textContentOf` only relies
 // on `is()`, `getChildren()` and `data`, so faking those keeps the test
-// independent of engine internals while still exercising the regression.
+// independent of engine internals.
 function viewText( data ) {
 	return {
 		data,
@@ -29,9 +29,8 @@ describe( 'code-block converters', () => {
 			expect( textContentOf( code ) ).toEqual( 'plain code' );
 		} );
 
-		it( 'reads a <code> whose children are elements (syntax highlighting) without throwing (COMMS-572)', () => {
-			// Pasted rich text: the <code> first child is a <span>, not text,
-			// so the previous `getChild(0).data.replace(...)` threw.
+		it( 'reads a <code> whose children are elements (syntax highlighting) without throwing', () => {
+			// Pasted rich text: the <code> first child is a <span>, not text.
 			const code = viewElement( 'code', [
 				viewElement( 'span', [ viewText( 'const ' ) ] ),
 				viewElement( 'span', [ viewText( 'x' ) ] ),
