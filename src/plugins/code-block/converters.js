@@ -71,13 +71,16 @@ export function viewCodeBlockToModel() {
 			// Insert codeblock in allowed position.
 			conversionApi.writer.insert( modelCodeBlock, splitResult.position );
 
-			// Convert text child of codeblock
+			// Convert text content of codeblock. The child is not necessarily
+			// a single text node (pasted rich text can wrap the code in
+			// syntax-highlight markup), so gather the text from the whole
+			// subtree rather than reading `.data` off the first child.
 			const child = codeBlock.getChild(0);
 			if (child) {
 				conversionApi.consumable.consume(child, { name: true });
 				// Replace last newline since that text is incorrectly mapped
 				// Regression OP#28609
-				const content = child.data.replace(/\n$/, "");
+				const content = textContentOf( codeBlock ).replace(/\n$/, "");
 				conversionApi.writer.setAttribute( 'opCodeblockContent', content, modelCodeBlock );
 			}
 
@@ -91,6 +94,27 @@ export function viewCodeBlockToModel() {
 			data.modelCursor = data.modelRange.end;
 		}
 	}
+}
+
+
+// Recursively collect the text of a view node. The code child is not
+// always a single text node (e.g. syntax-highlight markup wraps it in
+// nested elements), so we can't just read `.data` off the first child.
+export function textContentOf( viewNode ) {
+	if ( viewNode.is( '$text' ) || viewNode.is( '$textProxy' ) ) {
+		return viewNode.data;
+	}
+
+	if ( typeof viewNode.getChildren !== 'function' ) {
+		return '';
+	}
+
+	let text = '';
+	for ( const childNode of viewNode.getChildren() ) {
+		text += textContentOf( childNode );
+	}
+
+	return text;
 }
 
 
