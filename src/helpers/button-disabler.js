@@ -1,5 +1,3 @@
-import {FileDialogButtonView} from '@ckeditor/ckeditor5-ui';
-
 export function getToolbarItems(editor) {
 	editor.__currentlyDisabled = editor.__currentlyDisabled || [];
 
@@ -12,34 +10,23 @@ export function getToolbarItems(editor) {
 
 export function disableItems(editor, except) {
 	getToolbarItems(editor).forEach((item) => {
-		let toDisable = item;
-
-		if (item instanceof FileDialogButtonView) {
-			toDisable = item.buttonView;
-		} else if (item === except || !Object.prototype.hasOwnProperty.call(item, 'isEnabled')) {
-			toDisable = null;
+		if (item === except || !Object.prototype.hasOwnProperty.call(item, 'isEnabled')) {
+			return;
 		}
 
-		if (!toDisable) {
-			// do nothing
-		} else if (toDisable.isEnabled) {
-			toDisable.isEnabled = false;
+		if (item.isEnabled) {
+			item.isEnabled = false;
 		} else {
-			editor.__currentlyDisabled.push(toDisable);
+			editor.__currentlyDisabled.push(item);
 		}
 	});
 }
 
 export function enableItems(editor) {
 	getToolbarItems(editor).forEach((item) => {
-		let toEnable = item;
-
-		if (item instanceof FileDialogButtonView) {
-			toEnable = item.buttonView;
-		}
-
-		if (editor.__currentlyDisabled.indexOf(toEnable) < 0) {
-			toEnable.isEnabled = true
+		if (Object.prototype.hasOwnProperty.call(item, 'isEnabled')
+			&& editor.__currentlyDisabled.indexOf(item) < 0) {
+			item.isEnabled = true;
 		}
 	});
 
