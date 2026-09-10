@@ -10,6 +10,7 @@ import {countWords, generateHash} from "./utils";
 import imageIcon from "./../../icons/revisions.svg";
 import {getOPI18n, getOPService} from "../op-context/op-context";
 import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";
+import {dropdownPanelPosition} from "./dropdown-position";
 
 export default class OpContentRevisionsUI extends Plugin {
 
@@ -36,6 +37,16 @@ export default class OpContentRevisionsUI extends Plugin {
 
       // Populate the dropdown with the history when the button is clicked.
       this.listenTo(dropdownView.buttonView, "execute", async () => {
+        const toolbar = editor.ui.view.toolbar.element;
+        const button = dropdownView.buttonView.element;
+
+        if (toolbar && button) {
+          dropdownView.panelPosition = dropdownPanelPosition(
+            button.getBoundingClientRect(),
+            toolbar.getBoundingClientRect(),
+          );
+        }
+
         collection.clear();
         addAvailableRevisions(editor, collection);
       });
