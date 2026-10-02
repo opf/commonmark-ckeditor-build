@@ -42,6 +42,13 @@ Whenever a new CKEditor release is made, there are a plethora of packages to be 
 use [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) to update all dependencies in the package.json
 and then rebuild + run openproject tests.
 
+> [!IMPORTANT]
+> When bumping CKEditor here, also bump all direct `@ckeditor/ckeditor5-*` development dependencies in
+> OpenProject core's `frontend/package.json` to the same exact CKEditor version and regenerate
+> `frontend/package-lock.json`. Core imports types from these packages, so their versions must match the
+> rebuilt editor in `frontend/src/vendor/ckeditor/`. Include these changes in the companion core PR and
+> run `npm run typecheck` and the editor browser specs from core's `frontend/` directory.
+
 ### Patch for ckeditor5-mention plugin
 
 We use `patch-package` (https://www.npmjs.com/package/patch-package) to store a patch for the ckeditor5-mention plugin
