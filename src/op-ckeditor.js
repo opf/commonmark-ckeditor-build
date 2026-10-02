@@ -45,6 +45,8 @@ FullEditor.defaultConfig.toolbar = {
 			'|',
 			'preview',
 			'opShowSource',
+			'|',
+			'opAiActions',
 		]
 };
 

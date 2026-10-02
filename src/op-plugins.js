@@ -28,6 +28,7 @@ import { TableCellProperties } from '@ckeditor/ckeditor5-table';
 import { PasteFromOffice } from '@ckeditor/ckeditor5-paste-from-office';
 import { TodoList } from '@ckeditor/ckeditor5-list';
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
+import OpAiActionsPlugin from "./plugins/op-ai-actions-plugin";
 import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin';
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
 import CommonMark from './commonmark/commonmark';
@@ -108,6 +109,7 @@ export const builtinPlugins = [
 	TableCellProperties,
 
 	OPMacroListPlugin,
+	OpAiActionsPlugin,
 
 	OpCustomCssClassesPlugin,
 ].concat(
