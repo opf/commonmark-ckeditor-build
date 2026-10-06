@@ -20,6 +20,16 @@ if (!core) {
 	throw new Error("Expected OPENPROJECT_CORE to be present, but wasn't.");
 }
 
+const styleLoader = {
+	loader: 'style-loader',
+	options: {
+		injectType: 'singletonStyleTag',
+		attributes: {
+			'data-cke': true
+		}
+	}
+};
+
 module.exports = {
 	devtool: 'source-map',
 	performance: { hints: false },
@@ -65,17 +75,17 @@ module.exports = {
 				use: [ 'raw-loader' ]
 			},
 			{
+				// Our own stylesheets are plain CSS. The CKEditor PostCSS config below resolves a theme
+				// relative to the owning ckeditor5-* package, which a file of ours does not have.
 				test: /\.css$/,
+				include: path.resolve( __dirname, 'src' ),
+				use: [ styleLoader, 'css-loader' ]
+			},
+			{
+				test: /\.css$/,
+				exclude: path.resolve( __dirname, 'src' ),
 				use: [
-					{
-						loader: 'style-loader',
-						options: {
-							injectType: 'singletonStyleTag',
-							attributes: {
-								'data-cke': true
-							}
-						}
-					},
+					styleLoader,
 					'css-loader',
 					{
 						loader: 'postcss-loader',
