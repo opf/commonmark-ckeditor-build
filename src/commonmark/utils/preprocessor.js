@@ -1,3 +1,23 @@
+const HTML_ESCAPES = {
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;',
+	"'": '&#x27;',
+	'`': '&#x60;'
+};
+
+/**
+ * Escape the characters "&", "<", ">", '"', "'", and "`" in the given string.
+ * Mirrors the previous `_.escape` (underscore) behaviour so output is unchanged
+ * after dropping the global underscore/lodash dependency.
+ * @param {string} string
+ * @returns {string}
+ */
+function escapeHtml(string) {
+	return String(string).replace(/[&<>"'`]/g, char => HTML_ESCAPES[char]);
+}
+
 /**
  * Replace whitespace of text nodes within the given parents in the given root element.
  * @param {*} root An HTMLElement to look for text nodes within
@@ -26,7 +46,7 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
 		// Re-encode < and > that would otherwise be output as HTML by turndown
 		// https://github.com/domchristie/turndown/issues/106
 		if (!hasParentOfType(node, allowed_raw_nodes)) {
-			node.nodeValue = _.escape(node.nodeValue);
+			node.nodeValue = escapeHtml(node.nodeValue);
 		}
 	}
 }

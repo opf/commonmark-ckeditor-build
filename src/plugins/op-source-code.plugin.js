@@ -6,7 +6,6 @@ import wysiwygIcon from '../icons/wysiwyg.svg';
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
-import {getOPPath, getOPPreviewContext, getOPService} from './op-context/op-context';
 import {enableItems, disableItems} from '../helpers/button-disabler';
 
 export default class OPSourceCodePlugin extends Plugin {
@@ -35,21 +34,24 @@ export default class OPSourceCodePlugin extends Plugin {
 			} );
 
 
-			let showSource = function(preview) {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
-				let $reference;
-
-				if ($mainEditor.length) {
-					$reference = $mainEditor;
-				} else {
-					$reference = $editable;
+			let showSource = function(_preview) {
+				const editableElement = editor.ui.getEditableElement();
+				const reference = editableElement?.parentElement;
+				if (!reference?.parentElement) {
+					console.error('Cannot show source: invalid editor structure');
+					return;
 				}
 
-				let $sourceWrapper = jQuery('<div class="ck-editor__source"></div>');
-				$reference.siblings('.ck-editor__source').remove();
+				const sourceWrapper = document.createElement('div');
+				sourceWrapper.className = 'ck-editor__source';
+				
+				// Remove existing source elements (only direct siblings)
+				const existingSources = Array.from(reference.parentElement.children)
+					.filter(el => el !== reference && el.classList.contains('ck-editor__source'));
+				existingSources.forEach(el => el.remove());
 
-				$reference.hide();
-				$reference.after($sourceWrapper);
+				reference.style.display = 'none';
+				reference.parentElement.insertBefore(sourceWrapper, reference.nextSibling);
 
 				disableItems(editor, view);
 
@@ -65,12 +67,21 @@ export default class OPSourceCodePlugin extends Plugin {
 			};
 
 			let hideSource = function() {
-				let $mainEditor = jQuery(editor.ui.getEditableElement()).parent();
+				const editableElement = editor.ui.getEditableElement();
+				const mainEditor = editableElement?.parentElement;
+				if (!mainEditor?.parentElement) {
+					console.error('Cannot hide source: invalid editor structure');
+					return;
+				}
 
 				editor.fire('op:source-code-disabled');
 
-				$mainEditor.siblings('.ck-editor__source').remove();
-				$mainEditor.show();
+				// Remove existing source elements (only direct siblings)
+				const existingSources = Array.from(mainEditor.parentElement.children)
+					.filter(el => el !== mainEditor && el.classList.contains('ck-editor__source'));
+				existingSources.forEach(el => el.remove());
+				
+				mainEditor.style.display = '';
 
 				enableItems(editor);
 

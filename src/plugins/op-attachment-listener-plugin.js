@@ -1,5 +1,4 @@
 import { Plugin } from '@ckeditor/ckeditor5-core';
-import Selection from '@ckeditor/ckeditor5-engine/src/model/selection';
 
 export default class OPAttachmentListenerPlugin extends Plugin {
 	static get pluginName() {
@@ -19,7 +18,7 @@ export default class OPAttachmentListenerPlugin extends Plugin {
 
 		for (const child of Array.from(root.getChildren())) {
 			if (child.name === 'image' && urls.indexOf(child.getAttribute('src')) > -1) {
-				const selection = new Selection( child, 'on' );
+				const selection = this.editor.model.createSelection( child, 'on' );
 
 				this.editor.model.deleteContent(selection);
 			}

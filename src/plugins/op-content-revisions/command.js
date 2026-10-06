@@ -1,4 +1,4 @@
-import {Command} from "ckeditor5/src/core";
+import {Command} from "@ckeditor/ckeditor5-core";
 import {loadFromLocalStorage} from "./storage";
 import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";
 

@@ -9,17 +9,121 @@
 
 /* eslint-env browser */
 
-import {HtmlDataProcessor, DomConverter} from '@ckeditor/ckeditor5-engine';
-import {highlightedCodeBlock} from 'turndown-plugin-gfm';
+import { HtmlDataProcessor, ViewDomConverter } from '@ckeditor/ckeditor5-engine';
+import { highlightedCodeBlock } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import {textNodesPreprocessor, linkPreprocessor, breaksPreprocessor} from './utils/preprocessor';
-import {fixTasklistWhitespaces} from './utils/fix-tasklist-whitespaces';
-import {fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel} from "./utils/fix-breaks";
+import { textNodesPreprocessor, linkPreprocessor, breaksPreprocessor } from './utils/preprocessor';
+import { fixTasklistWhitespaces } from './utils/fix-tasklist-whitespaces';
+import { hoistTaskListCheckboxes } from './utils/hoist-task-list-checkboxes';
+import { fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel } from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
-import {isPageBreakNode, PAGE_BREAK_MARKDOWN} from "./utils/page-breaks";
+import { isPageBreakNode, PAGE_BREAK_MARKDOWN } from "./utils/page-breaks";
+import { getOPPath } from "../plugins/op-context/op-context";
 
 export const originalSrcAttribute = 'data-original-src';
+
+// `#` / `##` / `###` followed by either a numeric id (`6217`) or a
+// semantic identifier (`PROJ-7`, `MY_PROJ-1`, `MACROPROJ-42`). The
+// trailing `(?!\w)` rejects mid-word continuations like `#PROJ-1abc`.
+// Group 1 is the marker, group 2 is the id.
+const WP_REF_RE = /^(#{1,3})(\d+|[A-Z][A-Z0-9_]*-\d+)(?!\w)/;
+
+// Stored `<mention>X</mention>` envelopes round-trip through markdown-it
+// as three independent `html_inline` tokens; `#`-leading text between
+// the open and close must not be re-promoted by this rule.
+function isInsideStoredMention(tokens) {
+	if (!tokens.some(t => t.type === 'html_inline' && t.content.startsWith('<mention'))) {
+		return false;
+	}
+	for (let i = tokens.length - 1; i >= 0; i--) {
+		const token = tokens[i];
+		if (token.type !== 'html_inline') continue;
+		const c = token.content;
+		if (c.startsWith('</mention')) return false;
+		if (c.startsWith('<mention')) return true;
+	}
+	return false;
+}
+
+function workPackageRefInlineRule(state, silent) {
+	const start = state.pos;
+	const src = state.src;
+
+	if (src.charCodeAt(start) !== 0x23 /* # */) return false;
+	// Left boundary: refuse if preceded by a word char or another '#'
+	// (preventing partial matches inside ####+ states)
+	if (start > 0 && /[\w#]/.test(src[start - 1])) return false;
+
+	const match = WP_REF_RE.exec(src.slice(start));
+	if (!match) return false;
+
+	// Silent mode: advance pos so markdown-it's skipToken (used by parseLinkLabel)
+	// can measure the token extent without emitting anything.
+	if (silent) {
+		state.pos = start + match[0].length;
+		return true;
+	}
+
+	// Don't re-promote refs already inside a stored <mention> envelope.
+	// The check must happen before advancing pos: returning false with pos already
+	// advanced would silently swallow the text content (tokenize adds src[pos++]
+	// to pending on a false return, but pos is already past the match).
+	if (isInsideStoredMention(state.tokens)) return false;
+
+	state.pos = start + match[0].length;
+
+	const hashes = match[1].length;
+	const id = match[2];
+	const ref = match[0];
+	// Convert to CKEditor structures
+	// # results in <mention> model
+	// ##/### results in <opce-macro-wp-quickinfo> custom element
+	const html = hashes === 1
+		? `<mention class="mention" data-id="${id}" data-type="work_package" data-text="${ref}">${ref}</mention>`
+		: `<opce-macro-wp-quickinfo data-id="${id}" data-display-id="${id}" data-detailed="${hashes === 3}">${ref}</opce-macro-wp-quickinfo>`;
+
+	const token = state.push('html_inline', '', 0);
+	token.content = html;
+	return true;
+}
+
+const WIKI_PAGE_LINK_RE = /(?:\\\[){3}([0-9]+):([^\\\n]+)(?:\\\]){3}/;
+
+function wikiPageLinkInlineRule(state, silent, editor) {
+	const start = state.pos;
+	const src = state.src;
+
+	if (src.charCodeAt(start) !== 0x5c /* \ */) return false;
+
+	const word = src.slice(start);
+	const match = WIKI_PAGE_LINK_RE.exec(word);
+	if (!match) return false;
+	if (silent) return true;
+
+	const providerId = match[1];
+	const pageIdentifier = match[2];
+
+	const frameId = crypto.randomUUID();
+	const frameSrc = getOPPath(editor).wikiPageLinkMacro(providerId, pageIdentifier, frameId)
+
+	const token = state.push('html_inline', '', 0);
+	token.content = pageLinkTurboFrame(frameId, frameSrc, providerId, pageIdentifier).outerHTML;
+	state.pos = start + match[0].length;
+	return true;
+}
+
+function pageLinkTurboFrame(frameId, frameSrc, providerId, pageIdentifier) {
+	const frame = document.createElement('turbo-frame');
+	frame.id = frameId;
+	frame.src = frameSrc;
+	frame.dataset.providerId = providerId;
+	frame.dataset.pageIdentifier = pageIdentifier;
+	frame.dataset.type = 'wiki-page-link';
+
+	return frame;
+}
+
 
 /**
  * This data processor implementation uses CommonMark as input/output data.
@@ -27,9 +131,11 @@ export const originalSrcAttribute = 'data-original-src';
  * @implements module:engine/dataprocessor/dataprocessor~DataProcessor
  */
 export default class CommonMarkDataProcessor {
-	constructor(document) {
+	constructor(editor) {
+		const document = editor.editing.view.document;
 		this._htmlDP = new HtmlDataProcessor(document);
-		this._domConverter = new DomConverter(document);
+		this._domConverter = new ViewDomConverter(document);
+		this.editor = editor;
 	}
 
 	/**
@@ -48,7 +154,14 @@ export default class CommonMarkDataProcessor {
 		});
 
 		// Use tasklist plugin
-		let parser = md.use(markdownItTaskLists, {label: true});
+		let parser = md.use(markdownItTaskLists, { label: true });
+
+		parser.inline.ruler.before('text', 'op_workpackage_ref', workPackageRefInlineRule);
+		parser.inline.ruler.before(
+			'text',
+			'op_wiki_page_link',
+			(state, silent) => wikiPageLinkInlineRule(state, silent, this.editor)
+		);
 
 		const previousRenderer = parser.renderer.rules.code_block;
 		md.renderer.rules.code_block = function (tokens, idx, options, env, self) {
@@ -74,9 +187,12 @@ export default class CommonMarkDataProcessor {
 		// Fix for multiple empty lines in markdown lists
 		fixBreaksInLists(domFragment)
 
-		const viewFragment = this._domConverter.domToView(domFragment);
+		// Preprocess task list checkboxes to ensure they are direct children of <li>
+		hoistTaskListCheckboxes(domFragment);
 
 		// Convert DOM DocumentFragment to view DocumentFragment.
+		const viewFragment = this._domConverter.domToView(domFragment);
+
 		return viewFragment;
 	}
 
@@ -132,28 +248,73 @@ export default class CommonMarkDataProcessor {
 			highlightedCodeBlock,
 		]);
 
-		// Replace todolist with markdown representation
-		turndownService.addRule('todolist', {
+		/**
+		 * This rule is used to convert task list items with checkboxes to markdown.
+		 *
+		 * This is based on the turndown-plugin-gfm taskListItems rule, but modified to
+		 * support list items with checkboxes that are not direct children of a ul or ol.
+		 *
+		 * @see
+		 */
+		turndownService.addRule('taskListItems', {
 			filter: function (node) {
-				// check if we're a todo list item
+				const nodeIsCheckbox = node.type === "checkbox";
+				const parentIsListItem = node.parentNode && node.parentNode.nodeName === 'LI';
+				const grandparentIsListItem = node.parentNode && node.parentNode.parentNode && node.parentNode.parentNode.nodeName === 'LI';
+				return nodeIsCheckbox && (parentIsListItem || grandparentIsListItem);
+			},
+			replacement: function (content, node) {
+				return (node.checked ? '[x]' : '[ ]') + ' '
+			}
+		})
+
+		/**
+		 * This rule is used to convert ordered list items to markdown.
+		 *
+		 * This is based on he turndownService rule for listItems, but modified to
+		 * indent ordered list items with the appropriate amount of indentation spaces.
+		 * This fixes an issue with the indentation of ordered list items with more
+		 * than 10 items.
+		 *
+		 * 1. item
+		 *     - subitem # four spaces is enough
+		 * ...
+		 * 10. item
+		 *      - subitem # five spaces are necessary because `10.` is three digits, and wider than `#.`
+		 *
+		 * @see
+		 */
+		turndownService.addRule('orderedListItems', {
+			filter: function (node) {
 				if (node.nodeName !== 'LI') {
 					return false;
 				}
 
-				// Check for a parent ul, this LI might however be in an OL item
-				const parentUl = node.closest('ul');
-				return parentUl && parentUl.classList.contains('todo-list');
+				return !!node.closest('ol');
 			},
 			replacement: function (content, node, options) {
 				content = content
 					.replace(/^\n+/, '') // remove leading newlines
-					.replace(/\n+$/, '\n') // replace trailing newlines with just a single one
-					.replace(/\n/gm, '\n    '); // indent
+					.replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
 
-				const prefix = options.bulletListMarker + '   ';
-				const input = node.querySelector('input[type=checkbox]');
-				const tasklist = (input && input.checked) ? '[x] ' : '[ ] ';
-				return prefix + tasklist + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '');
+				var parent = node.parentNode;
+				var prefix = options.bulletListMarker + '   ';
+				var number = 1;
+				if (parent.nodeName === 'OL') {
+					var start = parent.getAttribute('start');
+					var index = Array.prototype.indexOf.call(parent.children, node);
+					number = start ? Number(start) + index : index + 1;
+					prefix = number + '.  ';
+				}
+
+				// Calculate indentation based on the width of the number prefix
+				var indentWidth = prefix.length;
+				var indent = ' '.repeat(indentWidth);
+				content = content.replace(/\n/gm, '\n' + indent);
+
+				return (
+					prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
+				);
 			}
 		});
 
@@ -196,8 +357,11 @@ export default class CommonMarkDataProcessor {
 			},
 			replacement: function (_content, node) {
 				// Remove filler attribute, but keep empty lines
-				node.querySelectorAll('td br[data-cke-filler]')
-					.forEach((node) => node.removeAttribute('data-cke-filler'));
+				node.querySelectorAll('td br[data-cke-filler]').forEach((node) => {
+					if (node.nextElementSibling) {
+						node.removeAttribute('data-cke-filler');
+					}
+				});
 
 				return node.outerHTML;
 			}
@@ -208,6 +372,25 @@ export default class CommonMarkDataProcessor {
 			replacement: function (content) {
 				return '~~' + content + '~~'
 			}
+		});
+
+		turndownService.addRule('workPackageQuickinfo', {
+			filter: (node) => node.nodeName === 'OPCE-MACRO-WP-QUICKINFO',
+			replacement: (_content, node) => {
+				const id = node.getAttribute('data-display-id') || node.getAttribute('data-id') || '';
+				if (!id) return '';
+				const detailed = node.getAttribute('data-detailed') === 'true';
+				return detailed ? `###${id}` : `##${id}`;
+			},
+		});
+
+		turndownService.addRule('wikiPageLink', {
+			filter: (node) => node.nodeName === 'TURBO-FRAME' && node.getAttribute('data-type') === 'wiki-page-link',
+			replacement: (_content, node) => {
+				const providerId = node.getAttribute('data-provider-id') || '';
+				const pageIdentifier = node.getAttribute('data-page-identifier') || '';
+				return `\\[\\[\\[${providerId}:${pageIdentifier}\\]\\]\\]`;
+			},
 		});
 
 		turndownService.addRule('openProjectMacros', {
@@ -226,7 +409,19 @@ export default class CommonMarkDataProcessor {
 					node.classList.contains('mention')
 				)
 			},
-			replacement: (_content, node) => node.outerHTML,
+			replacement: (_content, node) => {
+				if (node.getAttribute('data-type') === 'work_package') {
+					// `data-display-id` signals an autocomplete-picked or
+					// round-tripped envelope; preserve those intact.
+					// Parser-emitted single-hash shorthand has no
+					// `data-display-id` and collapses to bare markdown.
+					if (node.getAttribute('data-display-id')) {
+						return node.outerHTML;
+					}
+					return node.getAttribute('data-text') || node.textContent || '';
+				}
+				return node.outerHTML;
+			},
 		});
 
 		turndownService.addRule('emptyParagraphs', {

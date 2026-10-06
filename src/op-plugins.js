@@ -21,7 +21,6 @@ import { Paragraph } from '@ckeditor/ckeditor5-paragraph';
 import { Typing } from '@ckeditor/ckeditor5-typing';
 import OPHelpLinkPlugin from "./plugins/op-help-link-plugin/op-help-link-plugin";
 import CodeBlockPlugin from "./plugins/code-block/code-block";
-import OPPreviewPlugin from "./plugins/op-preview.plugin";
 import { Table } from '@ckeditor/ckeditor5-table';
 import { TableToolbar } from '@ckeditor/ckeditor5-table';
 import { TableProperties } from '@ckeditor/ckeditor5-table';
@@ -33,8 +32,7 @@ import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin'
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
 import CommonMark from './commonmark/commonmark';
 import OPSourceCodePlugin from './plugins/op-source-code.plugin';
-// import Mention from "../forked/ckeditor5-mention/src/mention";
-import { Mention } from '@ckeditor/ckeditor5-mention';
+import { Mention } from "@ckeditor/ckeditor5-mention";
 import {MentionCaster} from './mentions/mentions-caster';
 import { ImageResize } from '@ckeditor/ckeditor5-image';
 import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
@@ -43,6 +41,11 @@ import { ImageInline } from '@ckeditor/ckeditor5-image';
 import { PageBreak } from '@ckeditor/ckeditor5-page-break';
 import { Autosave } from '@ckeditor/ckeditor5-autosave';
 import OpContentRevisions from "./plugins/op-content-revisions/op-content-revisions";
+import OPMacroWpQuickinfoPlugin from "./plugins/op-macro-wp-quickinfo/op-macro-wp-quickinfo-plugin";
+import OpMacroWikiPageLinkPlugin from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-plugin";
+import OpMacroWikiPageLinkAddExisting from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-add-existing";
+import OpMacroWikiPageLinkCreateNew from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-create-new";
+import OPResizerGuard from "./plugins/op-resizer-guard/op-resizer-guard-plugin";
 import { Mermaid } from '@ckeditor/ckeditor5-mermaid';
 
 // We divide our plugins into separate concerns here
@@ -52,6 +55,8 @@ export const opMacroPlugins = [
 	OPMacroEmbeddedTable,
 	OPMacroWpButtonPlugin,
 	OPChildPagesPlugin,
+	OpMacroWikiPageLinkAddExisting,
+	OpMacroWikiPageLinkCreateNew,
 ];
 
 export const opImageUploadPlugins = [
@@ -77,6 +82,7 @@ export const builtinPlugins = [
 	ImageResize,
 	ImageToolbar,
 	OpImageAttachmentLookup,
+	OPResizerGuard,
 	Link,
 	List,
 	TodoList,
@@ -90,9 +96,10 @@ export const builtinPlugins = [
 	PasteFromOffice,
 
 	OPHelpLinkPlugin,
-	OPPreviewPlugin,
 	OPSourceCodePlugin,
 	OpContentRevisions,
+	OPMacroWpQuickinfoPlugin,
+	OpMacroWikiPageLinkPlugin,
 	CodeBlockPlugin,
 	Mermaid,
 

@@ -1,5 +1,5 @@
 const childPagesMacroSymbol = Symbol( 'isWpButtonMacroSymbol' );
-import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget/src/utils';
+import {toWidget, isWidget} from '@ckeditor/ckeditor5-widget';
 
 export function toChildPagesMacroWidget( viewElement, writer, label ) {
 	writer.setCustomProperty( childPagesMacroSymbol, true, viewElement );

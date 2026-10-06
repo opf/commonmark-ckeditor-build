@@ -7,6 +7,6 @@ import CommonMarkDataProcessor from './commonmarkdataprocessor';
 
 // Simple plugin which loads the data processor.
 export default function CommonMarkPlugin(editor) {
-	editor.data.processor = new CommonMarkDataProcessor(editor.editing.view.document);
+	editor.data.processor = new CommonMarkDataProcessor(editor);
 }
 

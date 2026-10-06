@@ -98,8 +98,20 @@ export const defaultConfig = {
 				minimumCharacters: 0
 			},
 			{
+				marker: '###',
+				feed: workPackageMentions('###'),
+				itemRenderer: customItemRenderer,
+				minimumCharacters: 1
+			},
+			{
+				marker: '##',
+				feed: workPackageMentions('##'),
+				itemRenderer: customItemRenderer,
+				minimumCharacters: 1
+			},
+			{
 				marker: '#',
-				feed: workPackageMentions,
+				feed: workPackageMentions('#'),
 				itemRenderer: customItemRenderer,
 				minimumCharacters: 1
 			},
@@ -112,5 +124,6 @@ export const defaultConfig = {
 		]
 	},
 
-	language: 'en'
+	language: 'en',
+	licenseKey: 'GPL'
 };
