@@ -46,6 +46,7 @@ import OpMacroWikiPageLinkPlugin from "./plugins/op-macro-wiki-page-link/op-macr
 import OpMacroWikiPageLinkAddExisting from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-add-existing";
 import OpMacroWikiPageLinkCreateNew from "./plugins/op-macro-wiki-page-link/op-macro-wiki-page-link-create-new";
 import OPResizerGuard from "./plugins/op-resizer-guard/op-resizer-guard-plugin";
+import Mermaid from './plugins/mermaid/mermaid';
 
 // We divide our plugins into separate concerns here
 // in order to enable / disable each group by configuration
@@ -108,6 +109,8 @@ export const builtinPlugins = [
 	TableCellProperties,
 
 	OPMacroListPlugin,
+
+	Mermaid,
 
 	OpCustomCssClassesPlugin,
 ].concat(
