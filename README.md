@@ -58,8 +58,8 @@ core repository, overriding anything in there.
 
 ### Type checking
 
-The source is being converted to TypeScript. Files ending in `.ts` are checked in strict mode; files still ending in
-`.js` are not checked. Webpack and jest strip types without checking them, so run the checker separately:
+The source and tests are TypeScript, checked in strict mode. Webpack and jest strip types without checking them, so run
+the checker separately:
 
 ```
 npm run typecheck
