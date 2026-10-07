@@ -39,6 +39,7 @@ import OpCustomCssClassesPlugin from "./plugins/op-custom-css-classes-plugin";
 import { ImageBlock } from '@ckeditor/ckeditor5-image';
 import { ImageInline } from '@ckeditor/ckeditor5-image';
 import { PageBreak } from '@ckeditor/ckeditor5-page-break';
+import { HorizontalLine } from '@ckeditor/ckeditor5-horizontal-line';
 import { Autosave } from '@ckeditor/ckeditor5-autosave';
 import OpContentRevisions from "./plugins/op-content-revisions/op-content-revisions";
 import OPMacroWpQuickinfoPlugin from "./plugins/op-macro-wp-quickinfo/op-macro-wp-quickinfo-plugin";
@@ -86,6 +87,7 @@ export const builtinPlugins = [
 	List,
 	TodoList,
 	PageBreak,
+	HorizontalLine,
 	Paragraph,
 	Typing,
 
