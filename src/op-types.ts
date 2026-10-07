@@ -123,6 +123,10 @@ export interface OpMentionFeedItem extends OpMention {
 	name: string;
 }
 
+export interface OpWidgetToolbarConfig {
+	toolbar: string[];
+}
+
 // The import makes this a module augmentation rather than a new declaration.
 import type {} from '@ckeditor/ckeditor5-core';
 
@@ -134,5 +138,11 @@ declare module '@ckeditor/ckeditor5-core' {
 		opContentRevisionKey?: string;
 		// Overrides the default revisions key.
 		storageKey?: string;
+		// Toolbars of our widgets; see createEditToolbar().
+		OPMacroEmbeddedTable?: OpWidgetToolbarConfig;
+		OPMacroWpButton?: OpWidgetToolbarConfig;
+		OPWikiIncludePage?: OpWidgetToolbarConfig;
+		OPCodeBlock?: OpWidgetToolbarConfig;
+		OPChildPages?: OpWidgetToolbarConfig;
 	}
 }

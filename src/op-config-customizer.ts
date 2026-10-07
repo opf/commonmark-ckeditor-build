@@ -1,8 +1,11 @@
+import type { EditorConfig } from '@ckeditor/ckeditor5-core';
+import type { DecoupledEditor } from '@ckeditor/ckeditor5-editor-decoupled';
 import {opImageUploadPlugins, opMacroPlugins} from './op-plugins';
 
-export function configurationCustomizer(editorClass) {
-	return (wrapper, configuration) => {
-		const context = configuration.openProject.context;
+export function configurationCustomizer(editorClass: typeof DecoupledEditor) {
+	return (wrapper: HTMLElement | string, configuration: EditorConfig) => {
+		// TODO(OP-18993): throws when core passes no openProject configuration.
+		const context = configuration.openProject!.context;
 
 		// We're going to remove some plugins from the default configuration
 		// when we detect they are unsupported in the current context
@@ -16,13 +19,14 @@ export function configurationCustomizer(editorClass) {
 
 		// Disable macros entirely
 		if (context.macros === false) {
-			configuration.openProject.disableAllMacros = true;
+			configuration.openProject!.disableAllMacros = true;
 			configuration.removePlugins.push(...opMacroPlugins.map(el => el.pluginName))
 		}
 
 		// Enable selective macros
 		if (Array.isArray(context.macros)) {
-			const disabledMacros = opMacroPlugins.filter(plugin => context.macros.indexOf(plugin.pluginName) === -1);
+			// The Array.isArray() check above does not carry into the callback.
+			const disabledMacros = opMacroPlugins.filter(plugin => (context.macros as string[]).indexOf(plugin.pluginName) === -1);
 			configuration.removePlugins.push(...disabledMacros);
 		}
 

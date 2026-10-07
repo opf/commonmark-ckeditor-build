@@ -11,6 +11,10 @@ interface Window {
 	OpenProject: {
 		urlRoot: string;
 	};
+	// Set by this build for core to pick up; see op-ckeditor.ts.
+	OPConstrainedEditor: typeof import('./op-ckeditor').ConstrainedEditor;
+	OPClassicEditor: typeof import('./op-ckeditor').FullEditor;
+	OPEditorWatchdog: typeof import('@ckeditor/ckeditor5-watchdog').EditorWatchdog;
 }
 
 // Fired by core when a dialog it opened for the editor closes.
