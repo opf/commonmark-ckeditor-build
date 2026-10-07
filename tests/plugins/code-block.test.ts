@@ -1,18 +1,20 @@
 import { textContentOf } from '../../src/plugins/code-block/converters';
 
+type FakeNode = Parameters<typeof textContentOf>[0];
+
 // Minimal stand-ins for CKEditor view nodes. `textContentOf` only relies
 // on `is()`, `getChildren()` and `data`, so faking those keeps the test
 // independent of engine internals.
-function viewText( data ) {
+function viewText( data: string ): FakeNode {
 	return {
 		data,
-		is: type => type === '$text',
+		is: ( type: string ) => type === '$text',
 	};
 }
 
-function viewElement( name, children = [] ) {
+function viewElement( name: string, children: FakeNode[] = [] ): FakeNode {
 	return {
-		is: ( type, elementName ) => type === 'element' && ( elementName === undefined || elementName === name ),
+		is: ( type: string, elementName?: string ) => type === 'element' && ( elementName === undefined || elementName === name ),
 		getChildren: () => children,
 	};
 }

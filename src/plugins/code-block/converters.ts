@@ -1,15 +1,35 @@
+import type {
+	DowncastConversionApi,
+	DowncastDispatcher,
+	ModelElement,
+	ModelRange,
+	UpcastConversionApi,
+	UpcastConversionData,
+	UpcastDispatcher,
+	ViewContainerElement,
+	ViewElement,
+} from '@ckeditor/ckeditor5-engine';
+import type { EventInfo } from '@ckeditor/ckeditor5-utils';
 import {renderCodeBlockContent} from './widget';
+
+// What textContentOf() needs of a view node: text nodes carry `data`,
+// elements and fragments have children.
+interface TextSource {
+	is( type: string, name?: string ): boolean;
+	data?: string;
+	getChildren?(): Iterable<TextSource>;
+}
 
 
 export function modelCodeBlockToView() {
-	return dispatcher => {
+	return ( dispatcher: DowncastDispatcher ) => {
 		dispatcher.on( 'insert:codeblock', converter, { priority: 'high' } );
 	};
 
-	function converter( evt, data, conversionApi ) {
+	function converter( evt: EventInfo, data: { item: ModelElement; range: ModelRange }, conversionApi: DowncastConversionApi ) {
 		const codeBlock = data.item;
-		const language = codeBlock.getAttribute('opCodeblockLanguage') || 'language-text';
-		const content = codeBlock.getAttribute('opCodeblockContent');
+		const language = codeBlock.getAttribute('opCodeblockLanguage') as string | undefined || 'language-text';
+		const content = codeBlock.getAttribute('opCodeblockContent') as string | undefined;
 
 		// Consume the codeblock and text
 		conversionApi.consumable.consume( codeBlock, 'insert' );
@@ -20,7 +40,8 @@ export function modelCodeBlockToView() {
 		const langElement = viewWriter.createContainerElement( 'div', { class: 'op-uc-code-block--language' } );
 		const codeElement = viewWriter.createContainerElement( 'code', { class: language } );
 		const langContent = viewWriter.createText( language );
-		const contentElement = viewWriter.createText( content );
+		// TODO(OP-18993): a code block upcast from an empty <code> has no content attribute.
+		const contentElement = viewWriter.createText( content! );
 
 		viewWriter.insert( viewWriter.createPositionAt( codeElement, 0 ), contentElement );
 		viewWriter.insert( viewWriter.createPositionAt( langElement, 0 ), langContent );
@@ -40,18 +61,18 @@ export function modelCodeBlockToView() {
 }
 
 export function viewCodeBlockToModel() {
-	return dispatcher => {
+	return ( dispatcher: UpcastDispatcher ) => {
 		dispatcher.on( 'element:pre', converter, { priority: 'high' } );
 	};
 
-	function converter( evt, data, conversionApi ) {
+	function converter( evt: EventInfo, data: UpcastConversionData<ViewElement>, conversionApi: UpcastConversionApi ) {
 		// Do not convert if this is not an "image figure".
 		if ( !conversionApi.consumable.test( data.viewItem, { name: true } ) ) {
 			return;
 		}
 
 		// Find an code element inside the pre element.
-		const codeBlock = Array.from( data.viewItem.getChildren() ).find( viewChild => viewChild.is('element', 'code'));
+		const codeBlock = Array.from( data.viewItem.getChildren() ).find( viewChild => viewChild.is('element', 'code')) as ViewElement | undefined;
 
 		// Do not convert if code block is absent
 		if ( !codeBlock || !conversionApi.consumable.consume( codeBlock, { name: true } ) ) {
@@ -100,9 +121,9 @@ export function viewCodeBlockToModel() {
 // Recursively collect the text of a view node. The code child is not
 // always a single text node (e.g. syntax-highlight markup wraps it in
 // nested elements), so we can't just read `.data` off the first child.
-export function textContentOf( viewNode ) {
+export function textContentOf( viewNode: TextSource ): string {
 	if ( viewNode.is( '$text' ) || viewNode.is( '$textProxy' ) ) {
-		return viewNode.data;
+		return viewNode.data!;
 	}
 
 	if ( typeof viewNode.getChildren !== 'function' ) {
@@ -119,23 +140,24 @@ export function textContentOf( viewNode ) {
 
 
 export function codeBlockContentToView() {
-	return dispatcher => {
+	return ( dispatcher: DowncastDispatcher ) => {
 		dispatcher.on( 'attribute:opCodeblockContent', converter );
 		dispatcher.on( 'attribute:opCodeblockLanguage', converter );
 	};
 
-	function converter( evt, data, conversionApi ) {
+	function converter( evt: EventInfo, data: { item: ModelElement }, conversionApi: DowncastConversionApi ) {
         const modelElement = data.item;
 
         // Mark element as consumed by conversion.
         conversionApi.consumable.consume( data.item, evt.name );
 
         // Get mapped view element to update.
-        const viewElement = conversionApi.mapper.toViewElement( modelElement );
+        // The widget's view element is the <pre> container created in createCodeBlockWidget().
+        const viewElement = conversionApi.mapper.toViewElement( modelElement ) as ViewContainerElement;
 
         // Remove current <div> element contents.
-        conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 1 ) ) );
-        conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 0 ) ) );
+        conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 1 )! ) );
+        conversionApi.writer.remove( conversionApi.writer.createRangeOn( viewElement.getChild( 0 )! ) );
 
 		// Set current content
 		renderCodeBlockContent( conversionApi.writer, modelElement, viewElement );

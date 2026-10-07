@@ -48,6 +48,10 @@ export interface OpServices {
 	i18n: {
 		t(key: string, options?: Record<string, unknown>): string;
 	};
+	// Opens core's modals for configuring a macro and resolves with the result.
+	macros: {
+		editCodeBlock(content?: string, languageClass?: string): Promise<{ content: string; languageClass: string }>;
+	};
 }
 
 /** Helper functions of core that plugins call into. */

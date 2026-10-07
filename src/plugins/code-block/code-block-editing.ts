@@ -2,9 +2,11 @@ import icon from '../../icons/code-block.svg';
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type { ViewElement } from '@ckeditor/ckeditor5-engine';
 import {modelCodeBlockToView, viewCodeBlockToModel, codeBlockContentToView} from './converters';
 import {createCodeBlockWidget, isCodeBlockWidget} from './widget';
 import DoubleClickObserver from './click-observer';
+import type { ViewDocumentDoubleClickEvent } from './click-observer';
 import { getPluginContext } from '../op-context/op-context';
 import {viewToModelPositionOutsideModelElement} from "@ckeditor/ckeditor5-widget";
 
@@ -57,8 +59,8 @@ export default class CodeBlockEditing extends Plugin {
 
 		// Register click handler to code block to edit it immediately
 		view.addObserver( DoubleClickObserver );
-		this.listenTo( viewDocument, 'dblclick', ( eventInfo, domEventData ) => {
-			let element = domEventData.target;
+		this.listenTo<ViewDocumentDoubleClickEvent>( viewDocument, 'dblclick', ( eventInfo, domEventData ) => {
+			let element: ViewElement | null = domEventData.target;
 			let evt = domEventData.domEvent;
 
 			// Avoid opening the widget with modifiers selected to allow selecting the widget
@@ -82,15 +84,15 @@ export default class CodeBlockEditing extends Plugin {
 			// Create model selection over widget.
 			const modelElement = editor.editing.mapper.toModelElement( element );
 
-			const macroService = pluginContext.services.macros;
-			const language = modelElement.getAttribute( 'opCodeblockLanguage' );
-			const content = modelElement.getAttribute( 'opCodeblockContent' );
+			const macroService = pluginContext!.services.macros;
+			const language = modelElement!.getAttribute( 'opCodeblockLanguage' ) as string | undefined;
+			const content = modelElement!.getAttribute( 'opCodeblockContent' ) as string | undefined;
 
 			macroService
 				.editCodeBlock( content, language )
 				.then((update) => editor.model.change(writer => {
-					writer.setAttribute( 'opCodeblockLanguage', update.languageClass, modelElement );
-					writer.setAttribute( 'opCodeblockContent', update.content, modelElement );
+					writer.setAttribute( 'opCodeblockLanguage', update.languageClass, modelElement! );
+					writer.setAttribute( 'opCodeblockContent', update.content, modelElement! );
 				})
 			);
 
@@ -108,7 +110,7 @@ export default class CodeBlockEditing extends Plugin {
 
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
-				pluginContext.services.macros
+				pluginContext!.services.macros
 					.editCodeBlock()
 					.then((update) => editor.model.change(writer => {
 
