@@ -1,6 +1,7 @@
+import type { Editor } from '@ckeditor/ckeditor5-core';
 import OpMacroWikiPageLinkPlugin from "./op-macro-wiki-page-link-plugin";
 
-export function insertWikiPageLink(editor, providerId, pageIdentifier) {
+export function insertWikiPageLink(editor: Editor, providerId: string | undefined, pageIdentifier: string | undefined) {
 	if (!providerId || !pageIdentifier) {
 		return;
 	}

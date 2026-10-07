@@ -1,5 +1,13 @@
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type {
+	DowncastConversionApi,
+	ModelElement,
+	ViewContainerElement,
+	ViewDowncastWriter,
+	ViewNode,
+} from '@ckeditor/ckeditor5-engine';
+import type { EventInfo } from '@ckeditor/ckeditor5-utils';
 
 import {toChildPagesMacroWidget} from './utils';
 
@@ -51,7 +59,7 @@ export default class OPChildPagesEditing extends Plugin {
 		conversion.for( 'editingDowncast' )
 			.elementToElement({
 				model: 'op-macro-child-pages',
-				view: (modelElement, {writer}) => {
+				view: (modelElement: ModelElement, {writer}: DowncastConversionApi) => {
 					return this.createMacroViewElement(modelElement, writer);
 				}
 			})
@@ -95,7 +103,7 @@ export default class OPChildPagesEditing extends Plugin {
 		} );
 	}
 
-	modelAttributeToView( evt, data, conversionApi ) {
+	modelAttributeToView( evt: EventInfo, data: { item: ModelElement }, conversionApi: DowncastConversionApi ) {
 		const modelElement = data.item;
 		if (!modelElement.is('element', 'op-macro-child-pages')) {
 			return;
@@ -105,7 +113,8 @@ export default class OPChildPagesEditing extends Plugin {
 		conversionApi.consumable.consume(data.item, evt.name);
 
 		// Get mapped view element to update.
-		const viewElement = conversionApi.mapper.toViewElement(modelElement);
+		// The widget's view element is the container created in createMacroViewElement().
+		const viewElement = conversionApi.mapper.toViewElement(modelElement) as ViewContainerElement;
 
 		// Remove current <div> element contents.
 		conversionApi.writer.remove(conversionApi.writer.createRangeIn(viewElement));
@@ -118,7 +127,7 @@ export default class OPChildPagesEditing extends Plugin {
 		return window.I18n.t('js.editor.macro.child_pages.text');
 	}
 
-	pageLabel(page) {
+	pageLabel(page: string | undefined) {
 		if (page && page.length > 0) {
 			return page
 		} else {
@@ -126,7 +135,7 @@ export default class OPChildPagesEditing extends Plugin {
 		}
 	}
 
-	includeParentText(includeParent) {
+	includeParentText(includeParent: boolean | undefined) {
 		if (includeParent) {
 			return ` (${window.I18n.t('js.editor.macro.child_pages.include_parent')})`;
 		} else {
@@ -134,21 +143,22 @@ export default class OPChildPagesEditing extends Plugin {
 		}
 	}
 
-	createMacroViewElement(modelElement, writer) {
+	createMacroViewElement(modelElement: ModelElement, writer: ViewDowncastWriter) {
 		const placeholderContainer = writer.createContainerElement( 'div' );
 
 		this.setPlaceholderContent( writer, modelElement, placeholderContainer );
 
-		return toChildPagesMacroWidget(placeholderContainer, writer, { label: this.macroLabel() } )
+		// TODO(OP-18993): passes an object where the widget label is expected to be a string.
+		return toChildPagesMacroWidget(placeholderContainer, writer, { label: this.macroLabel() } as unknown as string )
 	}
 
-	setPlaceholderContent(writer, modelElement, placeholderContainer ) {
-		const page = modelElement.getAttribute('page');
-		const includeParent = modelElement.getAttribute('includeParent');
+	setPlaceholderContent(writer: ViewDowncastWriter, modelElement: ModelElement, placeholderContainer: ViewContainerElement ) {
+		const page = modelElement.getAttribute('page') as string | undefined;
+		const includeParent = modelElement.getAttribute('includeParent') as boolean | undefined;
 		const macroLabel = this.macroLabel();
 		const pageLabel = this.pageLabel(page);
 		const pageLabelContainer = writer.createContainerElement( 'span', { class: 'macro-value' } );
-		let placeholderContent = [ writer.createText( `${macroLabel} ` ) ];
+		let placeholderContent: ViewNode[] = [ writer.createText( `${macroLabel} ` ) ];
 		writer.insert( writer.createPositionAt( pageLabelContainer, 0 ), writer.createText( `${pageLabel}` ) )
 		placeholderContent.push( pageLabelContainer );
 		placeholderContent.push( writer.createText( this.includeParentText(includeParent) ));

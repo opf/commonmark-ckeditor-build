@@ -1,11 +1,15 @@
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type { DowncastConversionApi, ModelElement, ViewDowncastWriter } from '@ckeditor/ckeditor5-engine';
 
 import {toEmbeddedTableWidget} from './utils';
 import {getPluginContext} from '../op-context/op-context';
 
 export default class EmbeddedTableEditing extends Plugin {
+	declare text: { button: string; macro_text: string };
+	// TODO(OP-18993): never assigned, so the widget label below is always undefined.
+	declare label?: string;
 
 	static get pluginName() {
 		return 'EmbeddedTableEditing';
@@ -54,14 +58,14 @@ export default class EmbeddedTableEditing extends Plugin {
 
 		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-embedded-table',
-			view: (modelElement, {writer:viewWriter}) => {
+			view: (modelElement: ModelElement, {writer:viewWriter}: DowncastConversionApi) => {
 				return toEmbeddedTableWidget(this.createEmbeddedTableView(viewWriter), viewWriter, { label: this.label } )
 			}
 	    } );
 
 		conversion.for('dataDowncast').elementToElement({
 			model: 'op-macro-embedded-table',
-			view: (modelElement, {writer:viewWriter}) => {
+			view: (modelElement: ModelElement, {writer:viewWriter}: DowncastConversionApi) => {
 				return this.createEmbeddedTableDataElement(modelElement, viewWriter)
 			}
 		});
@@ -75,8 +79,8 @@ export default class EmbeddedTableEditing extends Plugin {
 			} );
 
 			// Callback executed once the widget is clicked.
-			view.on( 'execute', () => pluginContext.runInZone(() => {
-				const externalQueryConfiguration = pluginContext.services.externalQueryConfiguration;
+			view.on( 'execute', () => pluginContext!.runInZone(() => {
+				const externalQueryConfiguration = pluginContext!.services.externalQueryConfiguration;
 				const currentQuery = {}; // Initial query currently empty, we may want to provide context here.
 
 				externalQueryConfiguration.show({
@@ -94,7 +98,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		} );
 	}
 
-	createEmbeddedTableView(writer) {
+	createEmbeddedTableView(writer: ViewDowncastWriter) {
 		const placeholder = writer.createText( this.text.macro_text );
 		const container = writer.createContainerElement( 'div' );
 
@@ -111,7 +115,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		// } );
 	}
 
-	createEmbeddedTableDataElement(modelElement, writer) {
+	createEmbeddedTableDataElement(modelElement: ModelElement, writer: ViewDowncastWriter) {
 		const queryProps = modelElement.getAttribute('opEmbeddedTableQuery') || {};
 		const element = writer.createContainerElement(
 			'macro',

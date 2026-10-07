@@ -37,8 +37,8 @@ export default class OpMacroWikiPageLinkPlugin extends Plugin {
 		conversion.for('dataDowncast').elementToElement({
 			model: MODEL_ELEMENT_NAME,
 			view: (modelElement, { writer }) => {
-				const providerId = modelElement.getAttribute('providerId');
-				const pageIdentifier = modelElement.getAttribute('pageIdentifier');
+				const providerId = modelElement.getAttribute('providerId') as string;
+				const pageIdentifier = modelElement.getAttribute('pageIdentifier') as string;
 				const frameId = crypto.randomUUID();
 
 				const container = writer.createContainerElement(
@@ -60,8 +60,8 @@ export default class OpMacroWikiPageLinkPlugin extends Plugin {
 		conversion.for('editingDowncast').elementToElement({
 			model: MODEL_ELEMENT_NAME,
 			view: (modelElement, { writer }) => {
-				const providerId = modelElement.getAttribute('providerId');
-				const pageIdentifier = modelElement.getAttribute('pageIdentifier');
+				const providerId = modelElement.getAttribute('providerId') as string;
+				const pageIdentifier = modelElement.getAttribute('pageIdentifier') as string;
 				const frameId = crypto.randomUUID();
 
 				const wrapper = writer.createContainerElement('span', {

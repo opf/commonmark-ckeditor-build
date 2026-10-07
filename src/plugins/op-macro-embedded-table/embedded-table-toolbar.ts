@@ -25,10 +25,10 @@ export default class EmbeddedTableToolbar extends Plugin {
 
 		// Add editing button
 		createToolbarEditButton( editor, 'opEditEmbeddedTableQuery', widget => {
-			const externalQueryConfiguration = pluginContext.services.externalQueryConfiguration;
+			const externalQueryConfiguration = pluginContext!.services.externalQueryConfiguration;
 			const currentQuery = widget.getAttribute('opEmbeddedTableQuery') || {};
 
-			pluginContext.runInZone(() => {
+			pluginContext!.runInZone(() => {
 				externalQueryConfiguration.show({
 					currentQuery: currentQuery,
 					callback: (newQuery) => model.change(writer => {

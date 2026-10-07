@@ -51,6 +51,15 @@ export interface OpServices {
 	// Opens core's modals for configuring a macro and resolves with the result.
 	macros: {
 		editCodeBlock(content?: string, languageClass?: string): Promise<{ content: string; languageClass: string }>;
+		configureWorkPackageButton(type?: string, classes?: string): Promise<{ type: string; classes: string }>;
+		configureChildPages(page: string, includeParent?: boolean): Promise<{ page: string; includeParent: boolean }>;
+	};
+	// Opens core's query configuration modal for an embedded table.
+	externalQueryConfiguration: {
+		show(options: { currentQuery: unknown; callback: (newQuery: unknown) => void }): void;
+	};
+	turboRequests: {
+		request(url: string, options?: { method?: string }): Promise<unknown>;
 	};
 }
 

@@ -24,9 +24,9 @@ export default class OPMacroWpButtonToolbar extends Plugin {
 
 		// Add editing button
 		createToolbarEditButton( editor, 'opEditWpMacroButton', widget => {
-			const macroService = pluginContext.services.macros;
-			const type = widget.getAttribute('type');
-			const classes = widget.getAttribute('classes');
+			const macroService = pluginContext!.services.macros;
+			const type = widget.getAttribute('type') as string | undefined;
+			const classes = widget.getAttribute('classes') as string | undefined;
 
 			macroService
 				.configureWorkPackageButton(type, classes)

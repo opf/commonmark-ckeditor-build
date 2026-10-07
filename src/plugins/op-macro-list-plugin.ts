@@ -12,7 +12,8 @@ import { opMacroPlugins } from "../op-plugins";
 export default class OPMacroListPlugin extends Plugin {
 	init() {
 		const editor = this.editor;
-		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => p.pluginName);
+		// TODO(OP-18993): entries given as plugin names (strings) have no pluginName and map to undefined.
+		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => (p as { pluginName?: string }).pluginName);
 
 		// Skip if we don't have any macros here
 		if (editor.config.get('openProject.disableAllMacros') === true) {

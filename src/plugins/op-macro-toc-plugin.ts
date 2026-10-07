@@ -1,6 +1,7 @@
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type { ViewDowncastWriter } from '@ckeditor/ckeditor5-engine';
 
 import { toWidget } from '@ckeditor/ckeditor5-widget';
 
@@ -76,7 +77,7 @@ export default class OPMacroTocPlugin extends Plugin {
 		return window.I18n.t('js.editor.macro.toc');
 	}
 
-	createTocViewElement(writer) {
+	createTocViewElement(writer: ViewDowncastWriter) {
 		const placeholder = writer.createText( this.label );
 		const container = writer.createContainerElement( 'div');
 
@@ -84,7 +85,7 @@ export default class OPMacroTocPlugin extends Plugin {
 		return container;
 	}
 
-	createTocDataElement(writer) {
+	createTocDataElement(writer: ViewDowncastWriter) {
 		return writer.createContainerElement('macro', { class: 'toc' } );
 	}
 

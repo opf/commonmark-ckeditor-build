@@ -1,7 +1,17 @@
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type { ModelRange } from '@ckeditor/ckeditor5-engine';
 import { Widget, toWidget } from '@ckeditor/ckeditor5-widget';
 
 import { isWorkPackageQuickinfoMention } from './predicate';
+import type { OpMention } from '../../op-types';
+
+// Options of the mention command, as our feeds produce them.
+interface MentionExecuteOptions {
+	mention?: OpMention;
+	marker: string;
+	text?: string;
+	range?: ModelRange;
+}
 
 const QUICKINFO_MODEL = 'op-macro-wp-quickinfo';
 const QUICKINFO_TAG = 'opce-macro-wp-quickinfo';
@@ -38,7 +48,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				const dataDisplayId = viewElement.getAttribute( 'data-display-id' ) || '';
 				const wpDisplayId = dataDisplayId || dataId;
 				const detailed = viewElement.getAttribute( 'data-detailed' ) === 'true';
-				const attrs = { wpDisplayId, detailed };
+				const attrs: Record<string, unknown> = { wpDisplayId, detailed };
 				if (dataId && dataId !== wpDisplayId) {
 					attrs.wpId = dataId;
 				}
@@ -58,7 +68,8 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 			model: ( viewElement, { writer } ) => {
 				if (!isWorkPackageQuickinfoMention(viewElement)) return null;
 				const markerText = viewElement.getAttribute( 'data-text' );
-				const detailed = markerText.startsWith('###');
+				// The predicate above only passes elements that have a data-text.
+				const detailed = markerText!.startsWith('###');
 				const wpId = viewElement.getAttribute( 'data-id' ) || '';
 				const wpDisplayId = viewElement.getAttribute( 'data-display-id' ) || wpId;
 				return writer.createElement( QUICKINFO_MODEL, { wpId, wpDisplayId, detailed, markerText } );
@@ -72,7 +83,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				const wpDisplayId = modelElement.getAttribute( 'wpDisplayId' ) || '';
 				const detailed = !!modelElement.getAttribute( 'detailed' );
 				const wpId = modelElement.getAttribute( 'wpId' ) || wpDisplayId;
-				const markerText = modelElement.getAttribute( 'markerText' ) || `${detailed ? '###' : '##'}${wpDisplayId}`;
+				const markerText = modelElement.getAttribute( 'markerText' ) as string | undefined || `${detailed ? '###' : '##'}${wpDisplayId}`;
 
 				const wrapper = writer.createContainerElement( 'span', {
 					class: 'op-macro-wp-quickinfo-widget',
@@ -98,7 +109,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				const wpDisplayId = modelElement.getAttribute( 'wpDisplayId' ) || '';
 				const detailed = !!modelElement.getAttribute( 'detailed' );
 				const wpId = modelElement.getAttribute( 'wpId' );
-				const markerText = modelElement.getAttribute( 'markerText' ) || `${detailed ? '###' : '##'}${wpDisplayId}`;
+				const markerText = modelElement.getAttribute( 'markerText' ) as string | undefined || `${detailed ? '###' : '##'}${wpDisplayId}`;
 
 				// Autocomplete picks carry a `wpId`; source-typed widgets
 				// don't. Autocomplete persists as a `<mention>` envelope;
@@ -137,7 +148,8 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 		// presence on the model is the discriminator that keeps
 		// autocomplete picks as a `<mention>` envelope at save time so
 		// identity survives display-id renames.
-		mentionCommand.on( 'execute', ( evt, args ) => {
+		// CKEditor also allows `mention` to be a plain string; our feeds only yield objects.
+		mentionCommand.on( 'execute', ( evt, args: [ MentionExecuteOptions? ] ) => {
 			const opts = args && args[0];
 			if (!opts || !opts.mention) return;
 			if (opts.mention.type !== 'work_package') return;
@@ -157,7 +169,7 @@ export default class OPMacroWpQuickinfoPlugin extends Plugin {
 				if (range) {
 					writer.remove( range );
 				}
-				const attrs = { wpDisplayId, detailed, markerText };
+				const attrs: Record<string, unknown> = { wpDisplayId, detailed, markerText };
 				if (wpId) attrs.wpId = wpId;
 				const el = writer.createElement( QUICKINFO_MODEL, attrs );
 				editor.model.insertContent( el, editor.model.document.selection );
