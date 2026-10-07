@@ -1,10 +1,10 @@
 import { ButtonView, FileDialogButtonView } from '@ckeditor/ckeditor5-ui';
 import { Locale } from '@ckeditor/ckeditor5-utils';
-import { disableItems, enableItems } from '../../src/helpers/button-disabler.js';
+import { disableItems, enableItems } from '../../src/helpers/button-disabler';
 
 // Builds a minimal editor stub exposing only what the helper touches:
 // editor.ui.view.toolbar.items._items.
-const fakeEditorWith = items => ( {
+const fakeEditorWith = ( items: { isEnabled?: boolean }[] ) => ( {
 	ui: {
 		view: {
 			toolbar: {

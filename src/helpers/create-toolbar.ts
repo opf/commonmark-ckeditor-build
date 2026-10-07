@@ -1,20 +1,25 @@
+import type { Editor, Plugin } from '@ckeditor/ckeditor5-core';
+import type { ViewDocumentSelection } from '@ckeditor/ckeditor5-engine';
 import { ToolbarView } from '@ckeditor/ckeditor5-ui';
+
+type IsWidgetSelected = (selection: ViewDocumentSelection) => boolean;
 import { BalloonPanelView } from '@ckeditor/ckeditor5-ui';
 
 const balloonClassName = 'ck-toolbar-container';
 
 export function createEditToolbar(
 	// Plugin instance
-	plugin,
+	plugin: Plugin,
 	// Editor instance
-	editor,
+	editor: Editor,
 	// Configuration namespace in op-ckeditor.js
-	config_namespace,
+	config_namespace: string,
 	// Callback to check if widget is selected
-	isWidgetSelected
+	isWidgetSelected: IsWidgetSelected
 ) {
 
-	const toolbarConfig = editor.config.get( config_namespace + '.toolbar' );
+	// The namespaces are our own configuration keys, each holding a list of toolbar item names.
+	const toolbarConfig = editor.config.get( config_namespace + '.toolbar' ) as string[] | undefined;
 
 	// Don't add the toolbar if there is no configuration.
 	if ( !toolbarConfig || !toolbarConfig.length ) {
@@ -79,7 +84,7 @@ export function createEditToolbar(
  *
  * @param {module:core/editor/editor~Editor} editor The editor instance.
  */
-function repositionContextualBalloon( editor, selectionCallback ) {
+function repositionContextualBalloon( editor: Editor, selectionCallback: IsWidgetSelected ) {
 	const balloon = editor.plugins.get( 'ContextualBalloon' );
 
 	if ( selectionCallback( editor.editing.view.document.selection ) ) {
@@ -98,12 +103,12 @@ function repositionContextualBalloon( editor, selectionCallback ) {
  * @param {module:core/editor/editor~Editor} editor The editor instance.
  * @returns {module:utils/dom/position~Options}
  */
-function getBalloonPositionData( editor ) {
+function getBalloonPositionData( editor: Editor ) {
 	const editingView = editor.editing.view;
 	const defaultPositions = BalloonPanelView.defaultPositions;
 
 	return {
-		target: editingView.domConverter.viewToDom( editingView.document.selection.getSelectedElement() ),
+		target: editingView.domConverter.viewToDom( editingView.document.selection.getSelectedElement()! ),
 		positions: [
 			defaultPositions.northArrowSouth,
 			defaultPositions.northArrowSouthWest,
