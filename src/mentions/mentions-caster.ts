@@ -1,8 +1,18 @@
 import {getPluginContext} from "../plugins/op-context/op-context";
+import type { Editor } from '@ckeditor/ckeditor5-core';
 import { ClickObserver } from '@ckeditor/ckeditor5-engine';
+import type {
+	DowncastConversionApi,
+	MatcherObjectPattern,
+	ModelElement,
+	ViewDocumentClickEvent,
+	ViewElement,
+	ViewText,
+} from '@ckeditor/ckeditor5-engine';
+import type { OpMention } from '../op-types';
 import { isWorkPackageQuickinfoMention } from '../plugins/op-macro-wp-quickinfo/predicate';
 
-export function MentionCaster( editor ) {
+export function MentionCaster( editor: Editor ) {
 	const pluginContext = getPluginContext(editor);
 	const view = editor.editing.view;
 	const viewDocument = view.document;
@@ -10,11 +20,12 @@ export function MentionCaster( editor ) {
 	view.addObserver(ClickObserver);
 
 	// Open mention links, in a new tab
-	editor.listenTo(viewDocument, 'click', (evt, data) => {
+	editor.listenTo<ViewDocumentClickEvent>(viewDocument, 'click', (evt, data) => {
 		if (data.domTarget.nodeName === 'A' &&  data.domTarget.classList.contains('mention')) {
 			const link = document.createElement('a');
 			link.target = '_blank';
-			link.href = data.domTarget.attributes.href.value;
+			// Attributes are also reachable by name, which NamedNodeMap's typing does not express.
+			link.href = (data.domTarget.attributes as NamedNodeMap & { href: Attr }).href.value;
 
 			link.click();
 		}
@@ -25,14 +36,15 @@ export function MentionCaster( editor ) {
 	editor.conversion
 		.for( 'upcast' )
 		.elementToAttribute( {
+			// TODO(OP-18993): `key` is not a property of a matcher pattern and is ignored.
 			view: {
 				name: 'mention',
 				key: 'data-mention',
 				classes: 'mention',
-			},
+			} as MatcherObjectPattern,
 			model: {
 				key: 'mention',
-				value: viewItem => {
+				value: (viewItem: ViewElement) => {
 					const dataId = viewItem.getAttribute( 'data-id' );
 					const dataDisplayId = viewItem.getAttribute( 'data-display-id' );
 					const type = viewItem.getAttribute( 'data-type' );
@@ -51,7 +63,8 @@ export function MentionCaster( editor ) {
 					// data downcast doesn't persist it.
 					const link = getMentionLink( dataDisplayId || dataId, type );
 
-					return editor.plugins.get( 'Mention' ).toMentionAttribute( viewItem, {
+					// CKEditor types this parameter as a model element, but documents and treats it as a view element.
+					return editor.plugins.get( 'Mention' ).toMentionAttribute( viewItem as unknown as ModelElement, {
 						dataId,
 						dataDisplayId,
 						link,
@@ -67,16 +80,18 @@ export function MentionCaster( editor ) {
 	editor.conversion
 		.for( 'upcast' )
 		.elementToAttribute( {
+		// TODO(OP-18993): `key` is not a property of a matcher pattern and is ignored.
 		view: {
 			name: 'span',
 			key: 'data-mention',
 			classes: 'mention',
-		},
+		} as MatcherObjectPattern,
 		model: {
 			key: 'mention',
-			value: viewItem => {
+			value: (viewItem: ViewElement) => {
 				const children = [...viewItem.getChildren()];
-				const content = children[0];
+				// Such a span holds a single text node.
+				const content = children[0] as ViewText | undefined;
 				const text = content && content.data;
 
 				if (text) {
@@ -95,7 +110,7 @@ export function MentionCaster( editor ) {
 		.attributeToElement({
 			model: 'mention',
 			converterPriority: 'high',
-			view: (modelAttributeValue, {writer}) => {
+			view: (modelAttributeValue: OpMention | undefined, {writer}: DowncastConversionApi) => {
 				// Do not convert empty attributes (lack of value means no mention).
 				if ( !modelAttributeValue ) {
 					return;
@@ -124,7 +139,7 @@ export function MentionCaster( editor ) {
 		.attributeToElement({
 			model: 'mention',
 			converterPriority: 'high',
-			view: (modelAttributeValue, {writer}) => {
+			view: (modelAttributeValue: OpMention | undefined, {writer}: DowncastConversionApi) => {
 				// Do not convert empty attributes (lack of value means no mention).
 				if ( !modelAttributeValue ) {
 					return;
@@ -134,7 +149,7 @@ export function MentionCaster( editor ) {
 					return writer.createAttributeElement('span');
 				}
 
-				const attrs = {
+				const attrs: Record<string, string | number | undefined> = {
 					'class': 'mention',
 					'data-id': modelAttributeValue.dataId,
 					'data-type': modelAttributeValue.type,
@@ -149,8 +164,8 @@ export function MentionCaster( editor ) {
 			}
 		});
 
-	function getMentionLink(id, type) {
-		const typePath = pluginContext.services.apiV3Service[`${type}s`].segment;
+	function getMentionLink(id: string | undefined, type: string | undefined) {
+		const typePath = pluginContext!.services.apiV3Service[`${type}s`].segment;
 		const base = window.OpenProject.urlRoot;
 
 		return `${base}/${typePath}/${id}`;

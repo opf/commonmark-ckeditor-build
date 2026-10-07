@@ -1,7 +1,8 @@
 import emojis from './emojis.json';
+import type { OpMentionFeedItem } from '../op-types';
 
-export function emojiMentions(query) {
-	function isNameOrKeywords( query, name, keywords ) {
+export function emojiMentions(query: string) {
+	function isNameOrKeywords( query: string, name: string, keywords: string[] ) {
 		if ( name.includes(query) ) {
 			return true;
 		}
@@ -15,7 +16,7 @@ export function emojiMentions(query) {
 		return false;
 	}
 
-	return new Promise((resolve, _reject) => {
+	return new Promise<OpMentionFeedItem[]>((resolve, _reject) => {
 		const emojiStore = emojis;
 		const matches = emojiStore
 			.filter((emoji) => isNameOrKeywords(query, emoji.id, emoji.keywords))
