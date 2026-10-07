@@ -5,6 +5,7 @@
 
 import { _stringifyView as stringify } from "@ckeditor/ckeditor5-engine";
 import { EditingView, StylesProcessor } from "@ckeditor/ckeditor5-engine";
+import type { Editor } from "@ckeditor/ckeditor5-core";
 
 import MarkdownDataProcessor from '../../../src/commonmark/commonmarkdataprocessor';
 
@@ -20,7 +21,12 @@ import MarkdownDataProcessor from '../../../src/commonmark/commonmarkdataprocess
  * markdown string (which will be used if this parameter is not provided).
  * @returns {module:engine/view/documentfragment~DocumentFragment}
  */
-export function testDataProcessor(markdown, viewString, normalizedMarkdown, options) {
+interface TestOptions {
+	setup?: (dataProcessor: MarkdownDataProcessor) => void;
+	simulatePlugin?: () => string;
+}
+
+export function testDataProcessor(markdown: string, viewString: string, normalizedMarkdown?: string, options?: TestOptions) {
 	const editor = createTestEditor();
 
 	const dataProcessor = new MarkdownDataProcessor(editor);
@@ -50,16 +56,17 @@ export function testDataProcessor(markdown, viewString, normalizedMarkdown, opti
 export function createTestEditor() {
 	const view = new EditingView(new StylesProcessor());
 
-	return { editing: { view } };
+	// The data processor only reads editing.view from the editor.
+	return { editing: { view } } as unknown as Editor;
 }
 
-function cleanHtml(html) {
+function cleanHtml(html: string) {
 	// Space between table elements.
 	html = html.replace(/(th|td|tr)>\s+<(\/?(?:th|td|tr))/g, '$1><$2');
 	return html;
 }
 
-function cleanMarkdown(markdown) {
+function cleanMarkdown(markdown: string) {
 	// Trim spaces at the end of the lines.
 	markdown = markdown.replace(/ +$/gm, '');
 	// Trim linebreak at the very beginning.

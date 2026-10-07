@@ -1,4 +1,4 @@
-import {testDataProcessor} from './_utils/utils.js';
+import {testDataProcessor} from './_utils/utils';
 
 describe('CommonMarkProcessor', () => {
 	describe('page breaks', () => {

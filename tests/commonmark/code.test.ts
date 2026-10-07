@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
-import {testDataProcessor} from './_utils/utils.js';
+import {testDataProcessor} from './_utils/utils';
 
 describe('CommonMarkProcessor', () => {
 	describe('code', () => {
