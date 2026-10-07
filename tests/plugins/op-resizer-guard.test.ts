@@ -1,12 +1,13 @@
-import OPResizerGuard from '../../src/plugins/op-resizer-guard/op-resizer-guard-plugin.js';
+import type { Editor } from '@ckeditor/ckeditor5-core';
+import OPResizerGuard from '../../src/plugins/op-resizer-guard/op-resizer-guard-plugin';
 
 // Builds a minimal editor stub exposing only what the plugin touches:
 // editor.plugins.get('WidgetResize').
-const fakeEditorWith = widgetResize => ( {
+const fakeEditorWith = ( widgetResize: { redrawSelectedResizer(): unknown } ) => ( {
 	plugins: {
-		get: name => ( name === 'WidgetResize' ? widgetResize : null )
+		get: ( name: string ) => ( name === 'WidgetResize' ? widgetResize : null )
 	}
-} );
+} as unknown as Editor );
 
 describe( 'OPResizerGuard', () => {
 	test( 'suppresses the synchronous re-entrant redraw', () => {

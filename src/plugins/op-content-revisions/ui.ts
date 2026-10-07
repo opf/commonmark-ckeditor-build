@@ -2,7 +2,9 @@
  * @file registers the history_log toolbar button and binds functionality to it.
  */
 import {Plugin} from "@ckeditor/ckeditor5-core";
+import type {Editor} from "@ckeditor/ckeditor5-core";
 import {addListToDropdown, createDropdown} from "@ckeditor/ckeditor5-ui";
+import type {ListDropdownItemDefinition} from "@ckeditor/ckeditor5-ui";
 import {Collection} from "@ckeditor/ckeditor5-utils";
 import {loadFromLocalStorage} from "./storage";
 import {countWords, generateHash} from "./utils";
@@ -19,7 +21,7 @@ export default class OpContentRevisionsUI extends Plugin {
 
     editor.ui.componentFactory.add("opContentRevisions", locale => {
       const dropdownView = createDropdown(locale);
-      const collection = new Collection();
+      const collection = new Collection<ListDropdownItemDefinition>();
 
       // Create a dropdown with a list inside the panel.
       addListToDropdown(dropdownView, collection, {
@@ -41,7 +43,8 @@ export default class OpContentRevisionsUI extends Plugin {
       });
 
       dropdownView.on("execute", (evt) => {
-        const { timestamp } = evt.source;
+        // The source is the list item's model, which carries the timestamp set below.
+        const { timestamp } = evt.source as { timestamp?: number };
 
         if (timestamp) {
           editor.execute("opContentRevisionApply", timestamp);
@@ -54,20 +57,23 @@ export default class OpContentRevisionsUI extends Plugin {
 
 }
 
-function addAvailableRevisions(editor, collection) {
-  const key = editor.config.get(OP_CONTENT_REVISION_KEY);
+function addAvailableRevisions(editor: Editor, collection: Collection<ListDropdownItemDefinition>) {
+  // The revisions plugin defines the key in its constructor.
+  const key = editor.config.get(OP_CONTENT_REVISION_KEY)!;
   const record = loadFromLocalStorage(key);
   const i18n = getOPI18n(editor);
   const timezoneService = getOPService(editor, "timezone");
 
-  if (!record?.items || record.items.count <= 0) {
+  // TODO(OP-18993): arrays have no `count`, so the second condition is always false.
+  if (!record?.items || (record.items as unknown as { count: number }).count <= 0) {
     const def = {
       type: "button",
       model: {
         label: i18n.t('js.editor.no_revisions'),
         withText: true,
       },
-    };
+    // CKEditor types `model` as a UIModel; a plain object with the same properties is passed.
+    } as unknown as ListDropdownItemDefinition;
 
     collection.add(def);
     return;
@@ -80,7 +86,8 @@ function addAvailableRevisions(editor, collection) {
     index--;
 
     const data = record.items[index];
-    const time = timezoneService.formattedRelativeDateTime(data.timestamp);
+    // TODO(OP-18993): core declares this parameter as a datetime string; a numeric timestamp is passed.
+    const time = timezoneService.formattedRelativeDateTime(data.timestamp as unknown as string);
     const words = i18n.t("js.units.word", { count: countWords(data.content) });
     const matches = data.hash === currentHash ? `${i18n.t('js.label_current')} - ` : "";
     const label = `${matches}${time} (${words})`;
@@ -92,7 +99,8 @@ function addAvailableRevisions(editor, collection) {
         label,
         withText: true,
       },
-    };
+    // CKEditor types `model` as a UIModel; a plain object with the same properties is passed.
+    } as unknown as ListDropdownItemDefinition;
 
     collection.add(def);
   }

@@ -8,9 +8,21 @@
 export interface OpResource {
 	_type: string;
 	id?: string | number | null;
+	href?: string | null;
 	canAddAttachments?: boolean;
 	$embedded?: {
 		workPackage?: OpResource;
+	};
+	// Present on resources that can hold attachments.
+	lookupDownloadLocationByName?(name: string): string | null | undefined;
+}
+
+/** An attachment as returned by core after an upload. */
+export interface OpAttachment {
+	_links: {
+		staticDownloadLocation: {
+			href: string;
+		};
 	};
 }
 
@@ -49,6 +61,9 @@ export interface OpServices {
 		t(key: string, options?: Record<string, unknown>): string;
 	};
 	// Opens core's modals for configuring a macro and resolves with the result.
+	// Declared as this repository calls them. Core's own declarations are looser
+	// in places: configureChildPages() takes includeParent as a string and
+	// resolves with `object`, and editCodeBlock() requires both arguments.
 	macros: {
 		editCodeBlock(content?: string, languageClass?: string): Promise<{ content: string; languageClass: string }>;
 		configureWorkPackageButton(type?: string, classes?: string): Promise<{ type: string; classes: string }>;
@@ -60,6 +75,16 @@ export interface OpServices {
 	};
 	turboRequests: {
 		request(url: string, options?: { method?: string }): Promise<unknown>;
+	};
+	notifications: {
+		addError(message: string): void;
+	};
+	timezone: {
+		formattedRelativeDateTime(datetimeString: string): string;
+	};
+	attachmentsResourceService: {
+		// Returns an RxJS observable; only toPromise() is used here.
+		attachFiles(resource: OpResource, files: File[]): { toPromise(): Promise<OpAttachment[]> };
 	};
 }
 
@@ -105,5 +130,9 @@ declare module '@ckeditor/ckeditor5-core' {
 	interface EditorConfig {
 		openProject?: OpConfig;
 		disabledMentions?: string[];
+		// Key under which the content revisions plugin stores drafts.
+		opContentRevisionKey?: string;
+		// Overrides the default revisions key.
+		storageKey?: string;
 	}
 }

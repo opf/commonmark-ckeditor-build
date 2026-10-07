@@ -4,9 +4,10 @@ import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";
 
 export default class OpContentRevisionsCommand extends Command {
 
-  async execute (timestamp) {
+  async execute (timestamp: number) {
     const editor = this.editor;
-    const key = editor.config.get(OP_CONTENT_REVISION_KEY);
+    // The revisions plugin defines the key in its constructor.
+    const key = editor.config.get(OP_CONTENT_REVISION_KEY)!;
 
     const record = await loadFromLocalStorage(key);
     if (!record) {

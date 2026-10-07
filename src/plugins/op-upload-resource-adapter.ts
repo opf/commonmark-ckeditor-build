@@ -1,7 +1,14 @@
+import type { Editor } from '@ckeditor/ckeditor5-core';
+import type { FileLoader } from '@ckeditor/ckeditor5-upload';
+import type { OpAttachment, OpResource } from '../op-types';
 import {getOPService} from './op-context/op-context';
 
 export default class OpUploadResourceAdapter {
-    constructor(loader, resource, editor) {
+    declare loader: FileLoader;
+    declare resource: OpResource | undefined;
+    declare editor: Editor;
+
+    constructor(loader: FileLoader, resource: OpResource | undefined, editor: Editor) {
         this.loader = loader;
         this.resource = resource;
         this.editor = editor;
@@ -19,7 +26,7 @@ export default class OpUploadResourceAdapter {
 		return this.loader.file
 			.then(file => {
 			return resourceService
-				.attachFiles(resource, [file])
+				.attachFiles(resource, [file!])
 				.toPromise()
 				.then((result) => {
 					this.editor.model.fire('op:attachment-added', result);
@@ -32,7 +39,7 @@ export default class OpUploadResourceAdapter {
 
 	}
 
-	buildResponse(result) {
+	buildResponse(result: OpAttachment) {
 		return { default: result._links.staticDownloadLocation.href };
 	}
 
