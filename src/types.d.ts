@@ -32,9 +32,9 @@ declare module 'turndown-plugin-gfm' {
 }
 
 declare module 'markdown-it-task-lists' {
-	import type MarkdownIt from 'markdown-it';
+	import type { PluginWithOptions } from 'markdown-it';
 
-	const taskLists: MarkdownIt.PluginWithOptions<{
+	const taskLists: PluginWithOptions<{
 		enabled?: boolean;
 		label?: boolean;
 		labelAfter?: boolean;

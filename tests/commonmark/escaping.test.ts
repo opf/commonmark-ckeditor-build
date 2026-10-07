@@ -5,9 +5,9 @@
 
 import MarkdownDataProcessor from '../../src/commonmark/commonmarkdataprocessor';
 import { _stringifyView as stringify } from '@ckeditor/ckeditor5-engine';
-import { testDataProcessor, createTestEditor } from './_utils/utils.js';
+import { testDataProcessor, createTestEditor } from './_utils/utils';
 
-const testCases = {
+const testCases: Record<string, { test: string; result: string }> = {
 	'backslash': { test: '\\\\', result: '\\' },
 	'underscore': { test: '\\_', result: '_' },
 	'left brace': { test: '\\{', result: '{' },
@@ -27,7 +27,7 @@ const testCases = {
 describe('Commonmark', () => {
 	describe('escaping', () => {
 		describe('toView', () => {
-			let dataProcessor;
+			let dataProcessor: MarkdownDataProcessor;
 
 			beforeEach(() => {
 				dataProcessor = new MarkdownDataProcessor(createTestEditor());

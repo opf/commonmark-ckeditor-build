@@ -58,7 +58,7 @@ export function textNodesPreprocessor(root: Node, allowed_whitespace_nodes: stri
  * @param {*} allowed_whitespace_nodes
  * @param {*} allowed_raw_nodes
  */
-export function linkPreprocessor(root: Node, _allowed_whitespace_nodes: string[], _allowed_raw_nodes: string[]) {
+export function linkPreprocessor(root: Node, _allowed_whitespace_nodes?: string[], _allowed_raw_nodes?: string[]) {
 	let walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
@@ -77,7 +77,7 @@ export function linkPreprocessor(root: Node, _allowed_whitespace_nodes: string[]
 	}
 }
 
-export function breaksPreprocessor(root: Node, _allowed_whitespace_nodes: string[], _allowed_raw_nodes: string[]) {
+export function breaksPreprocessor(root: Node, _allowed_whitespace_nodes?: string[], _allowed_raw_nodes?: string[]) {
 	// The filter returns undefined for nodes it does not accept, which the DOM
 	// treats like FILTER_SKIP but NodeFilter's typing does not allow.
 	let walker = document.createNodeIterator(

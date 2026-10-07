@@ -9,7 +9,9 @@
 
 /* eslint-env browser */
 
+import type { Editor } from '@ckeditor/ckeditor5-core';
 import { HtmlDataProcessor, ViewDomConverter } from '@ckeditor/ckeditor5-engine';
+import type { ViewDocumentFragment } from '@ckeditor/ckeditor5-engine';
 import { highlightedCodeBlock } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import { textNodesPreprocessor, linkPreprocessor, breaksPreprocessor } from './utils/preprocessor';
@@ -17,6 +19,7 @@ import { fixTasklistWhitespaces } from './utils/fix-tasklist-whitespaces';
 import { hoistTaskListCheckboxes } from './utils/hoist-task-list-checkboxes';
 import { fixBreaksInTables, fixBreaksInLists, fixBreaksOnRootLevel } from "./utils/fix-breaks";
 import markdownIt from 'markdown-it';
+import type { StateInline, Token } from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
 import { isPageBreakNode, PAGE_BREAK_MARKDOWN } from "./utils/page-breaks";
 import { getOPPath } from "../plugins/op-context/op-context";
@@ -32,7 +35,7 @@ const WP_REF_RE = /^(#{1,3})(\d+|[A-Z][A-Z0-9_]*-\d+)(?!\w)/;
 // Stored `<mention>X</mention>` envelopes round-trip through markdown-it
 // as three independent `html_inline` tokens; `#`-leading text between
 // the open and close must not be re-promoted by this rule.
-function isInsideStoredMention(tokens) {
+function isInsideStoredMention(tokens: Token[]) {
 	if (!tokens.some(t => t.type === 'html_inline' && t.content.startsWith('<mention'))) {
 		return false;
 	}
@@ -46,7 +49,7 @@ function isInsideStoredMention(tokens) {
 	return false;
 }
 
-function workPackageRefInlineRule(state, silent) {
+function workPackageRefInlineRule(state: StateInline, silent: boolean) {
 	const start = state.pos;
 	const src = state.src;
 
@@ -90,7 +93,7 @@ function workPackageRefInlineRule(state, silent) {
 
 const WIKI_PAGE_LINK_RE = /(?:\\\[){3}([0-9]+):([^\\\n]+)(?:\\\]){3}/;
 
-function wikiPageLinkInlineRule(state, silent, editor) {
+function wikiPageLinkInlineRule(state: StateInline, silent: boolean, editor: Editor) {
 	const start = state.pos;
 	const src = state.src;
 
@@ -113,8 +116,9 @@ function wikiPageLinkInlineRule(state, silent, editor) {
 	return true;
 }
 
-function pageLinkTurboFrame(frameId, frameSrc, providerId, pageIdentifier) {
-	const frame = document.createElement('turbo-frame');
+function pageLinkTurboFrame(frameId: string, frameSrc: string, providerId: string, pageIdentifier: string) {
+	// <turbo-frame> is a custom element with a src property; the DOM typings do not know it.
+	const frame = document.createElement('turbo-frame') as HTMLElement & { src: string };
 	frame.id = frameId;
 	frame.src = frameSrc;
 	frame.dataset.providerId = providerId;
@@ -131,7 +135,11 @@ function pageLinkTurboFrame(frameId, frameSrc, providerId, pageIdentifier) {
  * @implements module:engine/dataprocessor/dataprocessor~DataProcessor
  */
 export default class CommonMarkDataProcessor {
-	constructor(editor) {
+	declare _htmlDP: HtmlDataProcessor;
+	declare _domConverter: ViewDomConverter;
+	declare editor: Editor;
+
+	constructor(editor: Editor) {
 		const document = editor.editing.view.document;
 		this._htmlDP = new HtmlDataProcessor(document);
 		this._domConverter = new ViewDomConverter(document);
@@ -144,7 +152,7 @@ export default class CommonMarkDataProcessor {
 	 * @param {String} data A CommonMark string.
 	 * @returns {module:engine/view/documentfragment~DocumentFragment} The converted view element.
 	 */
-	toView(data) {
+	toView(data: string) {
 		const md = markdownIt({
 			// Output html
 			html: true,
@@ -167,12 +175,13 @@ export default class CommonMarkDataProcessor {
 		md.renderer.rules.code_block = function (tokens, idx, options, env, self) {
 			// markdown-it adds a newline to the end of code blocks, we need to remove it
 			tokens[idx].content = tokens[idx].content.replace(/\n$/, '');
-			return previousRenderer(tokens, idx, options, env, self);
+			return previousRenderer!(tokens, idx, options, env, self);
 		};
 
 		const html = parser.render(data);
 
 		// Convert input HTML data to DOM DocumentFragment.
+		// @ts-expect-error _toDom is protected; CKEditor offers no public way to get the DOM fragment before view conversion.
 		const domFragment = this._htmlDP._toDom(html);
 
 		// Fix duplicate whitespace in task lists
@@ -191,7 +200,8 @@ export default class CommonMarkDataProcessor {
 		hoistTaskListCheckboxes(domFragment);
 
 		// Convert DOM DocumentFragment to view DocumentFragment.
-		const viewFragment = this._domConverter.domToView(domFragment);
+		// A DOM fragment always converts to a view fragment.
+		const viewFragment = this._domConverter.domToView(domFragment) as ViewDocumentFragment;
 
 		return viewFragment;
 	}
@@ -203,9 +213,11 @@ export default class CommonMarkDataProcessor {
 	 * @param {module:engine/view/documentfragment~DocumentFragment} viewFragment
 	 * @returns {String} CommonMark string.
 	 */
-	toData(viewFragment) {
+	toData(viewFragment: ViewDocumentFragment) {
 		// Convert view DocumentFragment to DOM DocumentFragment.
-		const domFragment = this._domConverter.viewToDom(viewFragment, document);
+		// TODO(OP-18993): viewToDom() takes an options object here, not a document. Neither option
+		// exists on document, so the call behaves as if the argument were absent.
+		const domFragment = this._domConverter.viewToDom(viewFragment, document as object);
 
 		// Replace leading and trailing nbsp at the end of strong and em tags
 		// with single spaces
@@ -223,7 +235,8 @@ export default class CommonMarkDataProcessor {
 		// Turndown is filtering out empty paragraphs <p></p>, so we need to fix that with <p><br></p>
 		breaksPreprocessor(domFragment);
 
-		const blankReplacement = function (content, node) {
+		// Turndown sets isBlock on the nodes it visits; its typings omit that.
+		const blankReplacement = function (content: string, node: HTMLElement & { isBlock?: boolean }) {
 			if (node.tagName === 'CODE') {
 				// we don't want to remove code silently
 				const prefix = (node.getAttribute('class') || '').replace('language-', '');
@@ -257,14 +270,16 @@ export default class CommonMarkDataProcessor {
 		 * @see
 		 */
 		turndownService.addRule('taskListItems', {
-			filter: function (node) {
-				const nodeIsCheckbox = node.type === "checkbox";
+			// May return null instead of false, which Turndown treats the same.
+			filter: function (node: HTMLElement) {
+				const nodeIsCheckbox = (node as HTMLInputElement).type === "checkbox";
 				const parentIsListItem = node.parentNode && node.parentNode.nodeName === 'LI';
 				const grandparentIsListItem = node.parentNode && node.parentNode.parentNode && node.parentNode.parentNode.nodeName === 'LI';
 				return nodeIsCheckbox && (parentIsListItem || grandparentIsListItem);
-			},
+			} as TurndownService.FilterFunction,
 			replacement: function (content, node) {
-				return (node.checked ? '[x]' : '[ ]') + ' '
+				// The filter above only lets checkboxes through.
+				return ((node as HTMLInputElement).checked ? '[x]' : '[ ]') + ' '
 			}
 		})
 
@@ -297,7 +312,8 @@ export default class CommonMarkDataProcessor {
 					.replace(/^\n+/, '') // remove leading newlines
 					.replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
 
-				var parent = node.parentNode;
+				// A list item always sits inside an element.
+				var parent = node.parentNode as Element;
 				var prefix = options.bulletListMarker + '   ';
 				var number = 1;
 				if (parent.nodeName === 'OL') {
@@ -323,7 +339,7 @@ export default class CommonMarkDataProcessor {
 			replacement: function (content, node) {
 				const parent = node.parentElement;
 				if (parent && parent.classList.contains('op-uc-figure--content')) {
-					return parent.parentElement.outerHTML;
+					return parent.parentElement!.outerHTML;
 				}
 
 				return node.outerHTML;
@@ -350,11 +366,12 @@ export default class CommonMarkDataProcessor {
 
 		// Keep HTML tables and remove filler elements
 		turndownService.addRule('htmlTables', {
-			filter: function (node) {
+			// Returns a count instead of a boolean, which Turndown treats the same.
+			filter: function (node: HTMLElement) {
 				const tables = node.getElementsByTagName('table');
 				// check if we're a todo list item
 				return node.nodeName === 'FIGURE' && tables.length;
-			},
+			} as TurndownService.FilterFunction,
 			replacement: function (_content, node) {
 				// Remove filler attribute, but keep empty lines
 				node.querySelectorAll('td br[data-cke-filler]').forEach((node) => {
@@ -368,7 +385,8 @@ export default class CommonMarkDataProcessor {
 		});
 
 		turndownService.addRule('strikethrough', {
-			filter: ['del', 's', 'strike'],
+			// <strike> is obsolete and missing from the DOM typings' tag names.
+			filter: ['del', 's', 'strike'] as TurndownService.TagName[],
 			replacement: function (content) {
 				return '~~' + content + '~~'
 			}
@@ -394,7 +412,8 @@ export default class CommonMarkDataProcessor {
 		});
 
 		turndownService.addRule('openProjectMacros', {
-			filter: ['macro'],
+			// <macro> is an OpenProject element, unknown to the DOM typings.
+			filter: ['macro'] as unknown as TurndownService.TagName[],
 			replacement: (_content, node) => {
 				node.innerHTML = '';
 				const outer = node.outerHTML;
@@ -436,7 +455,7 @@ export default class CommonMarkDataProcessor {
 			replacement: (_content, node) => {
 				if (!node.parentElement && !node.nextSibling && !node.previousSibling) { //document with only one empty paragraph
 					return '';
-				} else if (node.childNodes.length === 1 && isPageBreakNode(node.childNodes[0])) {
+				} else if (node.childNodes.length === 1 && isPageBreakNode(node.childNodes[0] as Element)) {
 					return PAGE_BREAK_MARKDOWN + '\n\n'
 				} else {
 					return '<br>\n\n'

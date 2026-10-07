@@ -1,4 +1,4 @@
-import { testDataProcessor } from './_utils/utils.js';
+import { testDataProcessor } from './_utils/utils';
 
 describe('CommonMarkProcessor', () => {
 	describe('work package references', () => {
@@ -151,9 +151,9 @@ describe('CommonMarkProcessor', () => {
 			// The two fixtures differ only in attribute order — view
 			// stringify sorts alphabetically, DOM serialization preserves
 			// source order.
-			const inputFor = (text) =>
+			const inputFor = (text: string) =>
 				`<mention class="mention" data-id="42" data-text="${text}" data-type="work_package" data-display-id="KSTP-2">${text}</mention>`;
-			const viewFor = (text) =>
+			const viewFor = (text: string) =>
 				`<mention class="mention" data-display-id="KSTP-2" data-id="42" data-text="${text}" data-type="work_package">${text}</mention>`;
 
 			it('preserves single-hash <mention> envelope', () => {
