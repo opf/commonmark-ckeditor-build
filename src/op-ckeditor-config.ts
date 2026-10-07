@@ -1,13 +1,19 @@
+import type { Editor, EditorConfig } from "@ckeditor/ckeditor5-core";
+import type { MentionFeed } from "@ckeditor/ckeditor5-mention";
 import {userMentions} from "./mentions/user-mentions";
 import {workPackageMentions} from "./mentions/work-package-mentions";
 import {customItemRenderer, emojiItemRenderer} from './mentions/mentions-item-renderer';
 import {emojiMentions} from "./mentions/emoji-mentions";
 import {saveInLocalStorage} from "./plugins/op-content-revisions/storage";
 
-export const defaultConfig = {
+// CKEditor allows feed items to be plain strings. Our feeds only yield objects,
+// which is what the item renderers take.
+type ItemRenderer = MentionFeed["itemRenderer"];
+
+export const defaultConfig: EditorConfig = {
 	autosave: {
 		waitingTime: 5000,
-		save(editor) {
+		save(editor: Editor) {
 			return saveInLocalStorage(editor);
 		},
 	},
@@ -94,31 +100,31 @@ export const defaultConfig = {
 			{
 				marker: '@',
 				feed: userMentions,
-				itemRenderer: customItemRenderer,
+				itemRenderer: customItemRenderer as ItemRenderer,
 				minimumCharacters: 0
 			},
 			{
 				marker: '###',
 				feed: workPackageMentions('###'),
-				itemRenderer: customItemRenderer,
+				itemRenderer: customItemRenderer as ItemRenderer,
 				minimumCharacters: 1
 			},
 			{
 				marker: '##',
 				feed: workPackageMentions('##'),
-				itemRenderer: customItemRenderer,
+				itemRenderer: customItemRenderer as ItemRenderer,
 				minimumCharacters: 1
 			},
 			{
 				marker: '#',
 				feed: workPackageMentions('#'),
-				itemRenderer: customItemRenderer,
+				itemRenderer: customItemRenderer as ItemRenderer,
 				minimumCharacters: 1
 			},
 			{
 				marker: ':',
 				feed: emojiMentions,
-				itemRenderer: emojiItemRenderer,
+				itemRenderer: emojiItemRenderer as ItemRenderer,
 				minimumCharacters: 1
 			}
 		]

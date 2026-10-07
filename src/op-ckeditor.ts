@@ -4,8 +4,14 @@ import {builtinPlugins} from './op-plugins';
 import {defaultConfig} from "./op-ckeditor-config";
 import {configurationCustomizer} from './op-config-customizer';
 
-export class ConstrainedEditor extends DecoupledEditor {}
-export class FullEditor extends DecoupledEditor {}
+type CreateCustomized = ReturnType<typeof configurationCustomizer>;
+
+export class ConstrainedEditor extends DecoupledEditor {
+	declare static createCustomized: CreateCustomized;
+}
+export class FullEditor extends DecoupledEditor {
+	declare static createCustomized: CreateCustomized;
+}
 
 // Export the two common interfaces
 window.OPConstrainedEditor = ConstrainedEditor;
@@ -17,7 +23,7 @@ window.OPEditorWatchdog = EditorWatchdog;
 FullEditor.createCustomized = configurationCustomizer(FullEditor);
 FullEditor.builtinPlugins = builtinPlugins;
 FullEditor.defaultConfig = Object.assign({}, defaultConfig);
-FullEditor.defaultConfig.toolbar = {
+FullEditor.defaultConfig!.toolbar = {
 		items: [
 			'heading',
 			'|',
@@ -51,7 +57,7 @@ FullEditor.defaultConfig.toolbar = {
 ConstrainedEditor.createCustomized = configurationCustomizer(ConstrainedEditor);
 ConstrainedEditor.builtinPlugins = builtinPlugins;
 ConstrainedEditor.defaultConfig = Object.assign({}, defaultConfig);
-ConstrainedEditor.defaultConfig.toolbar = {
+ConstrainedEditor.defaultConfig!.toolbar = {
 	items: [
 		'bold',
 		'italic',
