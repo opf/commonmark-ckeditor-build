@@ -28,6 +28,10 @@ module.exports = {
 
 	mode: mode,
 
+	resolve: {
+		extensions: [ '.ts', '.js', '.json' ]
+	},
+
 	output: {
 		library: 'OPEditor',
 		path: path.resolve(core, 'frontend/src/vendor/ckeditor/' ),
@@ -60,6 +64,18 @@ module.exports = {
 
 	module: {
 		rules: [
+			{
+				test: /\.ts$/,
+				loader: 'ts-loader',
+				options: {
+					// Type checking runs separately (npm run typecheck).
+					transpileOnly: true,
+					compilerOptions: {
+						noEmit: false,
+						sourceMap: true
+					}
+				}
+			},
 			{
 				test: /\.svg$/,
 				use: [ 'raw-loader' ]
