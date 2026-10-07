@@ -1,4 +1,4 @@
-const HTML_ESCAPES = {
+const HTML_ESCAPES: Record<string, string> = {
 	'&': '&amp;',
 	'<': '&lt;',
 	'>': '&gt;',
@@ -14,7 +14,7 @@ const HTML_ESCAPES = {
  * @param {string} string
  * @returns {string}
  */
-function escapeHtml(string) {
+function escapeHtml(string: string | null) {
 	return String(string).replace(/[&<>"'`]/g, char => HTML_ESCAPES[char]);
 }
 
@@ -24,7 +24,7 @@ function escapeHtml(string) {
  * @param {*} allowed_whitespace_nodes String array of allowed text nodes ( ['STRONG', 'EM'] ... )
  * @param {*} allowed_raw_nodes String array of allowed raw text nodes ( ['PRE', 'CODE'] ... )
  */
-export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_raw_nodes) {
+export function textNodesPreprocessor(root: Node, allowed_whitespace_nodes: string[], allowed_raw_nodes: string[]) {
 	allowed_whitespace_nodes = allowed_whitespace_nodes.map(el => el.toUpperCase());
 	allowed_raw_nodes = allowed_raw_nodes.map(el => el.toUpperCase());
 
@@ -38,7 +38,7 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
 	while (node = walker.nextNode()) {
 		// Strip NBSP whitespace in given nodes
 		if (node.parentElement && allowed_whitespace_nodes.indexOf(node.parentElement.nodeName) >= 0) {
-			node.nodeValue = node.nodeValue
+			node.nodeValue = node.nodeValue!
 				.replace(/^[\u00a0]+/g, ' ')
 				.replace(/[\u00a0]+$/g, ' ');
 		}
@@ -58,36 +58,38 @@ export function textNodesPreprocessor(root, allowed_whitespace_nodes, allowed_ra
  * @param {*} allowed_whitespace_nodes
  * @param {*} allowed_raw_nodes
  */
-export function linkPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw_nodes) {
+export function linkPreprocessor(root: Node, _allowed_whitespace_nodes: string[], _allowed_raw_nodes: string[]) {
 	let walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
 		NodeFilter.SHOW_ELEMENT,
 		// Accept only A tags
-		function (node) {
+		function (node: Node) {
 			return node.nodeName.toLowerCase() === 'a' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
 		}
 	);
 
-	let node;
-	while (node = walker.nextNode()) {
+	let node: HTMLAnchorElement | null;
+	while (node = walker.nextNode() as HTMLAnchorElement | null) {
 		// node.href is properly escaped, while the attribute is not
 		// and turndown uses the getAttribute version
 		node.setAttribute('href', node.href);
 	}
 }
 
-export function breaksPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw_nodes) {
+export function breaksPreprocessor(root: Node, _allowed_whitespace_nodes: string[], _allowed_raw_nodes: string[]) {
+	// The filter returns undefined for nodes it does not accept, which the DOM
+	// treats like FILTER_SKIP but NodeFilter's typing does not allow.
 	let walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,
 		{
-			acceptNode: function (node) {
+			acceptNode: function (node: Element) {
 				if (node.tagName === 'P' && node.childNodes.length === 0 && (!node.parentElement || node.parentElement.tagName === 'LI')) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
 			}
-		}
+		} as NodeFilter
 	);
 
 	let node;
@@ -96,7 +98,7 @@ export function breaksPreprocessor(root, _allowed_whitespace_nodes, _allowed_raw
 	}
 }
 
-export function hasParentOfType(node, tagNames) {
+export function hasParentOfType(node: Node, tagNames: string[]) {
 	let parent = node.parentElement;
 
 	while (parent) {
