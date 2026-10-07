@@ -13,7 +13,50 @@ interface Window {
 	};
 }
 
+// Core also exposes I18n as a bare global.
+declare var I18n: Window['I18n'];
+
 declare module '*.svg' {
 	const content: string;
 	export default content;
+}
+
+declare module 'turndown-plugin-gfm' {
+	import type TurndownService from 'turndown';
+
+	export const gfm: TurndownService.Plugin;
+	export const highlightedCodeBlock: TurndownService.Plugin;
+	export const strikethrough: TurndownService.Plugin;
+	export const tables: TurndownService.Plugin;
+	export const taskListItems: TurndownService.Plugin;
+}
+
+declare module 'markdown-it-task-lists' {
+	import type MarkdownIt from 'markdown-it';
+
+	const taskLists: MarkdownIt.PluginWithOptions<{
+		enabled?: boolean;
+		label?: boolean;
+		labelAfter?: boolean;
+	}>;
+	export default taskLists;
+}
+
+declare module '@rails/request.js' {
+	export interface RequestOptions {
+		body?: unknown;
+		contentType?: string;
+		headers?: Record<string, string>;
+		query?: Record<string, string>;
+		responseKind?: string;
+	}
+
+	export interface FetchResponse {
+		readonly ok: boolean;
+		readonly statusCode: number;
+		readonly json: Promise<unknown>;
+		readonly text: Promise<string>;
+	}
+
+	export function get(url: string, options?: RequestOptions): Promise<FetchResponse>;
 }
