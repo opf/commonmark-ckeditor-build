@@ -22,9 +22,9 @@ export default class CodeBlockToolbar extends Plugin {
 
 		// Add editing button
 		createToolbarEditButton( editor, 'opEditCodeBlock', widget => {
-			const macroService = pluginContext.services.macros;
-			const language = widget.getAttribute( 'opCodeblockLanguage' );
-			const content = widget.getAttribute( 'opCodeblockContent' );
+			const macroService = pluginContext!.services.macros;
+			const language = widget.getAttribute( 'opCodeblockLanguage' ) as string | undefined;
+			const content = widget.getAttribute( 'opCodeblockContent' ) as string | undefined;
 
 			macroService
 				.editCodeBlock( content, language )
