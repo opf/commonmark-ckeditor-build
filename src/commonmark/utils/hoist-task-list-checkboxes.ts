@@ -1,4 +1,4 @@
-export function hoistTaskListCheckboxes(fragment) {
+export function hoistTaskListCheckboxes(fragment: ParentNode) {
   const checkboxes = fragment.querySelectorAll('input.task-list-item-checkbox');
   checkboxes.forEach(checkbox => {
     const li = checkbox.closest('li.task-list-item');

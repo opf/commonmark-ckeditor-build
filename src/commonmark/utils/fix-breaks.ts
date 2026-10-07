@@ -1,5 +1,8 @@
 import {isPageBreakNode} from "./page-breaks";
 
+// The filters below return undefined for nodes they do not accept, which the
+// DOM treats like FILTER_SKIP but NodeFilter's typing does not allow.
+
 /**
  * Remove breaks in empty table paragraphs
  *
@@ -7,24 +10,24 @@ import {isPageBreakNode} from "./page-breaks";
  * e.g. `<td><p>Demo<p><p><br></p><p>End</p></td>` converted to `<td><p>Demo<p><p><br><br data-ck-filler="true"></p><p>End</p></td>`
  * to avoid this, we remove the breaks, so CKEditor can add `<br data-ck-filler="true">`
  * e.g. `<td><p>Demo<p><p><br></p><p>End</p></td>` converted to `<td><p>Demo<p><p><br data-ck-filler="true"></p><p>End</p></td>` */
-export function fixBreaksInTables(root) {
+export function fixBreaksInTables(root: Node) {
 	const walker = document.createNodeIterator(
 		root,
 		// Only consider element nodes
 		NodeFilter.SHOW_ELEMENT,
 		// Only except text nodes whose parent is one of parents
 		{
-			acceptNode: function (node) {
+			acceptNode: function (node: Element) {
 				if (node.tagName === 'P' && node.parentElement &&
 					node.parentElement.tagName === 'TD' &&
 					(node.childNodes.length === 1 && node.childNodes[0].nodeName === 'BR')) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
 			}
-		}
+		} as NodeFilter
 	);
 
-	let node;
+	let node: Node | null;
 	while (node = walker.nextNode()) {
 		node.childNodes[0].remove();
 	}
@@ -39,22 +42,22 @@ export function fixBreaksInTables(root) {
  * e.g. `<p>Demo<p><br><br><p>End</p>` will be converted to `<p>Demo</p><p></p><p></p><p>End</p>`
  * (except for page breaks, which are kept but are wrapped in a paragraph)
  */
-export function fixBreaksOnRootLevel(root) {
+export function fixBreaksOnRootLevel(root: Node) {
 	let walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,
 		{
-			acceptNode: function (node) {
+			acceptNode: function (node: Element) {
 				if (node.tagName === 'BR' && !node.parentElement) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
 			}
-		}
+		} as NodeFilter
 	);
 
-	let node;
-	let list = []
-	while (node = walker.nextNode()) {
+	let node: Element | null;
+	let list: Element[] = []
+	while (node = walker.nextNode() as Element | null) {
 		list.push(node);
 	}
 	for (const node of list) {
@@ -78,26 +81,26 @@ export function fixBreaksOnRootLevel(root) {
  * e.g. `<li><p>Start</p><br><br><p>End</p></li>` will be converted to
  * `<li><p>Start</p><p></p><p></p><p>End</p></li>>`
  */
-export function fixBreaksInLists(root) {
+export function fixBreaksInLists(root: Node) {
 	const walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,
 		{
-			acceptNode: function (node) {
+			acceptNode: function (node: Element) {
 				if (node.tagName === 'BR' && node.parentElement && node.parentElement.tagName === 'LI') {
 					return NodeFilter.FILTER_ACCEPT;
 				}
 			}
-		}
+		} as NodeFilter
 	);
 
-	let node;
-	let list = []
-	while (node = walker.nextNode()) {
+	let node: Element | null;
+	let list: Element[] = []
+	while (node = walker.nextNode() as Element | null) {
 		list.push(node);
 	}
 	for (const node of list) {
-		node.parentElement.insertBefore(document.createElement('p'), node);
+		node.parentElement!.insertBefore(document.createElement('p'), node);
 		node.remove();
 	}
 }
