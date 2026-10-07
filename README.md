@@ -56,6 +56,15 @@ See https://community.openproject.org/work_packages/47084 for context.
 Now the webpack development mode is building the files and outputting them to `frontend/src/vendor/ckeditor/*` in the
 core repository, overriding anything in there.
 
+### Type checking
+
+The source is being converted to TypeScript. Files ending in `.ts` are checked in strict mode; files still ending in
+`.js` are not checked. Webpack and jest strip types without checking them, so run the checker separately:
+
+```
+npm run typecheck
+```
+
 ## Migration Notes
 
 ### jQuery Removal
