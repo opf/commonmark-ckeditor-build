@@ -1,18 +1,27 @@
+import type { Editor } from '@ckeditor/ckeditor5-core';
 import { get } from '@rails/request.js';
+import type { OpMentionFeedItem } from '../op-types';
 
-export function workPackageMentions(prefix) {
-  return function (query) {
+// An entry of core's work package autocompleter response.
+interface AutocompleteWorkPackage {
+	id: number;
+	displayId?: string;
+	to_s: string;
+}
+
+export function workPackageMentions(prefix: string) {
+  return function (this: Editor, query: string) {
     let editor = this;
     const urlRoot = window.OpenProject.urlRoot;
     const url = `${urlRoot}/work_packages/auto_complete.json`;
 
-    if (editor.config.get("disabledMentions").includes("work_package")) {
+    if (editor.config.get("disabledMentions")!.includes("work_package")) {
       return [];
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<OpMentionFeedItem[]>((resolve, reject) => {
       get(url, { responseKind: 'json', query: { q: query, scope: "all" } })
-        .then(response => response.json)
+        .then(response => response.json as Promise<AutocompleteWorkPackage[]>)
         .then(collection => {
           resolve(collection.map(wp => {
             const displayId = wp.displayId || wp.id;

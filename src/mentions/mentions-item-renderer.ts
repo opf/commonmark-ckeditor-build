@@ -1,4 +1,6 @@
-export function customItemRenderer( item ) {
+import type { OpMentionFeedItem } from '../op-types';
+
+export function customItemRenderer( item: OpMentionFeedItem ) {
     const itemElement = document.createElement( 'span' );
 
 	if (item.type === 'user' || item.type === 'work_package') {
@@ -12,7 +14,7 @@ export function customItemRenderer( item ) {
     return itemElement;
 }
 
-export function emojiItemRenderer( item ) {
+export function emojiItemRenderer( item: OpMentionFeedItem ) {
 	const itemElement = document.createElement( 'span' );
 
 	itemElement.classList.add('mention-list-item' );

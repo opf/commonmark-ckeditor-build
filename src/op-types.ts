@@ -4,8 +4,6 @@
 // `ICKEditorContext` and the editor setup service in core). Only members
 // that this repository reads are declared.
 
-import type { Editor } from '@ckeditor/ckeditor5-core';
-
 /** A HAL resource (work package, comment, ...) the editor belongs to. */
 export interface OpResource {
 	_type: string;
@@ -71,8 +69,24 @@ export interface OpConfig {
 	disableAllMacros?: boolean;
 }
 
-/** A function that reads the editor from `this`, as mention feeds do. */
-export type EditorBound<Args extends unknown[], Result> = (this: Editor, ...args: Args) => Result;
+/** An entry of a mention feed, and the value of the model's `mention` attribute. */
+export interface OpMention {
+	id: string;
+	type: string;
+	text: string;
+	name?: string;
+	link?: string;
+	dataId?: string | number;
+	dataDisplayId?: string | number;
+}
+
+/** A mention as offered in the autocompleter, which shows its name. */
+export interface OpMentionFeedItem extends OpMention {
+	name: string;
+}
+
+// The import makes this a module augmentation rather than a new declaration.
+import type {} from '@ckeditor/ckeditor5-core';
 
 declare module '@ckeditor/ckeditor5-core' {
 	interface EditorConfig {
