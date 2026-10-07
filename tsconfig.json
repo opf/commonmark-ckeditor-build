@@ -10,8 +10,6 @@
 		"moduleResolution": "bundler",
 		"strict": true,
 		"noEmit": true,
-		"allowJs": true,
-		"checkJs": false,
 		"isolatedModules": true,
 		"verbatimModuleSyntax": true,
 		"resolveJsonModule": true,
