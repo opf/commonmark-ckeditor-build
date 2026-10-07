@@ -1,11 +1,35 @@
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type { Editor } from '@ckeditor/ckeditor5-core';
+import type {
+	DowncastConversionApi,
+	ModelElement,
+	ModelRange,
+	UpcastConversionApi,
+	UpcastConversionData,
+	ViewDowncastWriter,
+	ViewElement,
+} from '@ckeditor/ckeditor5-engine';
+import type { EventInfo } from '@ckeditor/ckeditor5-utils';
+
+type CssClassesConfig = OpCustomCssClassesPlugin['config'];
+
+interface AttributeData {
+	item: ModelElement;
+	range: ModelRange;
+	attributeKey: string;
+	attributeNewValue: unknown;
+}
+
+// Children of a view element as the converters below read them. Text items are
+// among them at runtime; they have no name or classes, so every lookup skips them.
+type ViewChildren = ViewElement[];
 
 export default class OpCustomCssClassesPlugin extends Plugin {
 
 	get config() {
 		const preFix = 'op-uc-';
 		const editorClasses = [`${preFix}container`, `${preFix}container_editing`];
-		const elementsWithCustomClassesMap = {
+		const elementsWithCustomClassesMap: Record<string, string | string[]> = {
 			'paragraph': `${preFix}p`,
 			'heading1': `${preFix}h1`,
 			'heading2': `${preFix}h2`,
@@ -41,7 +65,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'op-macro-toc': [`${preFix}placeholder`, `${preFix}toc`],
 			'content': `${preFix}figure--content`
 		};
-		const attributesWithCustomClassesMap = {
+		const attributesWithCustomClassesMap: Record<string, string | null> = {
 			'code': `${preFix}code`,
 			'linkHref': `${preFix}link`,
 			'alignment': `${preFix}figure_align-`,
@@ -54,7 +78,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			'width': null,
 			'uploadStatus': null
 		};
-		const alignmentValuesMap = {
+		const alignmentValuesMap: Record<string, string> = {
 			'left': 'start',
 			'right': 'end',
 			'blockLeft': 'start',
@@ -78,16 +102,18 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		this._addCustomCSSClassesToAttributes(this.config);
 	}
 
-	_addCustomCSSClassesToTheEditorContainer(editor) {
-		editor.sourceElement.classList.add(...this.config.editorClasses);
+	_addCustomCSSClassesToTheEditorContainer(editor: Editor) {
+		// sourceElement comes from the ElementApi mixin of the editor classes this build uses.
+		(editor as Editor & { sourceElement: HTMLElement }).sourceElement.classList.add(...this.config.editorClasses);
 	}
 
-	_addCustomCSSClassesToElements(config) {
+	_addCustomCSSClassesToElements(config: CssClassesConfig) {
 		this.editor.model.schema.extend('table', {allowAttributes: [ 'figureClasses' ]});
 
 		this.editor
 				.conversion
 				.for('upcast')
+				// @ts-expect-error TODO(OP-18993): add() takes one argument, so this priority is ignored.
 				.add(dispatcher => dispatcher.on(`element:table`, this._manageTableUpcast(config)), {priority: 'high'});
 
 		this.editor
@@ -96,15 +122,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				.add(dispatcher => dispatcher.on(`insert`, this._manageElementsInsertion(config), {priority: 'low'}));
 	}
 
-	_addCustomCSSClassesToAttributes(config) {
+	_addCustomCSSClassesToAttributes(config: CssClassesConfig) {
 		this.editor
 				.conversion
 				.for('downcast')
 				.add(dispatcher => dispatcher.on('attribute', this._manageAttributesInsertion(config), {priority: 'low'}));
 	}
 
-	_manageTableUpcast(config) {
-		return (evt, data, conversionApi) => {
+	_manageTableUpcast(config: CssClassesConfig) {
+		return (evt: EventInfo, data: UpcastConversionData<ViewElement>, conversionApi: UpcastConversionApi) => {
 			const writer = conversionApi.writer;
 			const viewItem = data.viewItem;
 			const modelRange = data.modelRange;
@@ -118,14 +144,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			// this table model element. In the downcast we'll take this classes to place them again
 			// in the figure that wraps the table. This is because the figure element doesn't exist in
 			// the model but CkEditor wraps every table and image with a <figure>.
-			let figureClasses = modelElement.getAttribute('figureClasses') || [];
-			let parentFigureRawClasses = viewItem.parent.getClassNames && viewItem.parent.getClassNames();
+			let figureClasses = modelElement.getAttribute('figureClasses') as string[] | undefined || [];
+			// The parent may be a document fragment, which has no getClassNames(); the first operand guards that.
+			let parentFigureRawClasses = (viewItem.parent as ViewElement).getClassNames && (viewItem.parent as ViewElement).getClassNames();
 			const parentFigureClasses = parentFigureRawClasses ? [...parentFigureRawClasses].filter(figureClass => !!figureClass) : [];
 
 			figureClasses = [...figureClasses, ...parentFigureClasses];
 
-			const alignmentClass = parentFigureClasses.filter(figureClass => figureClass.startsWith(config.attributesWithCustomClassesMap.alignment))[0];
-			const alignmentAlias = alignmentClass && alignmentClass.replace(config.attributesWithCustomClassesMap.alignment, '') || config.alignmentValuesMap.default;
+			const alignmentClass = parentFigureClasses.filter(figureClass => figureClass.startsWith(config.attributesWithCustomClassesMap.alignment!))[0];
+			const alignmentAlias = alignmentClass && alignmentClass.replace(config.attributesWithCustomClassesMap.alignment!, '') || config.alignmentValuesMap.default;
 			const alignmentToApply = Object.keys(config.alignmentValuesMap).find(alignmentKey => config.alignmentValuesMap[alignmentKey] === alignmentAlias) || 'center';
 
 			if (!alignmentClass) {
@@ -143,14 +170,15 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		}
 	}
 
-	_manageElementsInsertion(config) {
-		return (evt, data, conversionApi) => {
+	_manageElementsInsertion(config: CssClassesConfig) {
+		// Text is inserted through here as well. It has no name and no view element, so it leaves at the first guard.
+		return (evt: EventInfo, data: { item: ModelElement }, conversionApi: DowncastConversionApi) => {
 			const elementsWithCustomClasses = Object.keys(config.elementsWithCustomClassesMap);
 			const viewWriter = conversionApi.writer;
 			const elementName = data.item.name;
 			const modelElement = data.item;
 			const viewElement = conversionApi.mapper.toViewElement(modelElement);
-			let viewElements = [viewElement];
+			let viewElements: ViewElement[] = [viewElement!];
 			// Images and tables are nested in a figure element, listItems are nested inside ul or ol
 			// elements (only in the view, in the model are single elements).
 			const nestedElements = ['imageBlock', 'table', 'tableCell', 'tableRow', 'listItem'];
@@ -165,10 +193,11 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 					viewElements = this._manageListItems(viewWriter, modelElement, viewElement, viewElements, config);
 				} else {
 					const figureViewElement = viewElement;
-					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
+					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewChildren;
 
 					if (elementName === 'imageBlock') {
-						const image = viewChildren.find(item => item.is('element', 'img'));
+						// CKEditor renders an image block as a <figure> containing an <img>.
+						const image = viewChildren.find(item => item.is('element', 'img'))!;
 
 						this._wrapInFigureContentContainer(image, figureViewElement, config, viewWriter);
 
@@ -200,13 +229,14 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		}
 	}
 
-	_manageAttributesInsertion(config) {
-		return (evt, data, conversionApi) => {
+	_manageAttributesInsertion(config: CssClassesConfig) {
+		return (evt: EventInfo, data: AttributeData, conversionApi: DowncastConversionApi) => {
 			const attributesWithCustomClasses = Object.keys(config.attributesWithCustomClassesMap);
 			const attributeName = data.attributeKey;
 			const viewWriter = conversionApi.writer;
 			const modelElement = data.item;
-			const viewElement = conversionApi.mapper.toViewElement(modelElement);
+			// Undefined for text and selections. Only the linkHref/code branch handles those, and it does not read this.
+			const viewElement = conversionApi.mapper.toViewElement(modelElement)!;
 
 			if (!attributesWithCustomClasses.includes(attributeName)) {
 				return;
@@ -223,14 +253,14 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				);
 
 				if (modelElement.is('selection')) {
-					viewWriter.wrap(viewSelection.getFirstRange(), viewElement);
+					viewWriter.wrap(viewSelection.getFirstRange()!, viewElement);
 				} else {
 					viewWriter.wrap(conversionApi.mapper.toViewRange(data.range), viewElement);
 				}
 			} else if (attributeName === 'tableAlignment') {
 				const figureViewElement = viewElement;
 				// When the selected align is 'center', data.attributeNewValue is null
-				const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue] || config.alignmentValuesMap.default;
+				const alignmentToApply = config.alignmentValuesMap[data.attributeNewValue as string] || config.alignmentValuesMap.default;
 				const alignmentClasses = Array.from(new Set(Object
 					.values(config.alignmentValuesMap)))
 					.map(alignmentValue => `${config.attributesWithCustomClassesMap[attributeName]}${alignmentValue}`);
@@ -257,7 +287,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				});
 			} else if (attributeName === 'headingColumns') {
 				const addHeadingColumns = data.attributeNewValue;
-				const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
+				const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewChildren;
 				const viewElements = viewChildren.filter(viewChild => Object.keys(config.elementsWithCustomClassesMap).includes(viewChild.name));
 
 				if (addHeadingColumns) {
@@ -273,7 +303,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 						.forEach(viewElement => {
 							const nextSibling = viewElement.nextSibling;
 
-							if (nextSibling && nextSibling.name !== 'th') {
+							if (nextSibling && (nextSibling as ViewElement).name !== 'th') {
 								viewWriter.removeClass(config.elementsWithCustomClassesMap.th[1], viewElement);
 							}
 						});
@@ -284,7 +314,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 				}
 			} else if (attributeName === 'uploadStatus') {
 				if (data.attributeNewValue === 'complete') {
-					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems());
+					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewChildren;
 					let placeholderElement = viewChildren.find(viewChild => viewChild.hasClass('ck-upload-placeholder-loader'));
 
 					if (placeholderElement) {
@@ -295,7 +325,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		}
 	}
 
-	_manageListItems(viewWriter, modelElement, viewElement, viewElements, config) {
+	_manageListItems(viewWriter: ViewDowncastWriter, modelElement: ModelElement, viewElement: ViewElement, viewElements: ViewElement[], config: CssClassesConfig) {
 		const listItemElement = viewElement.findAncestor('li');
 		const listElement = viewElement.findAncestor(/^(ul|ol)$/);
 
@@ -304,25 +334,26 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			return viewElements;
 		}
 
-		const listType = modelElement.getAttribute('listType');
+		const listType = modelElement.getAttribute('listType') as string;
 		const listTypeClass = config.attributesWithCustomClassesMap[listType];
 
 		if (listType === 'todo') {
-			viewWriter.addClass(listTypeClass, listElement);
+			viewWriter.addClass(listTypeClass!, listElement);
 		} else {
 			// Remove the op-uc-list_task-list class if present.
 			// It could be present for example when the list type has changed
-			const todoListClass = config.attributesWithCustomClassesMap['todo'];
+			const todoListClass = config.attributesWithCustomClassesMap['todo']!;
 
 			if (listElement.hasClass(todoListClass)) {
 				viewWriter.removeClass(todoListClass, listElement);
 			}
 		}
 
-		return [...viewElements, listElement, listItemElement];
+		// A view element inside a list always has an <li> ancestor as well.
+		return [...viewElements, listElement, listItemElement!];
 	}
 
-	_wrapInFigureContentContainer(element, parentElement, config, viewWriter) {
+	_wrapInFigureContentContainer(element: ViewElement, parentElement: ViewElement, config: CssClassesConfig, viewWriter: ViewDowncastWriter) {
 		const containerElement = viewWriter.createContainerElement(
 			'div',
 			{class: config.elementsWithCustomClassesMap.content}

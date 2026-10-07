@@ -1,60 +1,76 @@
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type {
+	DowncastConversionApi,
+	DowncastDispatcher,
+	ModelElement,
+	ViewElement,
+} from '@ckeditor/ckeditor5-engine';
+import type { EventInfo } from '@ckeditor/ckeditor5-utils';
+import type { OpResource } from '../../op-types';
+
+interface SrcAttributeData {
+	item: ModelElement;
+	attributeNewValue: unknown;
+}
 import {getOPResource} from '../op-context/op-context';
 import {originalSrcAttribute} from '../../commonmark/commonmarkdataprocessor';
 
 
-export function replaceImageAttachmentsByName(resource) {
-	return dispatcher => {
+export function replaceImageAttachmentsByName(resource: OpResource | undefined) {
+	return (dispatcher: DowncastDispatcher) => {
 		dispatcher.on('attribute:src:imageBlock', converter, { priority: 'highest' } );
 		dispatcher.on('attribute:src:imageInline', converter, { priority: 'highest' } );
 	};
 
-	function converter( evt, data, _conversionApi ) {
+	function converter( evt: EventInfo, data: SrcAttributeData, _conversionApi: DowncastConversionApi ) {
 
 		// We do not consume the attribute since we want the regular attribute
 		// converter to run as well.
-		let src = data.attributeNewValue;
+		let src = data.attributeNewValue as string | null;
 
 		// If the resource is not attachable or src has been nulled, do nothing
-		if (!(src && resource.lookupDownloadLocationByName)) {
+		// TODO(OP-18993): throws when the editor has no resource.
+		if (!(src && resource!.lookupDownloadLocationByName)) {
 			return;
 		}
 
-		const match = resource.lookupDownloadLocationByName(src);
+		const match = resource!.lookupDownloadLocationByName(src);
 		data.attributeNewValue = match || src;
 	}
 }
 
-export function replaceNamedAttachmentWithUrl(resource) {
-	return dispatcher => {
+export function replaceNamedAttachmentWithUrl(resource: OpResource | undefined) {
+	return (dispatcher: DowncastDispatcher) => {
 		dispatcher.on('attribute:src:imageBlock', converter, { priority: 'highest' } );
 		dispatcher.on('attribute:src:imageInline', converter, { priority: 'highest' } );
 	};
 
-	function converter( evt, data, conversionApi ) {
+	function converter( evt: EventInfo, data: SrcAttributeData, conversionApi: DowncastConversionApi ) {
 
 		// We do not consume the attribute since we want the regular attribute
 		// converter to run as well.
-		let src = data.attributeNewValue;
+		let src = data.attributeNewValue as string | null;
 
 		// If the resource is not attachable or src has been nulled, do nothing
-		if (!(src && resource.lookupDownloadLocationByName)) {
+		// TODO(OP-18993): throws when the editor has no resource.
+		if (!(src && resource!.lookupDownloadLocationByName)) {
 			return;
 		}
 
 
-		const match = resource.lookupDownloadLocationByName(src);
+		const match = resource!.lookupDownloadLocationByName(src);
 		data.attributeNewValue = match || src;
 
 
 		const viewWriter = conversionApi.writer;
 		const figure = conversionApi.mapper.toViewElement( data.item );
-		let img;
+		let img: ViewElement;
 
 		if (data.item.name === "imageInline") {
-			img = figure;
+			img = figure!;
 		} else {
-			img = figure.getChild( 0 );
+			// A block image is a <figure> whose first child is the <img>.
+			img = figure!.getChild( 0 ) as ViewElement;
 		}
 
 		if (match) {

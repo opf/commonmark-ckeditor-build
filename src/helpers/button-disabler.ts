@@ -1,34 +1,26 @@
-// The slice of an editor these helpers touch. It is declared structurally because
-// `toolbar` only exists on some UI views, `_items` is private in CKEditor's
-// ViewCollection, and `__currentlyDisabled` is bookkeeping this file adds.
+import type { Editor } from '@ckeditor/ckeditor5-core';
+
 interface ToolbarItem {
 	isEnabled?: boolean;
 }
 
-interface EditorWithToolbar {
+// `__currentlyDisabled` is bookkeeping these helpers keep on the editor.
+type EditorWithDisabledItems = Editor & {
 	__currentlyDisabled?: ToolbarItem[];
-	ui: {
-		view: {
-			toolbar?: {
-				items: {
-					_items: ToolbarItem[];
-				};
-			};
-		};
-	};
-}
+};
 
-export function getToolbarItems(editor: EditorWithToolbar) {
+export function getToolbarItems(editor: EditorWithDisabledItems) {
 	editor.__currentlyDisabled = editor.__currentlyDisabled || [];
 
 	if (!editor.ui.view.toolbar) {
 		return [];
 	}
 
-	return editor.ui.view.toolbar.items._items;
+	// `_items` is private in CKEditor's ViewCollection.
+	return (editor.ui.view.toolbar.items as unknown as { _items: ToolbarItem[] })._items;
 }
 
-export function disableItems(editor: EditorWithToolbar, except?: ToolbarItem) {
+export function disableItems(editor: EditorWithDisabledItems, except?: ToolbarItem) {
 	getToolbarItems(editor).forEach((item) => {
 		if (item === except || !Object.prototype.hasOwnProperty.call(item, 'isEnabled')) {
 			return;
@@ -42,7 +34,7 @@ export function disableItems(editor: EditorWithToolbar, except?: ToolbarItem) {
 	});
 }
 
-export function enableItems(editor: EditorWithToolbar) {
+export function enableItems(editor: EditorWithDisabledItems) {
 	getToolbarItems(editor).forEach((item) => {
 		if (Object.prototype.hasOwnProperty.call(item, 'isEnabled')
 			&& editor.__currentlyDisabled!.indexOf(item) < 0) {

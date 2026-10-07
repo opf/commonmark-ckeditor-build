@@ -34,7 +34,7 @@ export default class OPSourceCodePlugin extends Plugin {
 			} );
 
 
-			let showSource = function(_preview) {
+			let showSource = function(_preview?: unknown) {
 				const editableElement = editor.ui.getEditableElement();
 				const reference = editableElement?.parentElement;
 				if (!reference?.parentElement) {

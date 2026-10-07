@@ -1,4 +1,5 @@
 import {Plugin} from "@ckeditor/ckeditor5-core";
+import type {Editor} from "@ckeditor/ckeditor5-core";
 import OpContentRevisionsUI from "./ui";
 import {loadFromLocalStorage} from "./storage";
 import OpContentRevisionsCommand from "./command";
@@ -19,7 +20,7 @@ export default class OpContentRevisions extends Plugin {
     return "OpContentRevisions";
   }
 
-  constructor(editor) {
+  constructor(editor: Editor) {
     super(editor);
 
     // Define a storage key for this instance
@@ -40,6 +41,7 @@ export default class OpContentRevisions extends Plugin {
       const now = Date.now();
 
       // disable beforeunload hook, we have our own
+      // @ts-expect-error _domEmitter is private; Autosave offers no public way to drop its beforeunload listener.
       editor.plugins.get("Autosave")._domEmitter.stopListening(window, "beforeunload");
 
       Object
@@ -62,7 +64,7 @@ export default class OpContentRevisions extends Plugin {
    * If a StorageKey is defined in the editor configuration,
    * use that instead of the default key.
    */
-  getStorageKey(editor) {
+  getStorageKey(editor: Editor) {
     const storageKey = editor.config.get(STORAGE_KEY_OVERRIDE);
 
 	if (storageKey) {
@@ -76,7 +78,7 @@ export default class OpContentRevisions extends Plugin {
    * Create a storage key from the given resource, if available.
    * Fall back to using the current URL path.
    */
-  createLocalStorageKey(editor) {
+  createLocalStorageKey(editor: Editor) {
     const resource = getOPResource(editor);
     const field = getOPFieldName(editor);
 
