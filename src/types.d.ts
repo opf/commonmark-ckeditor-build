@@ -13,6 +13,17 @@ interface Window {
 	};
 }
 
+// Fired by core when a dialog it opened for the editor closes.
+interface DocumentEventMap {
+	'dialog:close': CustomEvent<{
+		additional?: {
+			action?: string;
+			providerId?: string;
+			pageIdentifier?: string;
+		};
+	}>;
+}
+
 // Core also exposes I18n as a bare global.
 declare var I18n: Window['I18n'];
 

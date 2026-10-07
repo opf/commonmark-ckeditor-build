@@ -1,6 +1,7 @@
 import { ButtonView } from '@ckeditor/ckeditor5-ui';
 
 import { Plugin } from '@ckeditor/ckeditor5-core';
+import type { DowncastConversionApi, ModelElement, ViewDowncastWriter } from '@ckeditor/ckeditor5-engine';
 
 import {toWpButtonMacroWidget} from './utils';
 import {getPluginContext} from '../op-context/op-context';
@@ -52,7 +53,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 
 		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-wp-button',
-			view: (modelElement, {writer}) => {
+			view: (modelElement: ModelElement, {writer}: DowncastConversionApi) => {
 				return this.createMacroViewElement(modelElement, writer);
 			}
 	    } );
@@ -83,7 +84,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
-				const macroService = pluginContext.services.macros;
+				const macroService = pluginContext!.services.macros;
 
 				macroService
 					.configureWorkPackageButton()
@@ -101,7 +102,7 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		} );
 	}
 
-	macroLabel(type) {
+	macroLabel(type?: string) {
 		if (type) {
 			return window.I18n.t('js.editor.macro.work_package_button.with_type', { typename: type });
 		} else {
@@ -109,14 +110,15 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		}
 	}
 
-	createMacroViewElement(modelElement, writer) {
+	createMacroViewElement(modelElement: ModelElement, writer: ViewDowncastWriter) {
 		// const type = modelElement.getAttribute('type');
-		const classes = modelElement.getAttribute('classes') || '';
+		const classes = modelElement.getAttribute('classes') as string | undefined || '';
 		const label = this.macroLabel(); // TODO: Pass type, it is not updated on coming back from the modal..
 		const placeholder = writer.createText( label );
 		const container = writer.createContainerElement( 'span', { class: classes } );
 
 		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
-		return toWpButtonMacroWidget(container, writer, { label: label } )
+		// TODO(OP-18993): passes an object where the widget label is expected to be a string.
+		return toWpButtonMacroWidget(container, writer, { label: label } as unknown as string )
 	}
 }

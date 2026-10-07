@@ -1,4 +1,5 @@
 import { Plugin } from "@ckeditor/ckeditor5-core";
+import type { Editor } from "@ckeditor/ckeditor5-core";
 import { ButtonView } from "@ckeditor/ckeditor5-ui";
 
 import { getOPPath, getOPService } from "../op-context/op-context";
@@ -30,7 +31,7 @@ export default class OpMacroWikiPageLinkAddExisting extends Plugin {
 		})
 	}
 
-	runModalDialog(editor) {
+	runModalDialog(editor: Editor) {
 		document.addEventListener('dialog:close', this.closeDialogHandler);
 
 		const turboRequests = getOPService(editor, 'turboRequests');
@@ -39,7 +40,7 @@ export default class OpMacroWikiPageLinkAddExisting extends Plugin {
 		void turboRequests.request(path, { method: 'GET' });
 	}
 
-	handleCloseDialog(event) {
+	handleCloseDialog(event: DocumentEventMap['dialog:close']) {
 		if (event.detail.additional?.action !== 'close_existing_page_dialog') {
 			// A previous step was closed, not the final stage of the dialog we expect.
 			return;
