@@ -101,6 +101,7 @@
     "watch": "NODE_ENV=development ./node_modules/.bin/webpack --watch --stats-error-details",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "verify:build": "node bin/verify-build.mjs",
     "test": "jest ."
   },
   "dependencies": {
