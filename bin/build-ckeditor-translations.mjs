@@ -6,6 +6,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 
 import { distDir } from './lib/paths.mjs';
+import { renderTranslationsIndex, TRANSLATIONS_INDEX_DTS } from './lib/translations-index.mjs';
 
 const cwd = process.cwd();
 const nodeModulesRoot = path.join(cwd, 'node_modules', '@ckeditor');
@@ -111,5 +112,12 @@ window.CKEDITOR_TRANSLATIONS[locale].getPluralForm = getPluralForm;
 
   await fs.writeFile(path.join(outputDir, `${locale}.js`), content, 'utf8');
 }
+
+await fs.writeFile(
+  path.join(outputDir, 'index.js'),
+  renderTranslationsIndex([...localeMap.keys()]),
+  'utf8',
+);
+await fs.writeFile(path.join(outputDir, 'index.d.ts'), TRANSLATIONS_INDEX_DTS, 'utf8');
 
 console.log(`Generated CKEditor translations: ${localeMap.size} locales -> ${outputDir}`);
