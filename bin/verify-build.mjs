@@ -9,6 +9,9 @@ import path from 'node:path';
 
 // The webpack build was 1.3 MB. Fail well before a regression doubles it.
 const MAX_BUNDLE_BYTES = 1_500_000;
+// The webpack source map was 7.7 MB. It doubles when the bundler follows the
+// source maps of dependencies back to their original sources.
+const MAX_SOURCE_MAP_BYTES = 9_000_000;
 const MIN_LOCALES = 50;
 
 const dir = process.argv[2];
@@ -54,6 +57,11 @@ if (bundle !== null) {
 
 if (sourceMap !== null) {
   const { sources } = JSON.parse(sourceMap);
+  const bytes = Buffer.byteLength(sourceMap);
+
+  if (bytes > MAX_SOURCE_MAP_BYTES) {
+    failures.push(`ckeditor.js.map is ${bytes} bytes, over the ${MAX_SOURCE_MAP_BYTES} budget`);
+  }
 
   if (!sources.some((source) => source.endsWith('src/op-ckeditor.ts'))) {
     failures.push('ckeditor.js.map does not map back to src/op-ckeditor.ts');
