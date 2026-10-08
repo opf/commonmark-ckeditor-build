@@ -45,7 +45,7 @@ export default [
 		ignores: ["tmp/", "coverage/", "node_modules/", "dist/"],
 	},
 	{
-		files: ["jest.config.js", 'babel.config.js'],
+		files: ["jest.config.cjs", 'babel.config.cjs'],
 		languageOptions: {
 			globals: {
 				...globals.node
