@@ -1,4 +1,4 @@
-// This SVG file import will be handled by webpack's raw-text loader.
+// This SVG file import is inlined as a string by the bundler's text loader.
 // This means that imageIcon will hold the source SVG.
 import sourceIcon from '../icons/source.svg';
 import wysiwygIcon from '../icons/wysiwyg.svg';
