@@ -31,6 +31,7 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build
+    - run: npm run verify:build -- tmp/frontend/src/vendor/ckeditor
     - run: npm test
     - run: npm run lint
     - run: npm run typecheck
