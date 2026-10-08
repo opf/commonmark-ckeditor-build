@@ -1,0 +1,120 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    if: ${{ github.repository == 'opf/commonmark-ckeditor-build' && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # tags, GitHub release, release branch
+      pull-requests: write # the Release Tracking pull request
+      id-token: write # OIDC for npm Trusted Publishing
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # Full history so changesets can attribute changelog entries.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - name: Create release pull request or publish to npm
+        # The changesets CLI v3 needs action v2, which renamed these inputs.
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          pr-title: Release Tracking
+          version-script: npm run changeset:version
+          publish-script: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  canary:
+    name: Canary
+    # Same-repository pull requests carrying the `canary` label only.
+    # Forks get no OIDC token and must never publish.
+    if: >-
+      ${{ github.repository == 'opf/commonmark-ckeditor-build'
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'canary') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+      pull-requests: write
+      id-token: write # OIDC for npm Trusted Publishing
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - name: Publish canary release
+        run: |
+          echo "$(jq '.version = "0.0.0"' package.json)" > package.json
+          printf -- '---\n"@openproject/commonmark-ckeditor-build": patch\n---\n\nCanary release\n' > .changeset/force-canary-release.md
+          jq '.changelog = "@changesets/cli/changelog"' .changeset/config.json > .changeset/config.tmp.json
+          mv .changeset/config.tmp.json .changeset/config.json
+          npx changeset version --snapshot canary
+          npx changeset publish --tag canary --no-git-tag
+      - name: Report canary version
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { name, version } = require(`${process.env.GITHUB_WORKSPACE}/package.json`)
+            const { owner, repo } = context.repo
+            const pull = context.payload.pull_request
+
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: pull.head.sha,
+              state: 'success',
+              context: `Published ${name}`,
+              description: version,
+              target_url: `https://www.npmjs.com/package/${name}/v/${version}`,
+            })
+
+            const marker = '<!-- canary-release -->'
+            const body = [
+              marker,
+              `Canary published: \`${name}@${version}\``,
+              '',
+              'In `frontend/` of OpenProject core:',
+              '',
+              '```shell',
+              `npm install --save-exact ${name}@${version}`,
+              '```',
+            ].join('\n')
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: pull.number,
+            })
+            const previous = comments.find((comment) => comment.body.includes(marker))
+
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body })
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: pull.number, body })
+            }
