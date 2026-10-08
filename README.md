@@ -8,33 +8,44 @@ This repository acts as a separated source for the custom CKEditor5 builds refer
 
 ## Setup
 
-### Install the dependencies
-
 ```shell
-# In this repository's root (commonmark-ckeditor-build)
 npm install
 # Or with docker:
 docker compose run --rm install
 ```
 
-### Reference the link in OpenProject
-
-```shell
-export OPENPROJECT_CORE=/path/to/openproject/root
-```
-
-If using the docker compose services, the `OPENPROJECT_CORE` environment variable must be set in the `.env` file.
-
 ## Building
 
-To build for the OpenProject core, run `npm run build` or `docker compose run --rm build`. This will override the
-`frontend/src/vendor/ckeditor/*` contents in the core repository with the newest build. You need to run this
-before opening a pull request.
+`npm run build` writes the bundle, its source map, the stylesheet and the translations to `dist/`. No OpenProject checkout is needed.
 
-> [!IMPORTANT]
-> Please ensure that for any changes in this repository, you have a core repository pull request with the output
-> of `npm run build`, so that all core tests can run and confirm your changes. Both pull requests should _always_ be
-> merged at the same time, never alone.
+## Developing against OpenProject
+
+OpenProject core installs this build from npm as `@openproject/commonmark-ckeditor-build`. To try local changes in a running core:
+
+```shell
+export OPENPROJECT_CORE=/path/to/openproject
+npm run watch
+```
+
+Each rebuild is copied over the copy in `$OPENPROJECT_CORE/frontend/node_modules/@openproject/commonmark-ckeditor-build/dist/`. Running `npm ci` in core's `frontend/` restores the pinned version. `npm run watch` rebuilds the bundle only; run `npm run build` once first so the stylesheet and translations exist.
+
+With docker compose, set `OPENPROJECT_CORE` in `.env` and run `docker compose up -d watch`.
+
+## Releasing
+
+Releases are managed with [changesets](https://github.com/changesets/changesets).
+
+1. Run `npm run changeset` in your branch, choose patch, minor or major, and commit the generated file. A pull request without one fails the "Check for changeset" check; use the `skip changeset` label when the published build does not change.
+2. After the merge to `master`, a "Release Tracking" pull request appears or is updated. Do not edit it by hand.
+3. Merging "Release Tracking" publishes to npm and creates the tag and GitHub release.
+
+### Testing a change in core before releasing it
+
+1. Add the label `canary` to your pull request. A snapshot version `0.0.0-canary-<timestamp>` is published under the npm dist-tag `canary`, and a comment on the pull request shows the install command.
+2. Pin that version in a core pull request and let core's CI run. Core refuses to merge a `0.0.0-` pin.
+3. Merge here, merge "Release Tracking", then replace the pin in the core pull request with the released version.
+
+## Maintenance
 
 ### Updating CKEditor
 
@@ -47,14 +58,6 @@ and then rebuild + run openproject tests.
 We use `patch-package` (https://www.npmjs.com/package/patch-package) to store a patch for the ckeditor5-mention plugin
 to ensure multiple-hash mentions for work packages (e.g., `###2134`) work correctly.
 See https://community.openproject.org/work_packages/47084 for context.
-
-## Development
-
-- Run `npm run watch`
-- Alternatively, run `docker compose up -d watch`
-
-Now esbuild is rebuilding the bundle on every change and writing it to `frontend/src/vendor/ckeditor/*` in the
-core repository, overriding anything in there.
 
 ### Type checking
 
@@ -69,7 +72,7 @@ npm run typecheck
 
 ### jQuery Removal
 
-As of version 11.2.0, this library no longer uses jQuery internally. All jQuery dependencies have been replaced with
+As of version 12.0.0, this library no longer uses jQuery internally. All jQuery dependencies have been replaced with
 vanilla JavaScript equivalents using Request.JS and native DOM manipulation.
 
 **Important for downstream consumers (e.g., OpenProject):** While this library no longer uses jQuery internally,
