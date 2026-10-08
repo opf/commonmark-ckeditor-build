@@ -2,11 +2,12 @@
 /* eslint-env node */
 
 // Asserts that a directory holds a usable editor build. Without an argument,
-// checks the build in the OpenProject core checkout.
+// checks dist.
 // Usage: node bin/verify-build.mjs [build directory]
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { distDir } from './lib/paths.mjs';
 
 // The webpack build was 1.3 MB. Fail well before a regression doubles it.
 const MAX_BUNDLE_BYTES = 1_500_000;
@@ -15,15 +16,7 @@ const MAX_BUNDLE_BYTES = 1_500_000;
 const MAX_SOURCE_MAP_BYTES = 9_000_000;
 const MIN_LOCALES = 50;
 
-const core = process.env.OPENPROJECT_CORE;
-const dir = process.argv[2]
-  ?? (core && path.resolve(core, 'frontend', 'src', 'vendor', 'ckeditor'));
-
-if (!dir) {
-  console.error('Usage: node bin/verify-build.mjs [build directory]');
-  console.error('Set OPENPROJECT_CORE to leave out the build directory.');
-  process.exit(1);
-}
+const dir = process.argv[2] ?? distDir;
 
 const failures = [];
 
@@ -39,6 +32,7 @@ async function read(file) {
 const bundle = await read('ckeditor.js');
 const sourceMap = await read('ckeditor.js.map');
 const css = await read('ckeditor.css');
+await read('ckeditor.d.ts');
 
 if (bundle !== null) {
   const bytes = Buffer.byteLength(bundle);

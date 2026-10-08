@@ -42,7 +42,7 @@ const tsRules = {
 export default [
 	eslint.configs.recommended,
 	{
-		ignores: ["tmp/", "coverage/", "node_modules/"],
+		ignores: ["tmp/", "coverage/", "node_modules/", "dist/"],
 	},
 	{
 		files: ["jest.config.js", 'babel.config.js'],
