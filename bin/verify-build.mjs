@@ -35,6 +35,13 @@ async function read(file) {
 const bundle = await read('ckeditor.js');
 const sourceMap = await read('ckeditor.js.map');
 const css = await read('ckeditor.css');
+await read('ckeditor.d.ts');
+const translationsIndex = await read('translations/index.js');
+await read('translations/index.d.ts');
+
+if (translationsIndex !== null && !translationsIndex.includes('export async function loadTranslation')) {
+  failures.push('translations/index.js does not export loadTranslation');
+}
 
 if (bundle !== null) {
   const bytes = Buffer.byteLength(bundle);

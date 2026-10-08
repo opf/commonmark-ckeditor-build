@@ -1,0 +1,32 @@
+name: Check for changeset
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      # For `skip changeset` only.
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+
+jobs:
+  check-for-changeset:
+    name: Check for changeset
+    # The Release Tracking pull request consumes changesets instead of adding one.
+    if: ${{ github.head_ref != 'changeset-release/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check for changeset
+        uses: brettcannon/check-for-changed-files@871d7b8b5917a4f6f06662e2262e8ffc51dff6d1 # v1
+        with:
+          # Every changeset, but not the permanent README next to them.
+          file-pattern: '.changeset/!(README).md'
+          skip-label: 'skip changeset'
+          failure-message: 'No changeset found. Run `npm run changeset` and commit the result, or apply the ${skip-label} label if this change does not affect the published build.'

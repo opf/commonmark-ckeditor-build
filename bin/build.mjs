@@ -1,20 +1,16 @@
 #!/usr/bin/env node
 /* eslint-env node */
 
-// Bundles the editor. Pass --watch to rebuild on change.
+// Bundles the editor into dist/. Pass --watch to rebuild on change.
+// With OPENPROJECT_CORE set, watch mode also copies each build into that
+// checkout's installed copy of this package.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import * as esbuild from 'esbuild';
 
-const core = process.env.OPENPROJECT_CORE;
+import { coreMirrorDir, distDir, mirrorToCore, rootDir } from './lib/paths.mjs';
 
-if (!core) {
-  throw new Error("Expected OPENPROJECT_CORE to be present, but wasn't.");
-}
-
-const root = path.resolve(import.meta.dirname, '..');
-const outdir = path.resolve(core, 'frontend', 'src', 'vendor', 'ckeditor');
 const production = process.env.NODE_ENV === 'production';
 const watch = process.argv.includes('--watch');
 
@@ -36,9 +32,28 @@ const ignoreDependencySourceMaps = {
   },
 };
 
+const mirrorPlugin = {
+  name: 'mirror-to-core',
+  setup(build) {
+    build.onEnd(async (result) => {
+      if (result.errors.length > 0) {
+        return;
+      }
+
+      const outcome = await mirrorToCore();
+
+      if (outcome === 'copied') {
+        console.log(`Copied build to ${coreMirrorDir()}`);
+      } else if (outcome === 'not-installed') {
+        console.warn(`Package not installed in ${coreMirrorDir()}; nothing copied.`);
+      }
+    });
+  },
+};
+
 const options = {
-  entryPoints: [path.join(root, 'src', 'op-ckeditor.ts')],
-  outfile: path.join(outdir, 'ckeditor.js'),
+  entryPoints: [path.join(rootDir, 'src', 'op-ckeditor.ts')],
+  outfile: path.join(distDir, 'ckeditor.js'),
   bundle: true,
   format: 'esm',
   platform: 'browser',
@@ -51,8 +66,12 @@ const options = {
   loader: { '.svg': 'text' },
   banner: { js: banner },
   logLevel: 'info',
-  plugins: [ignoreDependencySourceMaps],
+  plugins: [ignoreDependencySourceMaps, ...(watch ? [mirrorPlugin] : [])],
 };
+
+await fs.mkdir(distDir, { recursive: true });
+// The bundle is a side-effect module: it sets globals and exports nothing.
+await fs.writeFile(path.join(distDir, 'ckeditor.d.ts'), 'export {};\n', 'utf8');
 
 if (watch) {
   const context = await esbuild.context(options);
