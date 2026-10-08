@@ -83,13 +83,14 @@
     "url": "https://github.com/ckeditor/ckeditor5-build-balloon.git"
   },
   "scripts": {
-    "build": "NODE_ENV=production node bin/build.mjs && node ./bin/build-ckeditor-translations.mjs && node ./bin/build-ckeditor-styles.mjs",
+    "build": "rm -rf dist && NODE_ENV=production node bin/build.mjs && node ./bin/build-ckeditor-translations.mjs && node ./bin/build-ckeditor-styles.mjs && node bin/mirror-to-core.mjs",
     "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi",
     "postinstall": "patch-package",
     "watch": "node bin/build.mjs --watch",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "verify:build": "node bin/verify-build.mjs",
+    "verify:build": "node bin/verify-build.mjs dist",
+    "test:bin": "node --test \"bin/**/*.test.mjs\"",
     "test": "jest ."
   },
   "dependencies": {

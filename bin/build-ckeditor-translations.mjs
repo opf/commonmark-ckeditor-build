@@ -5,15 +5,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-const core = process.env.OPENPROJECT_CORE;
-
-if (!core) {
-  throw new Error("Expected OPENPROJECT_CORE to be present, but wasn't.");
-}
+import { distDir } from './lib/paths.mjs';
 
 const cwd = process.cwd();
 const nodeModulesRoot = path.join(cwd, 'node_modules', '@ckeditor');
-const outputDir = path.join(core, 'frontend', 'src', 'vendor', 'ckeditor', 'translations');
+const outputDir = path.join(distDir, 'translations');
 
 function serializePluralForm(fn) {
   const source = fn.toString().trim();

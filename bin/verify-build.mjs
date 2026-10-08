@@ -35,6 +35,7 @@ async function read(file) {
 const bundle = await read('ckeditor.js');
 const sourceMap = await read('ckeditor.js.map');
 const css = await read('ckeditor.css');
+await read('ckeditor.d.ts');
 
 if (bundle !== null) {
   const bytes = Buffer.byteLength(bundle);

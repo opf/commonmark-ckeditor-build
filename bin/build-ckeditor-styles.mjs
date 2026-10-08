@@ -4,15 +4,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-const core = process.env.OPENPROJECT_CORE;
-
-if (!core) {
-  throw new Error("Expected OPENPROJECT_CORE to be present, but wasn't.");
-}
+import { distDir } from './lib/paths.mjs';
 
 const cwd = process.cwd();
 const packageJsonPath = path.join(cwd, 'package.json');
-const outputPath = path.join(core, 'frontend', 'src', 'vendor', 'ckeditor', 'ckeditor.css');
+const outputPath = path.join(distDir, 'ckeditor.css');
 
 const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
 const dependencyNames = new Set([

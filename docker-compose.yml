@@ -3,9 +3,9 @@ x-op-node: &op-node
   working_dir: /home/node/app
   volumes:
     - ./:/home/node/app
-    # The absolute path to the core repository MUST be set in the `.env`,
-    # otherwise the build won't replace the code in there.
-    - ${OPENPROJECT_CORE:-/tmp}/frontend/src/vendor/ckeditor:/openproject/frontend/src/vendor/ckeditor
+    # Optional: the absolute path to the core repository, set in `.env`.
+    # A build is then copied over the package core installed from npm.
+    - ${OPENPROJECT_CORE:-/tmp}/frontend/node_modules/@openproject/commonmark-ckeditor-build:/openproject/frontend/node_modules/@openproject/commonmark-ckeditor-build
   environment:
     OPENPROJECT_CORE: /openproject
 
