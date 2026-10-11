@@ -11,7 +11,7 @@
 
 import type { Editor } from '@ckeditor/ckeditor5-core';
 import { HtmlDataProcessor, ViewDomConverter } from '@ckeditor/ckeditor5-engine';
-import type { ViewDocumentFragment } from '@ckeditor/ckeditor5-engine';
+import type { DataProcessor, MatcherPattern, ViewDocumentFragment } from '@ckeditor/ckeditor5-engine';
 import { highlightedCodeBlock } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import { textNodesPreprocessor, linkPreprocessor, breaksPreprocessor } from './utils/preprocessor';
@@ -134,7 +134,7 @@ function pageLinkTurboFrame(frameId: string, frameSrc: string, providerId: strin
  *
  * @implements module:engine/dataprocessor/dataprocessor~DataProcessor
  */
-export default class CommonMarkDataProcessor {
+export default class CommonMarkDataProcessor implements DataProcessor {
 	declare _htmlDP: HtmlDataProcessor;
 	declare _domConverter: ViewDomConverter;
 	declare editor: Editor;
@@ -144,6 +144,22 @@ export default class CommonMarkDataProcessor {
 		this._htmlDP = new HtmlDataProcessor(document);
 		this._domConverter = new ViewDomConverter(document);
 		this.editor = editor;
+	}
+
+	/**
+	 * Registers a matcher for elements whose content is kept as raw data.
+	 * Mirrors CKEditor's HtmlDataProcessor.
+	 */
+	registerRawContentMatcher(pattern: MatcherPattern) {
+		this._domConverter.registerRawContentMatcher(pattern);
+	}
+
+	/**
+	 * Selects the block filler used when converting to DOM.
+	 * Mirrors CKEditor's HtmlDataProcessor.
+	 */
+	useFillerType(type: 'default' | 'marked') {
+		this._domConverter.blockFillerMode = type == 'marked' ? 'markedNbsp' : 'nbsp';
 	}
 
 	/**
