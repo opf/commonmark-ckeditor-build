@@ -113,8 +113,9 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 		this.editor
 				.conversion
 				.for('upcast')
-				// @ts-expect-error TODO(OP-18993): add() takes one argument, so this priority is ignored.
-				.add(dispatcher => dispatcher.on(`element:table`, this._manageTableUpcast(config)), {priority: 'high'});
+				// Runs at the default priority, after CKEditor's own table upcast:
+				// the listener needs the model range that upcast produces.
+				.add(dispatcher => dispatcher.on(`element:table`, this._manageTableUpcast(config)));
 
 		this.editor
 				.conversion
