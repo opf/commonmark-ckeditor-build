@@ -1,9 +1,9 @@
 import type { Editor } from '@ckeditor/ckeditor5-core';
-import type { FileLoader } from '@ckeditor/ckeditor5-upload';
+import type { FileLoader, UploadAdapter, UploadResponse } from '@ckeditor/ckeditor5-upload';
 import type { OpAttachment, OpResource } from '../op-types';
 import {getOPService} from './op-context/op-context';
 
-export default class OpUploadResourceAdapter {
+export default class OpUploadResourceAdapter implements UploadAdapter {
     declare loader: FileLoader;
     declare resource: OpResource | undefined;
     declare editor: Editor;
@@ -14,7 +14,7 @@ export default class OpUploadResourceAdapter {
         this.editor = editor;
     }
 
-    upload() {
+    upload(): Promise<UploadResponse> {
 		const resource = this.resource;
 		const resourceService = getOPService(this.editor, 'attachmentsResourceService');
 
