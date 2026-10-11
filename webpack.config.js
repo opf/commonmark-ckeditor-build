@@ -24,7 +24,7 @@ module.exports = {
 	devtool: 'source-map',
 	performance: { hints: false },
 
-	entry: path.resolve( __dirname, 'src', 'op-ckeditor.js' ),
+	entry: path.resolve( __dirname, 'src', 'op-ckeditor.ts' ),
 
 	mode: mode,
 
