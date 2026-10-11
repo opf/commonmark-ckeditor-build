@@ -4,8 +4,14 @@ import {opImageUploadPlugins, opMacroPlugins} from './op-plugins';
 
 export function configurationCustomizer(editorClass: typeof DecoupledEditor) {
 	return (wrapper: HTMLElement | string, configuration: EditorConfig) => {
-		// TODO(OP-18993): throws when core passes no openProject configuration.
-		const context = configuration.openProject!.context;
+		// Core always passes this. Its absence is a bug in core, so it is
+		// reported by name instead of surfacing as a TypeError.
+		const openProject = configuration.openProject;
+		if (!openProject) {
+			throw new Error('CKEditor: openProject configuration is missing');
+		}
+
+		const context = openProject.context;
 
 		// We're going to remove some plugins from the default configuration
 		// when we detect they are unsupported in the current context
@@ -19,7 +25,7 @@ export function configurationCustomizer(editorClass: typeof DecoupledEditor) {
 
 		// Disable macros entirely
 		if (context.macros === false) {
-			configuration.openProject!.disableAllMacros = true;
+			openProject.disableAllMacros = true;
 			configuration.removePlugins.push(...opMacroPlugins.map(el => el.pluginName))
 		}
 
