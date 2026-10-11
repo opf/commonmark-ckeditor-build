@@ -215,9 +215,7 @@ export default class CommonMarkDataProcessor {
 	 */
 	toData(viewFragment: ViewDocumentFragment) {
 		// Convert view DocumentFragment to DOM DocumentFragment.
-		// TODO(OP-18993): viewToDom() takes an options object here, not a document. Neither option
-		// exists on document, so the call behaves as if the argument were absent.
-		const domFragment = this._domConverter.viewToDom(viewFragment, document as object);
+		const domFragment = this._domConverter.viewToDom(viewFragment);
 
 		// Replace leading and trailing nbsp at the end of strong and em tags
 		// with single spaces
