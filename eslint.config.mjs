@@ -14,8 +14,6 @@ const tsRules = {
 	// JavaScript rules never asked for.
 	"prefer-const": "off",
 	"no-var": "off",
-	"prefer-rest-params": "off",
-	"prefer-spread": "off",
 	"@typescript-eslint/no-this-alias": "off",
 	"@typescript-eslint/no-unused-expressions": "off",
 	"no-unused-vars": "off",
