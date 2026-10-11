@@ -118,7 +118,6 @@ export default class OPMacroWpButtonEditing extends Plugin {
 		const container = writer.createContainerElement( 'span', { class: classes } );
 
 		writer.insert( writer.createPositionAt( container, 0 ), placeholder );
-		// TODO(OP-18993): passes an object where the widget label is expected to be a string.
-		return toWpButtonMacroWidget(container, writer, { label: label } as unknown as string )
+		return toWpButtonMacroWidget(container, writer, label)
 	}
 }
