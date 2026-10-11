@@ -4,11 +4,14 @@ import OpUploadPlugin from '../../src/plugins/op-upload-plugin';
 
 // A real Notification plugin, so that its default handler (a browser
 // alert for every unhandled warning) is in play.
-function notificationWithUploadPlugin() {
+function notificationWithUploadPlugin( addError: ( message: string ) => void = () => {} ) {
 	const fileRepository = {};
 	const editor = {
 		plugins: {
 			get: ( name: string ) => ( name === 'Notification' ? notification : fileRepository ),
+		},
+		config: {
+			_config: { openProject: { pluginContext: { services: { notifications: { addError } } } } },
 		},
 	} as unknown as Editor;
 	const notification = new Notification( editor );
@@ -44,5 +47,14 @@ describe( 'OpUploadPlugin', () => {
 		notification.showWarning( 'Something else went wrong' );
 
 		expect( alert ).toHaveBeenCalledWith( 'Something else went wrong' );
+	} );
+
+	it( 'reports a failed upload through core', () => {
+		const addError = jest.fn();
+		const notification = notificationWithUploadPlugin( addError );
+
+		notification.showWarning( "'image/webp' is not allowed for upload", { title: 'Upload failed', namespace: 'upload' } );
+
+		expect( addError ).toHaveBeenCalledWith( "'image/webp' is not allowed for upload" );
 	} );
 } );
