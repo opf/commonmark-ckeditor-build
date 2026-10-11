@@ -3,7 +3,7 @@
  * Remove multiple whitespaces in task list text nodes
  */
 export function fixTasklistWhitespaces(root: Node) {
-	let walker = document.createNodeIterator(
+	const walker = document.createNodeIterator(
 		root,
 		// Only consider text nodes
 		NodeFilter.SHOW_TEXT,

@@ -17,7 +17,7 @@ export default class OPSourceCodePlugin extends Plugin {
 	init() {
 		const editor = this.editor;
 		let inSourceMode = false;
-		let labels = {
+		const labels = {
 			source: window.I18n.t('js.editor.mode.manual'),
 			wysiwyg: window.I18n.t('js.editor.mode.wysiwyg'),
 		}
@@ -34,7 +34,7 @@ export default class OPSourceCodePlugin extends Plugin {
 			} );
 
 
-			let showSource = function(_preview?: unknown) {
+			const showSource = function(_preview?: unknown) {
 				const editableElement = editor.ui.getEditableElement();
 				const reference = editableElement?.parentElement;
 				if (!reference?.parentElement) {
@@ -66,7 +66,7 @@ export default class OPSourceCodePlugin extends Plugin {
 
 			};
 
-			let hideSource = function() {
+			const hideSource = function() {
 				const editableElement = editor.ui.getEditableElement();
 				const mainEditor = editableElement?.parentElement;
 				if (!mainEditor?.parentElement) {

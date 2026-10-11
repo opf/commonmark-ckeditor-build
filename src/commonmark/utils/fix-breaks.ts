@@ -43,7 +43,7 @@ export function fixBreaksInTables(root: Node) {
  * (except for page breaks, which are kept but are wrapped in a paragraph)
  */
 export function fixBreaksOnRootLevel(root: Node) {
-	let walker = document.createNodeIterator(
+	const walker = document.createNodeIterator(
 		root,
 		NodeFilter.SHOW_ELEMENT,
 		{
@@ -56,7 +56,7 @@ export function fixBreaksOnRootLevel(root: Node) {
 	);
 
 	let node: Element | null;
-	let list: Element[] = []
+	const list: Element[] = []
 	while (node = walker.nextNode() as Element | null) {
 		list.push(node);
 	}
@@ -95,7 +95,7 @@ export function fixBreaksInLists(root: Node) {
 	);
 
 	let node: Element | null;
-	let list: Element[] = []
+	const list: Element[] = []
 	while (node = walker.nextNode() as Element | null) {
 		list.push(node);
 	}

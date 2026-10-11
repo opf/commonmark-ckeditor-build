@@ -146,7 +146,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			// the model but CkEditor wraps every table and image with a <figure>.
 			let figureClasses = modelElement.getAttribute('figureClasses') as string[] | undefined || [];
 			// The parent may be a document fragment, which has no getClassNames(); the first operand guards that.
-			let parentFigureRawClasses = (viewItem.parent as ViewElement).getClassNames && (viewItem.parent as ViewElement).getClassNames();
+			const parentFigureRawClasses = (viewItem.parent as ViewElement).getClassNames && (viewItem.parent as ViewElement).getClassNames();
 			const parentFigureClasses = parentFigureRawClasses ? [...parentFigureRawClasses].filter(figureClass => !!figureClass) : [];
 
 			figureClasses = [...figureClasses, ...parentFigureClasses];
@@ -315,7 +315,7 @@ export default class OpCustomCssClassesPlugin extends Plugin {
 			} else if (attributeName === 'uploadStatus') {
 				if (data.attributeNewValue === 'complete') {
 					const viewChildren = Array.from(viewWriter.createRangeIn(viewElement).getItems()) as ViewChildren;
-					let placeholderElement = viewChildren.find(viewChild => viewChild.hasClass('ck-upload-placeholder-loader'));
+					const placeholderElement = viewChildren.find(viewChild => viewChild.hasClass('ck-upload-placeholder-loader'));
 
 					if (placeholderElement) {
 						viewWriter.remove(viewWriter.createRangeOn(placeholderElement));

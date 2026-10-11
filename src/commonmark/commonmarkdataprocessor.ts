@@ -162,7 +162,7 @@ export default class CommonMarkDataProcessor {
 		});
 
 		// Use tasklist plugin
-		let parser = md.use(markdownItTaskLists, { label: true });
+		const parser = md.use(markdownItTaskLists, { label: true });
 
 		parser.inline.ruler.before('text', 'op_workpackage_ref', workPackageRefInlineRule);
 		parser.inline.ruler.before(
@@ -476,7 +476,7 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
-		let turndown = turndownService.turndown(domFragment);
+		const turndown = turndownService.turndown(domFragment);
 
 		// Escape non-breaking space characters
 		return turndown.replace(/\u00A0/, '&nbsp;').replace('###turndown-ignore###\n', '');

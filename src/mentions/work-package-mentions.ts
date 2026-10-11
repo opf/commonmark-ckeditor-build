@@ -11,7 +11,7 @@ interface AutocompleteWorkPackage {
 
 export function workPackageMentions(prefix: string) {
   return function (this: Editor, query: string) {
-    let editor = this;
+    const editor = this;
     const urlRoot = window.OpenProject.urlRoot;
     const url = `${urlRoot}/work_packages/auto_complete.json`;
 

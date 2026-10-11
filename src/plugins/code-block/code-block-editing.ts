@@ -61,7 +61,7 @@ export default class CodeBlockEditing extends Plugin {
 		view.addObserver( DoubleClickObserver );
 		this.listenTo<ViewDocumentDoubleClickEvent>( viewDocument, 'dblclick', ( eventInfo, domEventData ) => {
 			let element: ViewElement | null = domEventData.target;
-			let evt = domEventData.domEvent;
+			const evt = domEventData.domEvent;
 
 			// Avoid opening the widget with modifiers selected to allow selecting the widget
 			if (evt.shiftKey || evt.altKey || evt.metaKey) {
