@@ -9,10 +9,6 @@ const tsRules = {
 	// TypeScript reports undefined names itself.
 	"no-undef": "off",
 	"no-cond-assign": "off",
-	// TODO(OP-18993): re-enable once the conversion has merged. It changes
-	// types only, and these would demand edits to runtime code that the
-	// JavaScript rules never asked for.
-	"@typescript-eslint/no-unused-expressions": "off",
 	"no-unused-vars": "off",
 	"@typescript-eslint/no-unused-vars": [
 		"error",
