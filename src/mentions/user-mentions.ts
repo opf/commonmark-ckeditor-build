@@ -27,8 +27,7 @@ function uniqBy<T>(items: T[], keyFn: (item: T) => unknown) {
 }
 
 export function userMentions(this: Editor, queryText: string) {
-	const editor = this;
-	let resource = getOPResource(editor);
+	let resource = getOPResource(this);
 
 	if (resource && resource._type === 'Activity::Comment') {
 		const workPackage = resource.$embedded!.workPackage;
@@ -42,12 +41,12 @@ export function userMentions(this: Editor, queryText: string) {
 		return [];
 	}
 
-	if (editor.config.get('disabledMentions')!.includes('user')) {
+	if (this.config.get('disabledMentions')!.includes('user')) {
 		return [];
 	}
 
-	const url = getOPPath(editor).api.v3.principals(resource, queryText);
-	const pluginContext = getPluginContext(editor);
+	const url = getOPPath(this).api.v3.principals(resource, queryText);
+	const pluginContext = getPluginContext(this);
 	const base = window.OpenProject.urlRoot;
 
 	return new Promise<OpMentionFeedItem[]>((resolve, reject) => {

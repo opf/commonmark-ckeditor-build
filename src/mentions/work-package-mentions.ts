@@ -11,11 +11,10 @@ interface AutocompleteWorkPackage {
 
 export function workPackageMentions(prefix: string) {
   return function (this: Editor, query: string) {
-    const editor = this;
     const urlRoot = window.OpenProject.urlRoot;
     const url = `${urlRoot}/work_packages/auto_complete.json`;
 
-    if (editor.config.get("disabledMentions")!.includes("work_package")) {
+    if (this.config.get("disabledMentions")!.includes("work_package")) {
       return [];
     }
 
