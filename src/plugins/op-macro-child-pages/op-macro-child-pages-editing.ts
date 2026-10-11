@@ -148,8 +148,7 @@ export default class OPChildPagesEditing extends Plugin {
 
 		this.setPlaceholderContent( writer, modelElement, placeholderContainer );
 
-		// TODO(OP-18993): passes an object where the widget label is expected to be a string.
-		return toChildPagesMacroWidget(placeholderContainer, writer, { label: this.macroLabel() } as unknown as string )
+		return toChildPagesMacroWidget(placeholderContainer, writer, this.macroLabel())
 	}
 
 	setPlaceholderContent(writer: ViewDowncastWriter, modelElement: ModelElement, placeholderContainer: ViewContainerElement ) {

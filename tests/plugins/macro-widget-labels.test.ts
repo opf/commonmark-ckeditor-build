@@ -6,6 +6,7 @@ jest.mock( '@ckeditor/ckeditor5-widget', () => ( {
 import type { ModelElement, ViewDowncastWriter } from '@ckeditor/ckeditor5-engine';
 import { toWidget } from '@ckeditor/ckeditor5-widget';
 import OPMacroWpButtonEditing from '../../src/plugins/op-macro-wp-button/op-macro-wp-button-editing';
+import OPChildPagesEditing from '../../src/plugins/op-macro-child-pages/op-macro-child-pages-editing';
 
 const toWidgetMock = toWidget as unknown as jest.Mock;
 
@@ -30,5 +31,17 @@ describe( 'macro widget labels', () => {
 		OPMacroWpButtonEditing.prototype.createMacroViewElement.call( plugin, modelElement, writer );
 
 		expect( widgetLabel() ).toEqual( 'Create work package' );
+	} );
+
+	it( 'labels the child pages widget with its text', () => {
+		// Only macroLabel() and setPlaceholderContent() are read from the plugin instance.
+		const plugin = {
+			macroLabel: () => 'Child pages',
+			setPlaceholderContent: jest.fn(),
+		} as unknown as OPChildPagesEditing;
+
+		OPChildPagesEditing.prototype.createMacroViewElement.call( plugin, modelElement, writer );
+
+		expect( widgetLabel() ).toEqual( 'Child pages' );
 	} );
 } );
