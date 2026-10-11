@@ -57,15 +57,14 @@ export default class OpContentRevisionsUI extends Plugin {
 
 }
 
-function addAvailableRevisions(editor: Editor, collection: Collection<ListDropdownItemDefinition>) {
+export function addAvailableRevisions(editor: Editor, collection: Collection<ListDropdownItemDefinition>) {
   // The revisions plugin defines the key in its constructor.
   const key = editor.config.get(OP_CONTENT_REVISION_KEY)!;
   const record = loadFromLocalStorage(key);
   const i18n = getOPI18n(editor);
   const timezoneService = getOPService(editor, "timezone");
 
-  // TODO(OP-18993): arrays have no `count`, so the second condition is always false.
-  if (!record?.items || (record.items as unknown as { count: number }).count <= 0) {
+  if (!record?.items || record.items.length === 0) {
     const def = {
       type: "button",
       model: {
