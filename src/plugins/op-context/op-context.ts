@@ -31,14 +31,24 @@ export function getPluginContext(editor: Editor): OpPluginContext | undefined {
 	return (editor.config as unknown as RawConfig)?._config?.openProject?.pluginContext;
 }
 
+// Core always passes a plugin context. Its absence is a bug in core, so it
+// is reported by name instead of surfacing as a TypeError.
+function requirePluginContext(editor: Editor): OpPluginContext {
+	const pluginContext = getPluginContext(editor);
+
+	if (!pluginContext) {
+		throw new Error('CKEditor: openProject.pluginContext is missing');
+	}
+
+	return pluginContext;
+}
+
 export function getOPService<K extends keyof OpServices>(editor: Editor, name: K): OpServices[K] {
-	// TODO(OP-18993): throws when the editor has no plugin context.
-	return getPluginContext(editor)!.services[name];
+	return requirePluginContext(editor).services[name];
 }
 
 export function getOPHelper<K extends keyof OpHelpers>(editor: Editor, name: K): OpHelpers[K] {
-	// TODO(OP-18993): throws when the editor has no plugin context.
-	return getPluginContext(editor)!.helpers[name];
+	return requirePluginContext(editor).helpers[name];
 }
 
 export function getOPPath(editor: Editor) {
