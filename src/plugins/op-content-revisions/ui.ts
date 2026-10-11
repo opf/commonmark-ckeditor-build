@@ -86,8 +86,7 @@ function addAvailableRevisions(editor: Editor, collection: Collection<ListDropdo
     index--;
 
     const data = record.items[index];
-    // TODO(OP-18993): core declares this parameter as a datetime string; a numeric timestamp is passed.
-    const time = timezoneService.formattedRelativeDateTime(data.timestamp as unknown as string);
+    const time = timezoneService.formattedRelativeDateTime(data.timestamp);
     const words = i18n.t("js.units.word", { count: countWords(data.content) });
     const matches = data.hash === currentHash ? `${i18n.t('js.label_current')} - ` : "";
     const label = `${matches}${time} (${words})`;
