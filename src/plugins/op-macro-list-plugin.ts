@@ -3,6 +3,7 @@ import { createDropdown, addToolbarToDropdown } from '@ckeditor/ckeditor5-ui';
 
 import dropdownIcon from './../icons/plus.svg';
 import { opMacroPlugins } from "../op-plugins";
+import { pluginNames } from '../helpers/plugin-names';
 
 /**
  * Adding a drop down list of macros to the toolbar.
@@ -12,8 +13,7 @@ import { opMacroPlugins } from "../op-plugins";
 export default class OPMacroListPlugin extends Plugin {
 	init() {
 		const editor = this.editor;
-		// TODO(OP-18993): entries given as plugin names (strings) have no pluginName and map to undefined.
-		const disabledPluginNames = (editor.config.get('removePlugins') || []).map(p => (p as { pluginName?: string }).pluginName);
+		const disabledPluginNames = pluginNames(editor.config.get('removePlugins') || []);
 
 		// Skip if we don't have any macros here
 		if (editor.config.get('openProject.disableAllMacros') === true) {
