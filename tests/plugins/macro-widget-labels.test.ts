@@ -3,10 +3,11 @@ jest.mock( '@ckeditor/ckeditor5-widget', () => ( {
 	isWidget: jest.fn(),
 } ) );
 
-import type { ModelElement, ViewDowncastWriter } from '@ckeditor/ckeditor5-engine';
+import type { ModelElement, ViewDowncastWriter, ViewElement } from '@ckeditor/ckeditor5-engine';
 import { toWidget } from '@ckeditor/ckeditor5-widget';
 import OPMacroWpButtonEditing from '../../src/plugins/op-macro-wp-button/op-macro-wp-button-editing';
 import OPChildPagesEditing from '../../src/plugins/op-macro-child-pages/op-macro-child-pages-editing';
+import { toEmbeddedTableWidget } from '../../src/plugins/op-macro-embedded-table/utils';
 
 const toWidgetMock = toWidget as unknown as jest.Mock;
 
@@ -43,5 +44,11 @@ describe( 'macro widget labels', () => {
 		OPChildPagesEditing.prototype.createMacroViewElement.call( plugin, modelElement, writer );
 
 		expect( widgetLabel() ).toEqual( 'Child pages' );
+	} );
+
+	it( 'labels the embedded table widget with the given text', () => {
+		toEmbeddedTableWidget( {} as ViewElement, writer, 'Embedded table' );
+
+		expect( widgetLabel() ).toEqual( 'Embedded table' );
 	} );
 } );

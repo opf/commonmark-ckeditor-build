@@ -8,8 +8,6 @@ import {getPluginContext} from '../op-context/op-context';
 
 export default class EmbeddedTableEditing extends Plugin {
 	declare text: { button: string; macro_text: string };
-	// TODO(OP-18993): never assigned, so the widget label below is always undefined.
-	declare label?: string;
 
 	static get pluginName() {
 		return 'EmbeddedTableEditing';
@@ -59,7 +57,7 @@ export default class EmbeddedTableEditing extends Plugin {
 		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'op-macro-embedded-table',
 			view: (modelElement: ModelElement, {writer:viewWriter}: DowncastConversionApi) => {
-				return toEmbeddedTableWidget(this.createEmbeddedTableView(viewWriter), viewWriter, { label: this.label } )
+				return toEmbeddedTableWidget(this.createEmbeddedTableView(viewWriter), viewWriter, this.text.macro_text)
 			}
 	    } );
 
