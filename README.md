@@ -28,7 +28,7 @@ If using the docker compose services, the `OPENPROJECT_CORE` environment variabl
 ## Building
 
 To build for the OpenProject core, run `npm run build` or `docker compose run --rm build`. This will override the
-`frontend/src/vendor/ckeditor/*` contents in the core repository with the newest webpack build. You need to run this
+`frontend/src/vendor/ckeditor/*` contents in the core repository with the newest build. You need to run this
 before opening a pull request.
 
 > [!IMPORTANT]
@@ -53,12 +53,12 @@ See https://community.openproject.org/work_packages/47084 for context.
 - Run `npm run watch`
 - Alternatively, run `docker compose up -d watch`
 
-Now the webpack development mode is building the files and outputting them to `frontend/src/vendor/ckeditor/*` in the
+Now esbuild is rebuilding the bundle on every change and writing it to `frontend/src/vendor/ckeditor/*` in the
 core repository, overriding anything in there.
 
 ### Type checking
 
-The source and tests are TypeScript, checked in strict mode. Webpack and jest strip types without checking them, so run
+The source and tests are TypeScript, checked in strict mode. esbuild and jest strip types without checking them, so run
 the checker separately:
 
 ```
