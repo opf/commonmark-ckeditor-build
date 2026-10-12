@@ -3,7 +3,7 @@ import type { DecoupledEditor } from '@ckeditor/ckeditor5-editor-decoupled';
 import {opImageUploadPlugins, opMacroPlugins} from './op-plugins';
 
 export function configurationCustomizer(editorClass: typeof DecoupledEditor) {
-	return (wrapper: HTMLElement | string, configuration: EditorConfig) => {
+	return (wrapper: HTMLElement, configuration: EditorConfig) => {
 		// TODO(OP-18993): throws when core passes no openProject configuration.
 		const context = configuration.openProject!.context;
 
@@ -38,8 +38,9 @@ export function configurationCustomizer(editorClass: typeof DecoupledEditor) {
 		}
 
 		// Return the original promise for instance creation
-		return editorClass.create(wrapper, configuration).then(editor => {
-			return editor;
+		return editorClass.create({
+			...configuration,
+			root: { ...configuration.root, element: wrapper },
 		});
 	};
 }

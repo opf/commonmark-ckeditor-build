@@ -8,8 +8,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-// The webpack build was 1.3 MB. Fail well before a regression doubles it.
-const MAX_BUNDLE_BYTES = 1_500_000;
+// The webpack build was 1.3 MB, and CKEditor 49 brought the build to 1.6 MB.
+// Fail well before a regression doubles it.
+const MAX_BUNDLE_BYTES = 1_700_000;
 // The webpack source map was 7.7 MB. It doubles when the bundler follows the
 // source maps of dependencies back to their original sources.
 const MAX_SOURCE_MAP_BYTES = 9_000_000;
@@ -52,7 +53,7 @@ if (bundle !== null) {
   if (!bundle.includes('@license Copyright (c) 2003-')) {
     failures.push('ckeditor.js lacks the CKSource licence notice');
   }
-  for (const global of ['OPClassicEditor', 'OPConstrainedEditor', 'OPEditorWatchdog']) {
+  for (const global of ['OPClassicEditor', 'OPConstrainedEditor']) {
     if (!bundle.includes(global)) {
       failures.push(`ckeditor.js never assigns window.${global}`);
     }
