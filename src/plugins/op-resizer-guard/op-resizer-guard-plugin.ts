@@ -9,8 +9,8 @@ import { WidgetResize } from '@ckeditor/ckeditor5-widget';
 // view, which re-emits EditorUI#update, which redraws again. For an inline image
 // with no stored width and resizeUnit:'px', the measured (sub-pixel, device-pixel
 // rounded) size never matches what was written, so the cycle never converges and
-// recurses until the call stack overflows — taking down the editor via the
-// watchdog and losing content (COMMS-861 / COMMS-860 / OP-19619).
+// recurses until the call stack overflows and crashes the editor
+// (COMMS-861 / COMMS-860 / OP-19619).
 //
 // The redraw that view.change() triggers re-enters redrawSelectedResizer
 // synchronously (confirmed by the crash stack), so a simple in-progress flag is

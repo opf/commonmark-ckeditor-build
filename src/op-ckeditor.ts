@@ -1,5 +1,4 @@
 import { DecoupledEditor } from '@ckeditor/ckeditor5-editor-decoupled';
-import { EditorWatchdog } from '@ckeditor/ckeditor5-watchdog';
 import {builtinPlugins} from './op-plugins';
 import {defaultConfig} from "./op-ckeditor-config";
 import {configurationCustomizer} from './op-config-customizer';
@@ -16,9 +15,6 @@ export class FullEditor extends DecoupledEditor {
 // Export the two common interfaces
 window.OPConstrainedEditor = ConstrainedEditor;
 window.OPClassicEditor = FullEditor;
-
-// Export the Watchdog feature
-window.OPEditorWatchdog = EditorWatchdog;
 
 FullEditor.createCustomized = configurationCustomizer(FullEditor);
 FullEditor.builtinPlugins = builtinPlugins;
