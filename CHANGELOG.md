@@ -6,7 +6,7 @@
 
 - Upgraded CKEditor 5 to v49.0.0. See the [v49.0.0 update guide](https://ckeditor.com/docs/ckeditor5/latest/updating/guides/update-to-49.html).
 - Removed the `window.OPEditorWatchdog` global, because CKEditor 5 v49 removes the Watchdog. Consumers create editors directly and observe errors with `onEditorError()`, which every editor class also has as a static method (for example `window.OPClassicEditor.onEditorError()`). After an error, the editor keeps running with its content instead of restarting.
-- The generated `ckeditor.css` now ends with the CKEditor 5 legacy theme preset, so the editor keeps its look from before v49.
+- The editor uses the refreshed default theme of CKEditor 5 v49. It also changes the colors of block quotes, code blocks and horizontal lines inside the editor.
 - Removed jQuery dependency from the CKEditor build. All jQuery usage has been replaced with vanilla JavaScript equivalents:
   - `jQuery.each()` replaced with native `Array.forEach()`
   - `jQuery.getJSON()` replaced with Request.JS
