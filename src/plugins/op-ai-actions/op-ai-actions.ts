@@ -76,6 +76,8 @@ export default class OpAiActions extends Plugin {
 
 		addListToDropdown(dropdownView, collection, { role: 'menu', ariaLabel: caption });
 		dropdownView.set('class', 'op-ai-actions');
+		// The button sits at the toolbar's end; a panel growing outwards is clipped by the editor's pane.
+		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
 		dropdownView.buttonView.set({
 			label: caption,
 			icon: sparkleIcon,
