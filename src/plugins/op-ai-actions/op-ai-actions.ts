@@ -1,6 +1,6 @@
 import { Plugin } from '@ckeditor/ckeditor5-core';
 import type { Editor } from '@ckeditor/ckeditor5-core';
-import { addListToDropdown, createDropdown, UIModel } from '@ckeditor/ckeditor5-ui';
+import { addListToDropdown, createDropdown, SplitButtonView, UIModel } from '@ckeditor/ckeditor5-ui';
 import type { DropdownView, ListDropdownItemDefinition, ToolbarView } from '@ckeditor/ckeditor5-ui';
 import { Collection } from '@ckeditor/ckeditor5-utils';
 
@@ -11,11 +11,13 @@ import type { OpAiTextTransformAction, OpServices } from '../../op-types';
 type AiActionsService = NonNullable<OpServices['aiActions']>;
 
 /**
- * The Assistant dropdown of the work package description editor. It must stay
- * visible at every toolbar width.
+ * The Assistant split button of the work package description editor. It must
+ * stay visible at every toolbar width.
  */
 export default class OpAiActions extends Plugin {
 	public dropdownView?: DropdownView;
+
+	private currentAction?: OpAiTextTransformAction;
 
 	private destroyed = false;
 
@@ -58,13 +60,14 @@ export default class OpAiActions extends Plugin {
 
 		this.dropdownView = this.createDropdownView(service, actions);
 		this.attachToToolbar(toolbar, this.dropdownView);
+		this.showAction(service.defaultAction?.(actions) ?? actions[0]);
 		this.updateEnabled();
 	}
 
 	private createDropdownView(service: AiActionsService, actions: OpAiTextTransformAction[]): DropdownView {
 		const editor = this.editor;
 		const caption = getPluginContext(editor)!.services.i18n.t('js.editor.ai_actions.caption');
-		const dropdownView = createDropdown(editor.locale);
+		const dropdownView = createDropdown(editor.locale, SplitButtonView);
 		const collection = new Collection<ListDropdownItemDefinition>();
 
 		for (const action of actions) {
@@ -79,18 +82,19 @@ export default class OpAiActions extends Plugin {
 		// The button sits at the toolbar's end; a panel growing outwards is clipped by the editor's pane.
 		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
 		dropdownView.buttonView.set({
-			label: caption,
 			icon: sparkleIcon,
-			withText: false,
-			tooltip: true,
+			withText: true,
+			tooltip: caption,
 			tabindex: 0,
 		});
 
+		this.listenTo(dropdownView.buttonView, 'execute', () => this.runAction(service, this.currentAction));
 		this.listenTo(dropdownView, 'execute', evt => {
 			const { action } = evt.source as { action?: OpAiTextTransformAction };
 
-			if (action && dropdownView.isEnabled) {
-				void service.run(action, editor, getOPResource(editor));
+			if (action) {
+				this.showAction(action);
+				this.runAction(service, action);
 			}
 		});
 
@@ -101,11 +105,6 @@ export default class OpAiActions extends Plugin {
 		dropdownView.render();
 		toolbar.element!.appendChild(dropdownView.element!);
 		toolbar.focusTracker.add(dropdownView.element!);
-
-		// The toolbar regroups its items only when it is resized or when its maxWidth changes.
-		const maxWidth = toolbar.maxWidth;
-		toolbar.maxWidth = maxWidth === 'none' ? '100%' : 'none';
-		toolbar.maxWidth = maxWidth;
 	}
 
 	private detachDropdown() {
@@ -122,6 +121,29 @@ export default class OpAiActions extends Plugin {
 
 		dropdownView.destroy();
 		this.dropdownView = undefined;
+	}
+
+	private showAction(action: OpAiTextTransformAction) {
+		this.currentAction = action;
+		this.dropdownView!.buttonView.label = action.label;
+		this.regroupToolbar();
+	}
+
+	private regroupToolbar() {
+		const toolbar = this.editor.ui.view.toolbar!;
+
+		// The toolbar regroups its items only when it is resized or when its maxWidth changes.
+		const maxWidth = toolbar.maxWidth;
+		toolbar.maxWidth = maxWidth === 'none' ? '100%' : 'none';
+		toolbar.maxWidth = maxWidth;
+	}
+
+	private runAction(service: AiActionsService, action: OpAiTextTransformAction | undefined) {
+		const editor = this.editor;
+
+		if (action && this.dropdownView?.isEnabled) {
+			void service.run(action, editor, getOPResource(editor));
+		}
 	}
 
 	private setSourceMode(active: boolean) {
