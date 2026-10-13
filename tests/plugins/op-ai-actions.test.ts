@@ -132,6 +132,20 @@ describe('OpAiActions', () => {
 		expect(run).toHaveBeenCalledWith(actions[0], editor, workPackage);
 	});
 
+	test('opens its menu towards the toolbar, mirrored for right-to-left languages', async () => {
+		const { services } = servicesWith(() => Promise.resolve(actions));
+		const { plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+		expect(plugin.dropdownView!.panelPosition).toBe('sw');
+
+		const rtl = fakeEditor({ services, resource: workPackage, field: 'description' });
+		(rtl.editor as unknown as { locale: Locale }).locale = new Locale({ uiLanguage: 'ar' });
+		const rtlPlugin = new OpAiActions(rtl.editor);
+		rtlPlugin.init();
+		rtl.editor.ui.fire('ready');
+		await flushPromises();
+		expect(rtlPlugin.dropdownView!.panelPosition).toBe('se');
+	});
+
 	test('makes the toolbar regroup and keeps its width limit', async () => {
 		const { services } = servicesWith(() => Promise.resolve(actions));
 		const { toolbar } = await initialised({ services, resource: workPackage, field: 'description', maxWidth: '320px' });
