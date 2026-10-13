@@ -162,7 +162,7 @@ export default class CommonMarkDataProcessor {
 		});
 
 		// Use tasklist plugin
-		let parser = md.use(markdownItTaskLists, { label: true });
+		const parser = md.use(markdownItTaskLists, { label: true });
 
 		parser.inline.ruler.before('text', 'op_workpackage_ref', workPackageRefInlineRule);
 		parser.inline.ruler.before(
@@ -313,19 +313,19 @@ export default class CommonMarkDataProcessor {
 					.replace(/\n+$/, '\n'); // replace trailing newlines with just a single one
 
 				// A list item always sits inside an element.
-				var parent = node.parentNode as Element;
-				var prefix = options.bulletListMarker + '   ';
-				var number = 1;
+				const parent = node.parentNode as Element;
+				let prefix = options.bulletListMarker + '   ';
+				let number = 1;
 				if (parent.nodeName === 'OL') {
-					var start = parent.getAttribute('start');
-					var index = Array.prototype.indexOf.call(parent.children, node);
+					const start = parent.getAttribute('start');
+					const index = Array.prototype.indexOf.call(parent.children, node);
 					number = start ? Number(start) + index : index + 1;
 					prefix = number + '.  ';
 				}
 
 				// Calculate indentation based on the width of the number prefix
-				var indentWidth = prefix.length;
-				var indent = ' '.repeat(indentWidth);
+				const indentWidth = prefix.length;
+				const indent = ' '.repeat(indentWidth);
 				content = content.replace(/\n/gm, '\n' + indent);
 
 				return (
@@ -476,7 +476,7 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
-		let turndown = turndownService.turndown(domFragment);
+		const turndown = turndownService.turndown(domFragment);
 
 		// Escape non-breaking space characters
 		return turndown.replace(/\u00A0/, '&nbsp;').replace('###turndown-ignore###\n', '');

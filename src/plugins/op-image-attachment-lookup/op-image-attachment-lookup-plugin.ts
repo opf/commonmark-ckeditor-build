@@ -26,7 +26,7 @@ export function replaceImageAttachmentsByName(resource: OpResource | undefined) 
 
 		// We do not consume the attribute since we want the regular attribute
 		// converter to run as well.
-		let src = data.attributeNewValue as string | null;
+		const src = data.attributeNewValue as string | null;
 
 		// If the resource is not attachable or src has been nulled, do nothing
 		// TODO(OP-18993): throws when the editor has no resource.
@@ -49,7 +49,7 @@ export function replaceNamedAttachmentWithUrl(resource: OpResource | undefined) 
 
 		// We do not consume the attribute since we want the regular attribute
 		// converter to run as well.
-		let src = data.attributeNewValue as string | null;
+		const src = data.attributeNewValue as string | null;
 
 		// If the resource is not attachable or src has been nulled, do nothing
 		// TODO(OP-18993): throws when the editor has no resource.

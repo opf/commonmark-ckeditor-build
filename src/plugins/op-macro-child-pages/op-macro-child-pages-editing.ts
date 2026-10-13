@@ -158,7 +158,7 @@ export default class OPChildPagesEditing extends Plugin {
 		const macroLabel = this.macroLabel();
 		const pageLabel = this.pageLabel(page);
 		const pageLabelContainer = writer.createContainerElement( 'span', { class: 'macro-value' } );
-		let placeholderContent: ViewNode[] = [ writer.createText( `${macroLabel} ` ) ];
+		const placeholderContent: ViewNode[] = [ writer.createText( `${macroLabel} ` ) ];
 		writer.insert( writer.createPositionAt( pageLabelContainer, 0 ), writer.createText( `${pageLabel}` ) )
 		placeholderContent.push( pageLabelContainer );
 		placeholderContent.push( writer.createText( this.includeParentText(includeParent) ));

@@ -7,7 +7,7 @@ export default class OPAttachmentListenerPlugin extends Plugin {
 	}
 
 	init() {
-		let editor = this.editor;
+		const editor = this.editor;
 
 		editor.model.on('op:attachment-removed', (_, urls: string[]) => {
 			this.removeDeletedImage(urls)
@@ -15,7 +15,7 @@ export default class OPAttachmentListenerPlugin extends Plugin {
 	}
 
 	removeDeletedImage(urls: string[]) {
-		let root = this.editor.model.document.getRoot();
+		const root = this.editor.model.document.getRoot();
 
 		for (const child of Array.from(root!.getChildren())) {
 			// Text nodes have no name, so the comparison is false for them.

@@ -28,6 +28,7 @@ interface DocumentEventMap {
 }
 
 // Core also exposes I18n as a bare global.
+// eslint-disable-next-line no-var -- a global declaration needs `var` to appear on `window`
 declare var I18n: Window['I18n'];
 
 declare module '*.svg' {
