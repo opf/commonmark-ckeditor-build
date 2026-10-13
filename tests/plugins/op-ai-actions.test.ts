@@ -1,7 +1,10 @@
 import { EmitterMixin, Locale, ObservableMixin } from '@ckeditor/ckeditor5-utils';
+import { SplitButtonView } from '@ckeditor/ckeditor5-ui';
 import type { Editor } from '@ckeditor/ckeditor5-core';
 import OpAiActions from '../../src/plugins/op-ai-actions/op-ai-actions';
 import type { OpAiTextTransformAction, OpResource, OpServices } from '../../src/op-types';
+
+type AiActionsService = NonNullable<OpServices['aiActions']>;
 
 interface FakeEditorOptions {
 	services?: Partial<OpServices>;
@@ -72,8 +75,10 @@ const actions: OpAiTextTransformAction[] = [
 	{ id: 2, label: 'Make concise', position: 2 },
 ];
 
-function servicesWith(actionsFor: () => Promise<OpAiTextTransformAction[]>, run = jest.fn()) {
-	return { services: { i18n, aiActions: { actionsFor, run } }, run };
+function servicesWith(actionsFor: () => Promise<OpAiTextTransformAction[]>, overrides: Partial<AiActionsService> = {}) {
+	const run = jest.fn();
+
+	return { services: { i18n, aiActions: { actionsFor, run, ...overrides } }, run };
 }
 
 async function initialised(options: FakeEditorOptions) {
@@ -85,6 +90,14 @@ async function initialised(options: FakeEditorOptions) {
 	await flushPromises();
 
 	return { ...fake, plugin };
+}
+
+function actionButton(plugin: OpAiActions) {
+	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__action')!;
+}
+
+function arrowButton(plugin: OpAiActions) {
+	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__arrow')!;
 }
 
 function openedMenu(plugin: OpAiActions) {
@@ -112,24 +125,68 @@ describe('OpAiActions', () => {
 		expect(toolbar.maxWidths).toEqual([]);
 	});
 
-	test('attaches the dropdown behind the toolbar items and runs the chosen action', async () => {
+	test('attaches a split button behind the toolbar items that shows the first action', async () => {
 		const actionsFor = jest.fn(() => Promise.resolve(actions));
-		const { services, run } = servicesWith(actionsFor);
-		const { editor, toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+		const { services } = servicesWith(actionsFor);
+		const { toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
 		const dropdownView = plugin.dropdownView!;
 
 		expect(actionsFor).toHaveBeenCalledWith(workPackage, 'description');
 		expect(toolbar.element.lastElementChild).toBe(dropdownView.element);
+		expect(dropdownView.buttonView).toBeInstanceOf(SplitButtonView);
 		expect(dropdownView.buttonView.icon).toContain('<svg');
-		expect(dropdownView.buttonView.withText).toBe(false);
-		expect(dropdownView.buttonView.label).toBe('js.editor.ai_actions.caption');
+		expect(dropdownView.buttonView.withText).toBe(true);
+		expect(dropdownView.buttonView.label).toBe('Fix grammar');
+		expect(dropdownView.buttonView.tooltip).toBe('js.editor.ai_actions.caption');
+		expect(actionButton(plugin).textContent).toContain('Fix grammar');
+	});
 
-		const buttons = openedMenu(plugin);
-		expect([...buttons].map(button => button.textContent!.trim())).toEqual(['Fix grammar', 'Make concise']);
-		expect(buttons[0].getAttribute('role')).toBe('menuitem');
+	test('shows the action the service prefers', async () => {
+		const { services } = servicesWith(() => Promise.resolve(actions), { defaultAction: list => list[1] });
+		const { plugin } = await initialised({ services, resource: workPackage, field: 'description' });
 
-		buttons[0].click();
+		expect(plugin.dropdownView!.buttonView.label).toBe('Make concise');
+	});
+
+	test('falls back to the first action when the service prefers none', async () => {
+		const { services } = servicesWith(() => Promise.resolve(actions), { defaultAction: () => undefined });
+		const { plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+
+		expect(plugin.dropdownView!.buttonView.label).toBe('Fix grammar');
+	});
+
+	test('runs the shown action when its button is clicked', async () => {
+		const { services, run } = servicesWith(() => Promise.resolve(actions));
+		const { editor, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+
+		actionButton(plugin).click();
+
 		expect(run).toHaveBeenCalledWith(actions[0], editor, workPackage);
+		expect(plugin.dropdownView!.isOpen).toBe(false);
+	});
+
+	test('opens the list from the arrow and runs and shows the picked action', async () => {
+		const { services, run } = servicesWith(() => Promise.resolve(actions));
+		const { editor, toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+		const dropdownView = plugin.dropdownView!;
+
+		arrowButton(plugin).click();
+		expect(dropdownView.isOpen).toBe(true);
+
+		const buttons = dropdownView.panelView.element!.querySelectorAll<HTMLButtonElement>('.ck-list__item button');
+		expect([...buttons].map(button => button.textContent!.trim())).toEqual(['Fix grammar', 'Make concise']);
+		expect(buttons[1].getAttribute('role')).toBe('menuitem');
+
+		const regroupsBefore = toolbar.maxWidths.length;
+		buttons[1].click();
+
+		expect(run).toHaveBeenCalledWith(actions[1], editor, workPackage);
+		expect(dropdownView.isOpen).toBe(false);
+		expect(dropdownView.buttonView.label).toBe('Make concise');
+		expect(toolbar.maxWidths.length).toBeGreaterThan(regroupsBefore);
+
+		actionButton(plugin).click();
+		expect(run).toHaveBeenLastCalledWith(actions[1], editor, workPackage);
 	});
 
 	test('opens its menu towards the toolbar, mirrored for right-to-left languages', async () => {
@@ -159,6 +216,7 @@ describe('OpAiActions', () => {
 		const { toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
 
 		expect(plugin.dropdownView!.buttonView.tabindex).toBe(0);
+		expect(actionButton(plugin).tabIndex).toBe(0);
 		expect(toolbar.tracked).toContain(plugin.dropdownView!.element);
 	});
 
@@ -172,6 +230,7 @@ describe('OpAiActions', () => {
 		expect(plugin.dropdownView!.isEnabled).toBe(false);
 
 		buttons[0].click();
+		actionButton(plugin).click();
 		expect(run).not.toHaveBeenCalled();
 
 		observable.isReadOnly = false;

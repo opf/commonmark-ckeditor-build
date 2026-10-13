@@ -67,6 +67,7 @@ export interface OpServices {
 	aiActions?: {
 		actionsFor(resource: OpResource | undefined, field: string | undefined): Promise<OpAiTextTransformAction[]>;
 		run(action: OpAiTextTransformAction, editor: unknown, resource: OpResource | undefined): Promise<void>;
+		defaultAction?(actions: OpAiTextTransformAction[]): OpAiTextTransformAction | undefined;
 	};
 	apiV3Service: Record<string, { segment: string }>;
 	i18n: {
