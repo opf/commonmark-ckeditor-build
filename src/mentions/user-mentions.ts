@@ -37,8 +37,7 @@ export function userMentions(this: Editor, queryText: string) {
 		}
 	}
 
-	// Unsupported context does not allow mentioning
-	if (!(resource && resource._type === 'WorkPackage')) {
+	if (!resource) {
 		return [];
 	}
 
@@ -46,7 +45,12 @@ export function userMentions(this: Editor, queryText: string) {
 		return [];
 	}
 
+	// Unsupported context does not allow mentioning
 	const url = getOPPath(editor).api.v3.principals(resource, queryText);
+	if (!url) {
+		return [];
+	}
+
 	const pluginContext = getPluginContext(editor);
 	const base = window.OpenProject.urlRoot;
 
