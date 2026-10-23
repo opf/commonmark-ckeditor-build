@@ -54,14 +54,12 @@ export interface OpPathHelper {
 	openExistingWikiPageDialog(): string;
 }
 
-/** Angular services of core that plugins call into. */
 export interface OpAiTextTransformAction {
 	id: number;
 	label: string;
-	position: number;
-	injectsTypeTemplate?: boolean;
 }
 
+/** Angular services of core that plugins call into. */
 export interface OpServices {
 	pathHelperService: OpPathHelper;
 	aiActions?: {
