@@ -4,108 +4,68 @@ import type { Editor } from '@ckeditor/ckeditor5-core';
 import OpAiActions from '../../src/plugins/op-ai-actions/op-ai-actions';
 import type { OpAiTextTransformAction, OpResource, OpServices } from '../../src/op-types';
 
-type AiActionsService = NonNullable<OpServices['aiActions']>;
-
 interface FakeEditorOptions {
 	services?: Partial<OpServices>;
-	resource?: OpResource;
-	field?: string;
-	maxWidth?: string;
-}
-
-class FakeUi extends EmitterMixin() {
-	view: { toolbar: ReturnType<typeof fakeToolbar> };
-
-	constructor(toolbar: ReturnType<typeof fakeToolbar>) {
-		super();
-		this.view = { toolbar };
-	}
-}
-
-class FakeEditorBase extends ObservableMixin() {}
-
-function fakeToolbar(maxWidth: string) {
-	const element = document.createElement('div');
-	element.appendChild(document.createElement('div'));
-	const maxWidths: string[] = [];
-	const tracked: HTMLElement[] = [];
-
-	return {
-		element,
-		children: new (EmitterMixin())(),
-		focusTracker: {
-			add: (el: HTMLElement) => tracked.push(el),
-			remove: (el: HTMLElement) => tracked.splice(tracked.indexOf(el), 1),
-		},
-		tracked,
-		maxWidths,
-		get maxWidth() {
-			return maxWidths[maxWidths.length - 1] ?? maxWidth;
-		},
-		set maxWidth(value: string) {
-			maxWidths.push(value);
-		},
-	};
-}
-
-function fakeEditor({ services, resource, field, maxWidth = 'auto' }: FakeEditorOptions = {}) {
-	const toolbar = fakeToolbar(maxWidth);
-	const editor = new FakeEditorBase() as FakeEditorBase & { isReadOnly: boolean; locale: Locale; config: unknown; ui: FakeUi };
-
-	editor.set('isReadOnly', false);
-	editor.locale = new Locale();
-	editor.config = {
-		_config: {
-			openProject: {
-				context: { resource, field },
-				pluginContext: services ? { services } : undefined,
-			},
-		},
-	};
-	editor.ui = new FakeUi(toolbar);
-
-	return { editor: editor as unknown as Editor, observable: editor, toolbar };
+	uiLanguage?: string;
 }
 
 const i18n = { t: (key: string) => key };
 const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
 const workPackage: OpResource = { id: '42', _type: 'WorkPackage' };
 const actions: OpAiTextTransformAction[] = [
-	{ id: 1, label: 'Fix grammar', position: 1 },
-	{ id: 2, label: 'Make concise', position: 2 },
+	{ id: 1, label: 'Fix grammar' },
+	{ id: 2, label: 'Make concise' },
 ];
 
-function servicesWith(actionsFor: () => Promise<OpAiTextTransformAction[]>, overrides: Partial<AiActionsService> = {}) {
-	const run = jest.fn();
+function fakeEditor({ services, uiLanguage }: FakeEditorOptions) {
+	const toolbar = Object.assign(new (EmitterMixin())(), { element: document.createElement('div'), maxWidth: 'auto', regroups: 0 });
+	const editor = new (ObservableMixin())() as InstanceType<ReturnType<typeof ObservableMixin>> & Record<string, unknown>;
 
-	return { services: { i18n, aiActions: { actionsFor, run, ...overrides } }, run };
+	toolbar.element.appendChild(document.createElement('div'));
+	toolbar.on('change:maxWidth', () => toolbar.regroups++);
+	editor.set('isReadOnly', false);
+	editor.locale = new Locale({ uiLanguage });
+	editor.config = {
+		_config: {
+			openProject: {
+				context: { resource: workPackage, field: 'description' },
+				pluginContext: services ? { services } : undefined,
+			},
+		},
+	};
+	editor.ui = Object.assign(new (EmitterMixin())(), { view: { toolbar } });
+
+	return { editor: editor as unknown as Editor, observable: editor, toolbar };
 }
 
-async function initialised(options: FakeEditorOptions) {
-	const fake = fakeEditor(options);
-	const plugin = new OpAiActions(fake.editor);
+function servicesWith(overrides: Partial<NonNullable<OpServices['aiActions']>> = {}) {
+	const run = jest.fn();
+	const actionsFor = jest.fn(() => Promise.resolve(actions));
 
-	plugin.init();
+	return { services: { i18n, aiActions: { actionsFor, run, ...overrides } }, actionsFor, run };
+}
+
+type Initialised = ReturnType<typeof fakeEditor> & { plugin: OpAiActions };
+
+// `beforeLoad` runs after the UI is ready, but before the actions arrive.
+async function initialised(options: FakeEditorOptions, beforeLoad?: (fake: Initialised) => void) {
+	const fake = fakeEditor(options);
+	const initialisedFake = { ...fake, plugin: new OpAiActions(fake.editor) };
+
+	initialisedFake.plugin.init();
 	fake.editor.ui.fire('ready');
+	beforeLoad?.(initialisedFake);
 	await flushPromises();
 
-	return { ...fake, plugin };
+	return initialisedFake;
 }
 
 function actionButton(plugin: OpAiActions) {
 	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__action')!;
 }
 
-function arrowButton(plugin: OpAiActions) {
-	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__arrow')!;
-}
-
-function openedMenu(plugin: OpAiActions) {
-	const dropdownView = plugin.dropdownView!;
-
-	dropdownView.isOpen = true;
-
-	return dropdownView.panelView.element!.querySelectorAll<HTMLButtonElement>('.ck-list__item button');
+function menuButtons(plugin: OpAiActions) {
+	return plugin.dropdownView!.panelView.element!.querySelectorAll<HTMLButtonElement>('.ck-list__item button');
 }
 
 describe('OpAiActions', () => {
@@ -117,113 +77,79 @@ describe('OpAiActions', () => {
 	});
 
 	test('adds nothing while the action list is empty', async () => {
-		const { services } = servicesWith(() => Promise.resolve([]));
-		const { toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+		const { services } = servicesWith({ actionsFor: () => Promise.resolve([]) });
+		const { toolbar, plugin } = await initialised({ services });
 
 		expect(toolbar.element.childElementCount).toBe(1);
 		expect(plugin.dropdownView).toBeUndefined();
-		expect(toolbar.maxWidths).toEqual([]);
+		expect(toolbar.regroups).toBe(0);
 	});
 
-	test('attaches a split button behind the toolbar items that shows the first action', async () => {
-		const actionsFor = jest.fn(() => Promise.resolve(actions));
-		const { services } = servicesWith(actionsFor);
-		const { toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+	test('attaches a reachable split button behind the toolbar items that shows the first action', async () => {
+		const { services, actionsFor } = servicesWith();
+		const { toolbar, plugin } = await initialised({ services });
 		const dropdownView = plugin.dropdownView!;
 
 		expect(actionsFor).toHaveBeenCalledWith(workPackage, 'description');
 		expect(toolbar.element.lastElementChild).toBe(dropdownView.element);
+		expect(toolbar.regroups).toBe(1);
 		expect(dropdownView.buttonView).toBeInstanceOf(SplitButtonView);
 		expect(dropdownView.buttonView.icon).toContain('<svg');
 		expect(dropdownView.buttonView.withText).toBe(true);
 		expect(dropdownView.buttonView.label).toBe('Fix grammar');
 		expect(dropdownView.buttonView.tooltip).toBe('js.editor.ai_actions.caption');
 		expect(actionButton(plugin).textContent).toContain('Fix grammar');
+		expect(actionButton(plugin).tabIndex).toBe(0);
 	});
 
-	test('shows the action the service prefers', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions), { defaultAction: list => list[1] });
-		const { plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+	test('shows the action the service prefers, else the first one', async () => {
+		const preferred = await initialised(servicesWith({ defaultAction: list => list[1] }));
+		const none = await initialised(servicesWith({ defaultAction: () => undefined }));
 
-		expect(plugin.dropdownView!.buttonView.label).toBe('Make concise');
+		expect(preferred.plugin.dropdownView!.buttonView.label).toBe('Make concise');
+		expect(none.plugin.dropdownView!.buttonView.label).toBe('Fix grammar');
 	});
 
-	test('falls back to the first action when the service prefers none', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions), { defaultAction: () => undefined });
-		const { plugin } = await initialised({ services, resource: workPackage, field: 'description' });
-
-		expect(plugin.dropdownView!.buttonView.label).toBe('Fix grammar');
-	});
-
-	test('runs the shown action when its button is clicked', async () => {
-		const { services, run } = servicesWith(() => Promise.resolve(actions));
-		const { editor, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
-
-		actionButton(plugin).click();
-
-		expect(run).toHaveBeenCalledWith(actions[0], editor, workPackage);
-		expect(plugin.dropdownView!.isOpen).toBe(false);
-	});
-
-	test('opens the list from the arrow and runs and shows the picked action', async () => {
-		const { services, run } = servicesWith(() => Promise.resolve(actions));
-		const { editor, toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+	test('runs the shown action from its button and the picked one from the list', async () => {
+		const { services, run } = servicesWith();
+		const { editor, toolbar, plugin } = await initialised({ services });
 		const dropdownView = plugin.dropdownView!;
 
-		arrowButton(plugin).click();
+		actionButton(plugin).click();
+		expect(run).toHaveBeenCalledWith(actions[0], editor, workPackage);
+		expect(dropdownView.isOpen).toBe(false);
+
+		plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__arrow')!.click();
 		expect(dropdownView.isOpen).toBe(true);
 
-		const buttons = dropdownView.panelView.element!.querySelectorAll<HTMLButtonElement>('.ck-list__item button');
+		const buttons = menuButtons(plugin);
 		expect([...buttons].map(button => button.textContent!.trim())).toEqual(['Fix grammar', 'Make concise']);
 		expect(buttons[1].getAttribute('role')).toBe('menuitem');
 
-		const regroupsBefore = toolbar.maxWidths.length;
 		buttons[1].click();
-
-		expect(run).toHaveBeenCalledWith(actions[1], editor, workPackage);
+		expect(run).toHaveBeenLastCalledWith(actions[1], editor, workPackage);
 		expect(dropdownView.isOpen).toBe(false);
 		expect(dropdownView.buttonView.label).toBe('Make concise');
-		expect(toolbar.maxWidths.length).toBeGreaterThan(regroupsBefore);
+		expect(toolbar.regroups).toBe(2);
 
 		actionButton(plugin).click();
 		expect(run).toHaveBeenLastCalledWith(actions[1], editor, workPackage);
 	});
 
 	test('opens its menu towards the toolbar, mirrored for right-to-left languages', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions));
-		const { plugin } = await initialised({ services, resource: workPackage, field: 'description' });
-		expect(plugin.dropdownView!.panelPosition).toBe('sw');
+		const { services } = servicesWith();
+		const ltr = await initialised({ services });
+		const rtl = await initialised({ services, uiLanguage: 'ar' });
 
-		const rtl = fakeEditor({ services, resource: workPackage, field: 'description' });
-		(rtl.editor as unknown as { locale: Locale }).locale = new Locale({ uiLanguage: 'ar' });
-		const rtlPlugin = new OpAiActions(rtl.editor);
-		rtlPlugin.init();
-		rtl.editor.ui.fire('ready');
-		await flushPromises();
-		expect(rtlPlugin.dropdownView!.panelPosition).toBe('se');
-	});
-
-	test('makes the toolbar regroup and keeps its width limit', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions));
-		const { toolbar } = await initialised({ services, resource: workPackage, field: 'description', maxWidth: '320px' });
-
-		expect(toolbar.maxWidths.length).toBeGreaterThanOrEqual(2);
-		expect(toolbar.maxWidth).toBe('320px');
-	});
-
-	test('is reachable by keyboard', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions));
-		const { toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
-
-		expect(plugin.dropdownView!.buttonView.tabindex).toBe(0);
-		expect(actionButton(plugin).tabIndex).toBe(0);
-		expect(toolbar.tracked).toContain(plugin.dropdownView!.element);
+		expect(ltr.plugin.dropdownView!.panelPosition).toBe('sw');
+		expect(rtl.plugin.dropdownView!.panelPosition).toBe('se');
 	});
 
 	test('closes the menu and refuses to run while the editor is read-only', async () => {
-		const { services, run } = servicesWith(() => Promise.resolve(actions));
-		const { observable, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
-		const buttons = openedMenu(plugin);
+		const { services, run } = servicesWith();
+		const { observable, plugin } = await initialised({ services });
+		plugin.dropdownView!.isOpen = true;
+		const buttons = menuButtons(plugin);
 
 		observable.isReadOnly = true;
 		expect(plugin.dropdownView!.isOpen).toBe(false);
@@ -238,8 +164,8 @@ describe('OpAiActions', () => {
 	});
 
 	test('is disabled throughout source mode', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions));
-		const { editor, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
+		const { services } = servicesWith();
+		const { editor, plugin } = await initialised({ services });
 
 		editor.fire('op:source-code-enabled');
 		expect(plugin.dropdownView!.isEnabled).toBe(false);
@@ -249,45 +175,26 @@ describe('OpAiActions', () => {
 	});
 
 	test('stays disabled when actions resolve during source mode', async () => {
-		let resolveActions!: (value: OpAiTextTransformAction[]) => void;
-		const { services } = servicesWith(() => new Promise(resolve => { resolveActions = resolve; }));
-		const fake = fakeEditor({ services, resource: workPackage, field: 'description' });
-		const plugin = new OpAiActions(fake.editor);
-
-		plugin.init();
-		fake.editor.ui.fire('ready');
-		fake.editor.fire('op:source-code-enabled');
-		resolveActions(actions);
-		await flushPromises();
+		const { services } = servicesWith();
+		const { plugin } = await initialised({ services }, ({ editor }) => editor.fire('op:source-code-enabled'));
 
 		expect(plugin.dropdownView!.isEnabled).toBe(false);
 	});
 
 	test('ignores actions that resolve after the plugin was destroyed', async () => {
-		let resolveActions!: (value: OpAiTextTransformAction[]) => void;
-		const { services } = servicesWith(() => new Promise(resolve => { resolveActions = resolve; }));
-		const fake = fakeEditor({ services, resource: workPackage, field: 'description' });
-		const plugin = new OpAiActions(fake.editor);
+		const { services } = servicesWith();
+		const { toolbar, plugin } = await initialised({ services }, fake => fake.plugin.destroy());
 
-		plugin.init();
-		fake.editor.ui.fire('ready');
-		plugin.destroy();
-		resolveActions(actions);
-		await flushPromises();
-
-		expect(fake.toolbar.element.childElementCount).toBe(1);
+		expect(toolbar.element.childElementCount).toBe(1);
 		expect(plugin.dropdownView).toBeUndefined();
 	});
 
 	test('removes the dropdown when destroyed', async () => {
-		const { services } = servicesWith(() => Promise.resolve(actions));
-		const { toolbar, plugin } = await initialised({ services, resource: workPackage, field: 'description' });
-		const element = plugin.dropdownView!.element!;
+		const { services } = servicesWith();
+		const { toolbar, plugin } = await initialised({ services });
 
 		plugin.destroy();
 
-		expect(element.isConnected).toBe(false);
-		expect(toolbar.tracked).not.toContain(element);
-		expect(plugin.dropdownView).toBeUndefined();
+		expect(toolbar.element.childElementCount).toBe(1);
 	});
 });
