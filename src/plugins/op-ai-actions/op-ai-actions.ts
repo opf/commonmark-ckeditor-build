@@ -10,7 +10,7 @@ import type { OpAiTextTransformAction, OpServices } from '../../op-types';
 type AiActionsService = NonNullable<OpServices['aiActions']>;
 
 /**
- * The Assistant split button of the work package description editor. It must
+ * The Assistant split button at the end of every editor's toolbar. It must
  * stay visible at every toolbar width.
  */
 export default class OpAiActions extends Plugin {
