@@ -1,7 +1,7 @@
 import { EmitterMixin, Locale, ObservableMixin } from '@ckeditor/ckeditor5-utils';
 import { SplitButtonView } from '@ckeditor/ckeditor5-ui';
 import type { Editor } from '@ckeditor/ckeditor5-core';
-import OpAiActions from '../../src/plugins/op-ai-actions/op-ai-actions';
+import OpAiActionsPlugin from '../../src/plugins/op-ai-actions/op-ai-actions-plugin';
 import type { OpAiTextTransformAction, OpResource, OpServices } from '../../src/op-types';
 
 interface FakeEditorOptions {
@@ -45,12 +45,12 @@ function servicesWith(overrides: Partial<NonNullable<OpServices['aiActions']>> =
 	return { services: { i18n, aiActions: { actionsFor, run, ...overrides } }, actionsFor, run };
 }
 
-type Initialised = ReturnType<typeof fakeEditor> & { plugin: OpAiActions };
+type Initialised = ReturnType<typeof fakeEditor> & { plugin: OpAiActionsPlugin };
 
 // `beforeLoad` runs after the UI is ready, but before the actions arrive.
 async function initialised(options: FakeEditorOptions, beforeLoad?: (fake: Initialised) => void) {
 	const fake = fakeEditor(options);
-	const initialisedFake = { ...fake, plugin: new OpAiActions(fake.editor) };
+	const initialisedFake = { ...fake, plugin: new OpAiActionsPlugin(fake.editor) };
 
 	initialisedFake.plugin.init();
 	fake.editor.ui.fire('ready');
@@ -60,15 +60,15 @@ async function initialised(options: FakeEditorOptions, beforeLoad?: (fake: Initi
 	return initialisedFake;
 }
 
-function actionButton(plugin: OpAiActions) {
+function actionButton(plugin: OpAiActionsPlugin) {
 	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__action')!;
 }
 
-function menuButtons(plugin: OpAiActions) {
+function menuButtons(plugin: OpAiActionsPlugin) {
 	return plugin.dropdownView!.panelView.element!.querySelectorAll<HTMLButtonElement>('.ck-list__item button');
 }
 
-describe('OpAiActions', () => {
+describe('OpAiActionsPlugin', () => {
 	test('adds nothing when the core provides no service', async () => {
 		const { toolbar, plugin } = await initialised({});
 

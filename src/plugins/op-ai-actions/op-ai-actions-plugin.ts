@@ -13,7 +13,7 @@ type AiActionsService = NonNullable<OpServices['aiActions']>;
  * The Assistant split button at the end of every editor's toolbar. It must
  * stay visible at every toolbar width.
  */
-export default class OpAiActions extends Plugin {
+export default class OpAiActionsPlugin extends Plugin {
 	public dropdownView?: DropdownView;
 
 	private destroyed = false;
