@@ -28,13 +28,12 @@ export function replaceImageAttachmentsByName(resource: OpResource | undefined) 
 		// converter to run as well.
 		let src = data.attributeNewValue as string | null;
 
-		// If the resource is not attachable or src has been nulled, do nothing
-		// TODO(OP-18993): throws when the editor has no resource.
-		if (!(src && resource!.lookupDownloadLocationByName)) {
+		// If there is no attachable resource or src has been nulled, do nothing
+		if (!src || !resource?.lookupDownloadLocationByName) {
 			return;
 		}
 
-		const match = resource!.lookupDownloadLocationByName(src);
+		const match = resource.lookupDownloadLocationByName(src);
 		data.attributeNewValue = match || src;
 	}
 }
@@ -51,14 +50,13 @@ export function replaceNamedAttachmentWithUrl(resource: OpResource | undefined) 
 		// converter to run as well.
 		let src = data.attributeNewValue as string | null;
 
-		// If the resource is not attachable or src has been nulled, do nothing
-		// TODO(OP-18993): throws when the editor has no resource.
-		if (!(src && resource!.lookupDownloadLocationByName)) {
+		// If there is no attachable resource or src has been nulled, do nothing
+		if (!src || !resource?.lookupDownloadLocationByName) {
 			return;
 		}
 
 
-		const match = resource!.lookupDownloadLocationByName(src);
+		const match = resource.lookupDownloadLocationByName(src);
 		data.attributeNewValue = match || src;
 
 

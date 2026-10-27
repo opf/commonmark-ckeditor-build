@@ -45,7 +45,8 @@ export interface OpContext {
 export interface OpPathHelper {
 	api: {
 		v3: {
-			principals(resource: OpResource, query: string): string;
+			// null where the resource does not allow mentioning users.
+			principals(resource: OpResource, query: string): string | null;
 		};
 	};
 	wikiPageLinkMacro(providerId: string, pageIdentifier: string, frameId: string): string;
