@@ -1,5 +1,5 @@
-import { EmitterMixin, Locale, ObservableMixin } from '@ckeditor/ckeditor5-utils';
-import { SplitButtonView } from '@ckeditor/ckeditor5-ui';
+import { EmitterMixin, keyCodes, Locale, ObservableMixin } from '@ckeditor/ckeditor5-utils';
+import { ButtonView, SplitButtonView, ToolbarView } from '@ckeditor/ckeditor5-ui';
 import type { Editor } from '@ckeditor/ckeditor5-core';
 import OpAiActionsPlugin from '../../src/plugins/op-ai-actions/op-ai-actions-plugin';
 import type { OpAiTextTransformAction, OpResource, OpServices } from '../../src/op-types';
@@ -7,6 +7,7 @@ import type { OpAiTextTransformAction, OpResource, OpServices } from '../../src/
 interface FakeEditorOptions {
 	services?: Partial<OpServices>;
 	uiLanguage?: string;
+	shouldGroupWhenFull?: boolean;
 }
 
 const i18n = { t: (key: string) => key };
@@ -17,14 +18,25 @@ const actions: OpAiTextTransformAction[] = [
 	{ id: 2, label: 'Make concise' },
 ];
 
-function fakeEditor({ services, uiLanguage }: FakeEditorOptions) {
-	const toolbar = Object.assign(new (EmitterMixin())(), { element: document.createElement('div'), maxWidth: 'auto', regroups: 0 });
+function toolbarButton(locale: Locale, label: string) {
+	const button = new ButtonView(locale);
+
+	button.set({ label, withText: true });
+
+	return button;
+}
+
+function fakeEditor({ services, uiLanguage, shouldGroupWhenFull = false }: FakeEditorOptions) {
+	const locale = new Locale({ uiLanguage });
+	const toolbar = Object.assign(new ToolbarView(locale, { shouldGroupWhenFull }), { regroups: 0 });
 	const editor = new (ObservableMixin())() as InstanceType<ReturnType<typeof ObservableMixin>> & Record<string, unknown>;
 
-	toolbar.element.appendChild(document.createElement('div'));
+	toolbar.render();
+	document.body.appendChild(toolbar.element!);
+	toolbar.items.addMany([toolbarButton(locale, 'Bold'), toolbarButton(locale, 'Italic')]);
 	toolbar.on('change:maxWidth', () => toolbar.regroups++);
 	editor.set('isReadOnly', false);
-	editor.locale = new Locale({ uiLanguage });
+	editor.locale = locale;
 	editor.config = {
 		_config: {
 			openProject: {
@@ -64,15 +76,40 @@ function actionButton(plugin: OpAiActionsPlugin) {
 	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__action')!;
 }
 
+function pressKey(keyCode: number) {
+	document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { keyCode, bubbles: true }));
+}
+
+function focusedButton(plugin: OpAiActionsPlugin) {
+	const focused = document.activeElement!;
+
+	if (focused.classList.contains('ck-splitbutton__arrow')) {
+		return 'Assistant arrow';
+	}
+
+	return focused === actionButton(plugin) ? 'Assistant' : focused.textContent;
+}
+
 function menuButtons(plugin: OpAiActionsPlugin) {
 	return plugin.dropdownView!.panelView.element!.querySelectorAll<HTMLButtonElement>('.ck-list__item button');
 }
 
 describe('OpAiActionsPlugin', () => {
+	beforeEach(() => {
+		// The focus cycler skips elements without a layout box, and jsdom lays out nothing.
+		jest.spyOn(HTMLElement.prototype, 'getClientRects').mockReturnValue([{}] as unknown as DOMRectList);
+		window.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver;
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+		document.body.innerHTML = '';
+	});
+
 	test('adds nothing when the core provides no service', async () => {
 		const { toolbar, plugin } = await initialised({});
 
-		expect(toolbar.element.childElementCount).toBe(1);
+		expect(toolbar.element!.childElementCount).toBe(1);
 		expect(plugin.dropdownView).toBeUndefined();
 	});
 
@@ -80,7 +117,7 @@ describe('OpAiActionsPlugin', () => {
 		const { services } = servicesWith({ actionsFor: () => Promise.resolve([]) });
 		const { toolbar, plugin } = await initialised({ services });
 
-		expect(toolbar.element.childElementCount).toBe(1);
+		expect(toolbar.element!.childElementCount).toBe(1);
 		expect(plugin.dropdownView).toBeUndefined();
 		expect(toolbar.regroups).toBe(0);
 	});
@@ -91,7 +128,7 @@ describe('OpAiActionsPlugin', () => {
 		const dropdownView = plugin.dropdownView!;
 
 		expect(actionsFor).toHaveBeenCalledWith(workPackage, 'description');
-		expect(toolbar.element.lastElementChild).toBe(dropdownView.element);
+		expect(toolbar.element!.lastElementChild).toBe(dropdownView.element);
 		expect(toolbar.regroups).toBe(1);
 		expect(dropdownView.buttonView).toBeInstanceOf(SplitButtonView);
 		expect(dropdownView.buttonView.icon).toContain('<svg');
@@ -134,6 +171,34 @@ describe('OpAiActionsPlugin', () => {
 
 		actionButton(plugin).click();
 		expect(run).toHaveBeenLastCalledWith(actions[1], editor, workPackage);
+	});
+
+	test.each([false, true])('joins the arrow key navigation behind the toolbar items (grouping: %s)', async shouldGroupWhenFull => {
+		const { services } = servicesWith();
+		const { toolbar, plugin } = await initialised({ services, shouldGroupWhenFull });
+
+		expect(toolbar.focusables.getIndex(plugin.dropdownView!)).toBe(toolbar.focusables.length - 1);
+
+		toolbar.focus();
+		expect(focusedButton(plugin)).toBe('Bold');
+
+		const visited = [keyCodes.arrowright, keyCodes.arrowright, keyCodes.arrowright, keyCodes.arrowright, keyCodes.arrowleft]
+			.map(keyCode => {
+				pressKey(keyCode);
+				return focusedButton(plugin);
+			});
+
+		expect(visited).toEqual(['Italic', 'Assistant', 'Assistant arrow', 'Bold', 'Assistant']);
+	});
+
+	test.each([false, true])('stays the last focusable when the toolbar items change (grouping: %s)', async shouldGroupWhenFull => {
+		const { services } = servicesWith();
+		const { editor, toolbar, plugin } = await initialised({ services, shouldGroupWhenFull });
+
+		toolbar.items.add(toolbarButton(editor.locale, 'Underline'));
+
+		expect(toolbar.focusables.getIndex(plugin.dropdownView!)).toBe(toolbar.focusables.length - 1);
+		expect(toolbar.focusables.length).toBe(4);
 	});
 
 	test('opens its menu towards the toolbar, mirrored for right-to-left languages', async () => {
@@ -185,16 +250,18 @@ describe('OpAiActionsPlugin', () => {
 		const { services } = servicesWith();
 		const { toolbar, plugin } = await initialised({ services }, fake => fake.plugin.destroy());
 
-		expect(toolbar.element.childElementCount).toBe(1);
+		expect(toolbar.element!.childElementCount).toBe(1);
 		expect(plugin.dropdownView).toBeUndefined();
 	});
 
 	test('removes the dropdown when destroyed', async () => {
 		const { services } = servicesWith();
 		const { toolbar, plugin } = await initialised({ services });
+		const dropdownView = plugin.dropdownView!;
 
 		plugin.destroy();
 
-		expect(toolbar.element.childElementCount).toBe(1);
+		expect(toolbar.element!.childElementCount).toBe(1);
+		expect(toolbar.focusables.has(dropdownView)).toBe(false);
 	});
 });

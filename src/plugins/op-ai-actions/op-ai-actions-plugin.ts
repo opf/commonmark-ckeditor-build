@@ -36,10 +36,21 @@ export default class OpAiActionsPlugin extends Plugin {
 	}
 
 	override destroy() {
+		const dropdownView = this.dropdownView;
+		const toolbar = this.editor.ui.view.toolbar;
+
 		this.destroyed = true;
-		this.dropdownView?.element?.remove();
-		this.dropdownView?.destroy();
+		// Stops listening to the focusables first, so removing the dropdown below does not append it again.
 		super.destroy();
+
+		if (dropdownView) {
+			if (toolbar?.focusables.has(dropdownView)) {
+				toolbar.focusables.remove(dropdownView);
+			}
+			toolbar?.focusTracker.remove(dropdownView);
+			dropdownView.element?.remove();
+			dropdownView.destroy();
+		}
 	}
 
 	private async loadActions(service: AiActionsService) {
@@ -98,8 +109,30 @@ export default class OpAiActionsPlugin extends Plugin {
 		// Outside the toolbar's items, so the toolbar never groups it into its overflow menu.
 		dropdownView.render();
 		toolbar.element!.appendChild(dropdownView.element!);
+		this.joinArrowKeyNavigation(toolbar, dropdownView);
 		show(service.defaultAction?.(actions) ?? actions[0]);
 
 		return dropdownView;
+	}
+
+	private joinArrowKeyNavigation(toolbar: ToolbarView, dropdownView: DropdownView) {
+		const focusables = toolbar.focusables;
+		// The toolbar refills its focusables whenever it regroups its items.
+		const keepLast = () => {
+			if (focusables.last === dropdownView) {
+				return;
+			}
+
+			if (focusables.has(dropdownView)) {
+				// The change event of the removal appends it again.
+				focusables.remove(dropdownView);
+			} else {
+				focusables.add(dropdownView);
+			}
+		};
+
+		toolbar.focusTracker.add(dropdownView);
+		this.listenTo(focusables, 'change', keepLast);
+		keepLast();
 	}
 }
