@@ -54,9 +54,19 @@ export interface OpPathHelper {
 	openExistingWikiPageDialog(): string;
 }
 
+export interface OpAiTextTransformAction {
+	id: number;
+	label: string;
+}
+
 /** Angular services of core that plugins call into. */
 export interface OpServices {
 	pathHelperService: OpPathHelper;
+	aiActions?: {
+		actionsFor(resource: OpResource | undefined, field: string | undefined): Promise<OpAiTextTransformAction[]>;
+		run(action: OpAiTextTransformAction, editor: unknown, resource: OpResource | undefined): Promise<void>;
+		defaultAction?(actions: OpAiTextTransformAction[]): OpAiTextTransformAction | undefined;
+	};
 	apiV3Service: Record<string, { segment: string }>;
 	i18n: {
 		t(key: string, options?: Record<string, unknown>): string;
