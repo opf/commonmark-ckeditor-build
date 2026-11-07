@@ -29,7 +29,8 @@ export function modelCodeBlockToView() {
 	function converter( evt: EventInfo, data: { item: ModelElement; range: ModelRange }, conversionApi: DowncastConversionApi ) {
 		const codeBlock = data.item;
 		const language = codeBlock.getAttribute('opCodeblockLanguage') as string | undefined || 'language-text';
-		const content = codeBlock.getAttribute('opCodeblockContent') as string | undefined;
+		// A code block upcast from an empty <code> has no content attribute.
+		const content = codeBlock.getAttribute('opCodeblockContent') as string | undefined || '';
 
 		// Consume the codeblock and text
 		conversionApi.consumable.consume( codeBlock, 'insert' );
@@ -40,8 +41,7 @@ export function modelCodeBlockToView() {
 		const langElement = viewWriter.createContainerElement( 'div', { class: 'op-uc-code-block--language' } );
 		const codeElement = viewWriter.createContainerElement( 'code', { class: language } );
 		const langContent = viewWriter.createText( language );
-		// TODO(OP-18993): a code block upcast from an empty <code> has no content attribute.
-		const contentElement = viewWriter.createText( content! );
+		const contentElement = viewWriter.createText( content );
 
 		viewWriter.insert( viewWriter.createPositionAt( codeElement, 0 ), contentElement );
 		viewWriter.insert( viewWriter.createPositionAt( langElement, 0 ), langContent );
