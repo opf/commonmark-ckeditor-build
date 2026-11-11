@@ -90,6 +90,9 @@ export interface OpServices {
 	notifications: {
 		addError(message: string): void;
 	};
+	currentUser: {
+		userId: string;
+	};
 	timezone: {
 		formattedRelativeDateTime(datetimeString: string): string;
 	};
