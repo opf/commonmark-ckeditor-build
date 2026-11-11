@@ -1,9 +1,9 @@
 import {Plugin} from "@ckeditor/ckeditor5-core";
 import type {Editor} from "@ckeditor/ckeditor5-core";
 import OpContentRevisionsUI from "./ui";
-import {loadFromLocalStorage} from "./storage";
+import {scheduleRevisionCleanup} from "./storage";
 import OpContentRevisionsCommand from "./command";
-import {getOPFieldName, getOPResource} from "../op-context/op-context";
+import {getOPFieldName, getOPResource, getOPService} from "../op-context/op-context";
 import {Autosave} from "@ckeditor/ckeditor5-autosave";
 
 export const OP_CONTENT_REVISION_KEY = "opContentRevisionKey";
@@ -36,26 +36,12 @@ export default class OpContentRevisions extends Plugin {
 
     editor.commands.add("opContentRevisionApply", new OpContentRevisionsCommand(editor));
 
-    // Remove expired revisions for all saved drafts
     editor.once("ready", () => {
-      const now = Date.now();
-
       // disable beforeunload hook, we have our own
       // @ts-expect-error _domEmitter is private; Autosave offers no public way to drop its beforeunload listener.
       editor.plugins.get("Autosave")._domEmitter.stopListening(window, "beforeunload");
 
-      Object
-        .keys(localStorage)
-        .forEach((key) => {
-          if (key.startsWith(OP_CONTENT_REVISION_PREFIX)) {
-            const record = loadFromLocalStorage(key);
-
-            // Remove data that is older than 8 hours
-            if (record?.updatedAt && (now - record.updatedAt) >= 28800000) {
-              localStorage.removeItem(key);
-            }
-          }
-        });
+      scheduleRevisionCleanup(revisionKeyPrefix(editor));
     });
   }
 
@@ -68,7 +54,7 @@ export default class OpContentRevisions extends Plugin {
     const storageKey = editor.config.get(STORAGE_KEY_OVERRIDE);
 
 	if (storageKey) {
-	  return storageKey;
+	  return `${revisionKeyPrefix(editor)}${storageKey}`;
 	}
 
     return this.createLocalStorageKey(editor)
@@ -94,7 +80,12 @@ export default class OpContentRevisions extends Plugin {
       segment += `_${field}`;
     }
 
-
-    return `${OP_CONTENT_REVISION_PREFIX}_${segment}`;
+    return `${revisionKeyPrefix(editor)}${segment}`;
   }
+}
+
+export function revisionKeyPrefix(editor: Editor) {
+  const userId = getOPService(editor, "currentUser").userId;
+
+  return `${OP_CONTENT_REVISION_PREFIX}_u${userId}_`;
 }

@@ -1,8 +1,21 @@
 import type { Editor } from "@ckeditor/ckeditor5-core";
 import * as LZString from "lz-string";
 import {generateHash} from "./utils";
-import {OP_CONTENT_REVISION_KEY} from "./op-content-revisions";
+import {OP_CONTENT_REVISION_KEY, OP_CONTENT_REVISION_PREFIX, revisionKeyPrefix} from "./op-content-revisions";
 import {getOPService} from "../op-context/op-context";
+
+const REVISION_MAX_AGE = 8 * 60 * 60 * 1000;
+const CLEANUP_DELAY = 1000;
+
+// Unscoped storage keys that core passed before revision keys were prefixed with the user.
+const LEGACY_STORAGE_KEYS = [
+  /^work_package-\d+-notes-(\d+|new)$/,
+  /^forum-topic-\d*-reply-(\d+|new)$/,
+  /^meeting-(\d+|new)-agenda-item-(\d+|new)$/,
+  /^meeting-agenda-(\d+|new)-outcome-(\d+|new)$/,
+];
+
+let cleanupTimer: ReturnType<typeof setTimeout> | undefined;
 
 export interface OpRevision {
   timestamp: number;
@@ -65,5 +78,28 @@ export async function saveInLocalStorage(editor: Editor) {
     notifications.addError("Failed to save CKEditor data to localStorage: " + (e as Error).toString());
   }
 
+  scheduleRevisionCleanup(revisionKeyPrefix(editor));
+
   return true;
+}
+
+export function scheduleRevisionCleanup(ownPrefix: string) {
+  clearTimeout(cleanupTimer);
+  cleanupTimer = setTimeout(() => removeForeignAndExpiredRevisions(ownPrefix), CLEANUP_DELAY);
+}
+
+export function removeForeignAndExpiredRevisions(ownPrefix: string, now = Date.now()) {
+  Object
+    .keys(localStorage)
+    .forEach((key) => {
+      if (key.startsWith(ownPrefix)) {
+        const updatedAt = loadFromLocalStorage(key)?.updatedAt;
+
+        if (!updatedAt || now - updatedAt >= REVISION_MAX_AGE) {
+          localStorage.removeItem(key);
+        }
+      } else if (key.startsWith(OP_CONTENT_REVISION_PREFIX) || LEGACY_STORAGE_KEYS.some((pattern) => pattern.test(key))) {
+        localStorage.removeItem(key);
+      }
+    });
 }
