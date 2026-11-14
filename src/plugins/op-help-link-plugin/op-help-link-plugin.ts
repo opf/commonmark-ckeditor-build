@@ -27,7 +27,7 @@ export default class OPHelpLinkPlugin extends Plugin {
 
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
-				window.open(helpURL, '_blank');
+				window.open(helpURL, '_blank', 'noopener');
 			} );
 
 			return view;
