@@ -4,6 +4,8 @@
 // `ICKEditorContext` and the editor setup service in core). Only members
 // that this repository reads are declared.
 
+import type { Observable } from 'rxjs';
+
 /** A HAL resource (work package, comment, ...) the editor belongs to. */
 export interface OpResource {
 	_type: string;
@@ -97,8 +99,7 @@ export interface OpServices {
 		formattedRelativeDateTime(datetimeString: string): string;
 	};
 	attachmentsResourceService: {
-		// Returns an RxJS observable; only toPromise() is used here.
-		attachFiles(resource: OpResource, files: File[]): { toPromise(): Promise<OpAttachment[]> };
+		attachFiles(resource: OpResource, files: File[]): Observable<OpAttachment[]>;
 	};
 }
 
