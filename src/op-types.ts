@@ -94,7 +94,9 @@ export interface OpServices {
 		userId: string;
 	};
 	timezone: {
-		formattedRelativeDateTime(datetimeString: string): string;
+		// Core declares the parameter as a string. It hands the value to
+		// moment, which also takes the epoch milliseconds revisions store.
+		formattedRelativeDateTime(datetime: string | number): string;
 	};
 	attachmentsResourceService: {
 		// Returns an RxJS observable; only toPromise() is used here.

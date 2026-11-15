@@ -3,7 +3,6 @@ import type { Editor } from '@ckeditor/ckeditor5-core';
 import { ClickObserver } from '@ckeditor/ckeditor5-engine';
 import type {
 	DowncastConversionApi,
-	MatcherObjectPattern,
 	ModelElement,
 	ViewDocumentClickEvent,
 	ViewElement,
@@ -36,12 +35,10 @@ export function MentionCaster( editor: Editor ) {
 	editor.conversion
 		.for( 'upcast' )
 		.elementToAttribute( {
-			// TODO(OP-18993): `key` is not a property of a matcher pattern and is ignored.
 			view: {
 				name: 'mention',
-				key: 'data-mention',
 				classes: 'mention',
-			} as MatcherObjectPattern,
+			},
 			model: {
 				key: 'mention',
 				value: (viewItem: ViewElement) => {
@@ -80,12 +77,10 @@ export function MentionCaster( editor: Editor ) {
 	editor.conversion
 		.for( 'upcast' )
 		.elementToAttribute( {
-		// TODO(OP-18993): `key` is not a property of a matcher pattern and is ignored.
 		view: {
 			name: 'span',
-			key: 'data-mention',
 			classes: 'mention',
-		} as MatcherObjectPattern,
+		},
 		model: {
 			key: 'mention',
 			value: (viewItem: ViewElement) => {
