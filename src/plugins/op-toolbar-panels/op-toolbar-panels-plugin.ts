@@ -2,11 +2,11 @@ import { Plugin } from '@ckeditor/ckeditor5-core';
 import { DropdownView } from '@ckeditor/ckeditor5-ui';
 import type { View, ViewCollection } from '@ckeditor/ckeditor5-ui';
 
-import { liftPanelToTopLayer } from './top-layer-panel';
+import { liftPanelToTopLayer, liftTooltipsAboveLiftedPanels } from './top-layer-panel';
 
 /**
  * Opens the panels of the toolbar's dropdowns, including "Show more items",
- * in the top layer. See {@link liftPanelToTopLayer}.
+ * in the top layer, and keeps tooltips above them. See {@link liftPanelToTopLayer}.
  */
 export default class OpToolbarPanelsPlugin extends Plugin {
 	static get pluginName() {
@@ -22,6 +22,8 @@ export default class OpToolbarPanelsPlugin extends Plugin {
 			}
 
 			const toolbarElement = () => toolbar.element!;
+
+			liftTooltipsAboveLiftedPanels(this.editor.ui.tooltipManager.balloonPanelView);
 
 			this.liftDropdowns(toolbar.items);
 			// "Show more items" joins the children once the toolbar starts grouping. It sits

@@ -1,9 +1,9 @@
 import { EmitterMixin, Locale } from '@ckeditor/ckeditor5-utils';
-import { ButtonView, createDropdown, ToolbarView } from '@ckeditor/ckeditor5-ui';
+import { BalloonPanelView, ButtonView, createDropdown, ToolbarView } from '@ckeditor/ckeditor5-ui';
 import type { DropdownView } from '@ckeditor/ckeditor5-ui';
 import type { Editor } from '@ckeditor/ckeditor5-core';
 import OpToolbarPanelsPlugin from '../../src/plugins/op-toolbar-panels/op-toolbar-panels-plugin';
-import { liftPanelToTopLayer } from '../../src/plugins/op-toolbar-panels/top-layer-panel';
+import { liftPanelToTopLayer, liftTooltipsAboveLiftedPanels } from '../../src/plugins/op-toolbar-panels/top-layer-panel';
 
 const showPopover = jest.fn();
 const hidePopover = jest.fn();
@@ -29,6 +29,36 @@ class FakeIntersectionObserver {
 			.filter(observer => observer.targets.includes(target))
 			.forEach(observer => observer.callback([{ target, isIntersecting }]));
 	}
+}
+
+class FakeResizeObserver {
+	static observers: FakeResizeObserver[] = [];
+	targets: Element[] = [];
+
+	constructor(private callback: () => void) {
+		FakeResizeObserver.observers.push(this);
+	}
+
+	observe(target: Element) {
+		this.targets.push(target);
+	}
+
+	disconnect() {
+		this.targets = [];
+	}
+
+	static report(target: Element) {
+		this.observers.filter(observer => observer.targets.includes(target)).forEach(observer => observer.callback());
+	}
+}
+
+let frames: FrameRequestCallback[] = [];
+
+function flushFrames() {
+	const pending = frames;
+
+	frames = [];
+	pending.forEach(callback => callback(0));
 }
 
 function rect(left: number, top: number, width: number, height: number) {
@@ -65,7 +95,12 @@ describe('liftPanelToTopLayer', () => {
 	beforeEach(() => {
 		Object.assign(HTMLElement.prototype, { showPopover, hidePopover });
 		FakeIntersectionObserver.observers = [];
+		FakeResizeObserver.observers = [];
+		frames = [];
 		window.IntersectionObserver = FakeIntersectionObserver as unknown as typeof IntersectionObserver;
+		window.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
+		jest.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => frames.push(callback));
+		jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => { frames = []; });
 		Object.defineProperties(document.documentElement, {
 			clientWidth: { value: 1000, configurable: true },
 			clientHeight: { value: 800, configurable: true },
@@ -77,12 +112,13 @@ describe('liftPanelToTopLayer', () => {
 		delete (HTMLElement.prototype as Partial<HTMLElement>).showPopover;
 		delete (HTMLElement.prototype as Partial<HTMLElement>).hidePopover;
 		delete (window as unknown as Record<string, unknown>).IntersectionObserver;
+		delete (window as unknown as Record<string, unknown>).ResizeObserver;
 		delete (document.documentElement as unknown as Record<string, unknown>).clientWidth;
 		delete (document.documentElement as unknown as Record<string, unknown>).clientHeight;
 		document.body.innerHTML = '';
 	});
 
-	test('opens the panel in the top layer below the button, aligned to its end', () => {
+	test('opens the panel in the top layer below the button, starting at the button', () => {
 		const dropdownView = dropdown();
 		const panel = panelOf(dropdownView);
 
@@ -91,9 +127,9 @@ describe('liftPanelToTopLayer', () => {
 
 		expect(panel.getAttribute('popover')).toBe('manual');
 		expect(showPopover.mock.contexts).toEqual([panel]);
-		expect(dropdownView.panelView.position).toBe('sw');
+		expect(dropdownView.panelView.position).toBe('se');
 		expect(panel.style).toMatchObject({ position: 'fixed', margin: '0px', overflow: 'visible' });
-		expect(panel.style).toMatchObject({ top: '130px', left: '440px', minWidth: '40px', maxHeight: '', overflowY: 'visible' });
+		expect(panel.style).toMatchObject({ top: '130px', left: '600px', minWidth: '40px', maxHeight: '', overflowY: 'visible' });
 
 		dropdownView.isOpen = false;
 
@@ -111,7 +147,7 @@ describe('liftPanelToTopLayer', () => {
 		sizePanel(dropdownView, 200, 300);
 		dropdownView.isOpen = true;
 
-		expect(dropdownView.panelView.position).toBe('nw');
+		expect(dropdownView.panelView.position).toBe('ne');
 		expect(panel.style).toMatchObject({ top: '300px', maxHeight: '', overflowY: 'visible' });
 
 		dropdownView.isOpen = false;
@@ -137,6 +173,63 @@ describe('liftPanelToTopLayer', () => {
 		expect(panelOf(rtl).style.left).toBe('8px');
 	});
 
+	test('aligns to the end of the button when the dropdown asks for it, or when the panel does not fit otherwise', () => {
+		const requested = dropdown();
+		const fallback = dropdown();
+
+		requested.panelPosition = 'sw';
+		placeElement(fallback.buttonView.element!, rect(900, 100, 40, 30));
+		liftPanelToTopLayer(requested);
+		liftPanelToTopLayer(fallback);
+		requested.isOpen = true;
+		fallback.isOpen = true;
+
+		expect(requested.panelView.position).toBe('sw');
+		expect(panelOf(requested).style.left).toBe('440px');
+		expect(fallback.panelView.position).toBe('sw');
+		expect(panelOf(fallback).style.left).toBe('740px');
+	});
+
+	test('is in the top layer before the dropdown moves focus into it', () => {
+		const dropdownView = dropdown();
+		let liftedWhenFocused: boolean | undefined;
+
+		jest.spyOn(dropdownView.panelView, 'focus').mockImplementation(() => {
+			liftedWhenFocused = panelOf(dropdownView).hasAttribute('popover');
+		});
+		liftPanelToTopLayer(dropdownView);
+		dropdownView.isOpen = true;
+
+		expect(liftedWhenFocused).toBe(true);
+	});
+
+	test('places a dropdown lifted before it is rendered after CKEditor has positioned it', () => {
+		const dropdownView = createDropdown(new Locale());
+
+		dropdownView.panelPosition = 'sw';
+		liftPanelToTopLayer(dropdownView);
+		dropdownView.render();
+		document.body.appendChild(dropdownView.element!);
+		placeElement(dropdownView.buttonView.element!, rect(600, 700, 40, 30));
+		sizePanel(dropdownView, 200, 150);
+		dropdownView.isOpen = true;
+
+		expect(dropdownView.panelView.position).toBe('nw');
+		expect(panelOf(dropdownView).style.top).toBe('550px');
+	});
+
+	test('keeps inline styles it did not set', () => {
+		const dropdownView = dropdown();
+		const panel = panelOf(dropdownView);
+
+		panel.style.width = '300px';
+		liftPanelToTopLayer(dropdownView);
+		dropdownView.isOpen = true;
+		dropdownView.isOpen = false;
+
+		expect(panel.getAttribute('style')).toBe('width: 300px;');
+	});
+
 	test('follows the button while scrolling, and closes once the button is hidden', () => {
 		const dropdownView = dropdown();
 		const button = dropdownView.buttonView.element!;
@@ -146,24 +239,46 @@ describe('liftPanelToTopLayer', () => {
 		dropdownView.isOpen = true;
 		FakeIntersectionObserver.report(button, true);
 
+		flushFrames();
 		placeElement(button, rect(600, 200, 40, 30));
 		document.dispatchEvent(new Event('scroll'));
+		document.dispatchEvent(new Event('scroll'));
+		expect(panel.style.top).toBe('130px');
+		flushFrames();
 		expect(panel.style.top).toBe('230px');
 
-		placeElement(button, rect(600, 360, 40, 30));
+		placeElement(button, rect(600, 260, 40, 30));
+		panel.dispatchEvent(new Event('scroll'));
+		flushFrames();
+		expect(panel.style.top).toBe('230px');
+
 		window.dispatchEvent(new Event('resize'));
+		flushFrames();
+		expect(panel.style.top).toBe('290px');
+
+		placeElement(button, rect(600, 360, 40, 30));
+		FakeResizeObserver.report(panel);
+		flushFrames();
 		expect(panel.style.top).toBe('390px');
 		expect(dropdownView.isOpen).toBe(true);
 
+		const item = document.createElement('button');
+
+		panel.appendChild(item);
+		item.focus();
+		const buttonFocused = jest.spyOn(dropdownView.buttonView, 'focus');
+
 		FakeIntersectionObserver.report(button, false);
 		expect(dropdownView.isOpen).toBe(false);
+		expect(buttonFocused).not.toHaveBeenCalled();
+		expect(document.activeElement).not.toBe(item);
 		expect(panel.hasAttribute('popover')).toBe(false);
 
 		dropdownView.isOpen = true;
 		expect(dropdownView.isOpen).toBe(true);
 	});
 
-	test('opens a dropdown inside a lifted panel within that panel', () => {
+	test('lifts a dropdown inside a lifted panel above it, so a scrolling outer panel cannot clip it', () => {
 		const outer = dropdown();
 		const inner = dropdown({ parent: panelOf(outer) });
 
@@ -172,8 +287,8 @@ describe('liftPanelToTopLayer', () => {
 		outer.isOpen = true;
 		inner.isOpen = true;
 
-		expect(panelOf(inner).hasAttribute('popover')).toBe(false);
-		expect(showPopover.mock.contexts).toEqual([panelOf(outer)]);
+		expect(panelOf(inner).getAttribute('popover')).toBe('manual');
+		expect(showPopover.mock.contexts).toEqual([panelOf(outer), panelOf(inner)]);
 	});
 
 	test('leaves the panel in place in browsers without the Popover API', () => {
@@ -187,11 +302,53 @@ describe('liftPanelToTopLayer', () => {
 		expect(panelOf(dropdownView).hasAttribute('style')).toBe(false);
 	});
 
+	test('shows tooltips above lifted panels only while one is open', () => {
+		const balloon = new BalloonPanelView();
+		const dropdownView = dropdown();
+
+		balloon.render();
+		document.body.appendChild(balloon.element!);
+		liftTooltipsAboveLiftedPanels(balloon);
+		liftPanelToTopLayer(dropdownView);
+
+		balloon.isVisible = true;
+		expect(balloon.element!.hasAttribute('popover')).toBe(false);
+		balloon.isVisible = false;
+
+		dropdownView.isOpen = true;
+		balloon.isVisible = true;
+		expect(balloon.element!.getAttribute('popover')).toBe('manual');
+		expect(balloon.element!.style).toMatchObject({ margin: '0px', padding: '', overflow: 'visible' });
+		expect(showPopover.mock.contexts).toEqual([panelOf(dropdownView), balloon.element]);
+
+		balloon.isVisible = false;
+		expect(balloon.element!.hasAttribute('popover')).toBe(false);
+		expect(balloon.element!.style).toMatchObject({ margin: '', overflow: '' });
+	});
+
+	test('lifts a tooltip that is already visible when a panel opens', () => {
+		const balloon = new BalloonPanelView();
+		const dropdownView = dropdown();
+
+		balloon.render();
+		document.body.appendChild(balloon.element!);
+		liftTooltipsAboveLiftedPanels(balloon);
+		liftPanelToTopLayer(dropdownView);
+		balloon.isVisible = true;
+		dropdownView.isOpen = true;
+
+		expect(showPopover.mock.contexts).toEqual([panelOf(dropdownView), balloon.element]);
+
+		dropdownView.isOpen = false;
+		balloon.isVisible = false;
+	});
+
 	describe('OpToolbarPanelsPlugin', () => {
 		function editorWithToolbar() {
 			const locale = new Locale();
 			const toolbar = new ToolbarView(locale);
-			const ui = Object.assign(new (EmitterMixin())(), { view: { toolbar } });
+			const tooltipManager = { balloonPanelView: new BalloonPanelView(locale) };
+			const ui = Object.assign(new (EmitterMixin())(), { view: { toolbar }, tooltipManager });
 			const plugin = new OpToolbarPanelsPlugin({ ui } as unknown as Editor);
 
 			toolbar.render();
@@ -225,8 +382,8 @@ describe('liftPanelToTopLayer', () => {
 			before.isOpen = true;
 			after.isOpen = true;
 
-			expect(panelOf(before).style.left).toBe('440px');
-			expect(panelOf(after).style.left).toBe('440px');
+			expect(panelOf(before).style.left).toBe('600px');
+			expect(panelOf(after).style.left).toBe('600px');
 		});
 
 		test('aligns the "Show more items" panel to the end of the toolbar', () => {

@@ -87,7 +87,7 @@ export default class OpAiActionsPlugin extends Plugin {
 			model: new UIModel({ action, label: action.label, withText: true, role: 'menuitem' }),
 		}))), { role: 'menu', ariaLabel: caption });
 		dropdownView.set('class', 'op-ai-actions');
-		// The button sits at the toolbar's end; a panel growing outwards is clipped by the editor's pane.
+		// The button sits at the toolbar's end; a panel growing outwards would leave the editor.
 		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
 		liftPanelToTopLayer(dropdownView);
 		dropdownView.buttonView.set({ icon: sparkleIcon, withText: true, tooltip: caption, tabindex: 0 });
