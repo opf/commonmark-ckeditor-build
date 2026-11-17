@@ -5,6 +5,7 @@ import { Collection } from '@ckeditor/ckeditor5-utils';
 
 import sparkleIcon from '../../icons/sparkle.svg';
 import { getOPFieldName, getOPI18n, getOPResource, getPluginContext } from '../op-context/op-context';
+import { liftPanelToTopLayer } from '../op-toolbar-panels/top-layer-panel';
 import type { OpAiTextTransformAction, OpServices } from '../../op-types';
 
 type AiActionsService = NonNullable<OpServices['aiActions']>;
@@ -86,8 +87,9 @@ export default class OpAiActionsPlugin extends Plugin {
 			model: new UIModel({ action, label: action.label, withText: true, role: 'menuitem' }),
 		}))), { role: 'menu', ariaLabel: caption });
 		dropdownView.set('class', 'op-ai-actions');
-		// The button sits at the toolbar's end; a panel growing outwards is clipped by the editor's pane.
+		// The button sits at the toolbar's end; a panel growing outwards would leave the editor.
 		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
+		liftPanelToTopLayer(dropdownView);
 		dropdownView.buttonView.set({ icon: sparkleIcon, withText: true, tooltip: caption, tabindex: 0 });
 		dropdownView.bind('isEnabled').to(this, 'isEnabled', editor, 'isReadOnly', (enabled, readOnly) => enabled && !readOnly);
 		dropdownView.on('change:isEnabled', (evt, name, isEnabled) => {
