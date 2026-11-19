@@ -1,9 +1,9 @@
 import type { Editor } from '@ckeditor/ckeditor5-core';
-import type { FileLoader } from '@ckeditor/ckeditor5-upload';
+import type { FileLoader, UploadAdapter, UploadResponse } from '@ckeditor/ckeditor5-upload';
 import type { OpAttachment, OpResource } from '../op-types';
 import {getOPService} from './op-context/op-context';
 
-export default class OpUploadResourceAdapter {
+export default class OpUploadResourceAdapter implements UploadAdapter {
     declare loader: FileLoader;
     declare resource: OpResource | undefined;
     declare editor: Editor;
@@ -14,7 +14,7 @@ export default class OpUploadResourceAdapter {
         this.editor = editor;
     }
 
-    upload() {
+    upload(): Promise<UploadResponse> {
 		const resource = this.resource;
 		const resourceService = getOPService(this.editor, 'attachmentsResourceService');
 
@@ -32,8 +32,13 @@ export default class OpUploadResourceAdapter {
 					this.editor.model.fire('op:attachment-added', result);
 
 					return this.buildResponse(result[0])
-				}).catch((error) => {
+				}).catch((error: unknown) => {
 					console.error("Failed upload %O", error);
+					// Re-throw so CKEditor's FileRepository marks the loader as failed
+					// and removes the placeholder. Previously the error was swallowed,
+					// leaving the upload to resolve with `undefined`; CKEditor then
+					// crashed reading the (missing) upload result ("unexpected-error").
+					throw OpUploadResourceAdapter.errorMessage(error);
 				});
 		})
 
@@ -41,6 +46,23 @@ export default class OpUploadResourceAdapter {
 
 	buildResponse(result: OpAttachment) {
 		return { default: result._links.staticDownloadLocation.href };
+	}
+
+	// Extract the most readable message from whatever the attachments resource
+	// service rejected with (a HAL error response, a plain Error, or a string),
+	// so CKEditor can surface it instead of an opaque object.
+	static errorMessage(error: unknown): string {
+		const halError = (error as { error?: { message?: unknown } } | null | undefined)?.error;
+		if (halError && typeof halError.message === 'string') {
+			return halError.message;
+		}
+
+		const message = (error as { message?: unknown } | null | undefined)?.message;
+		if (typeof message === 'string') {
+			return message;
+		}
+
+		return String(error);
 	}
 
     abort() {
