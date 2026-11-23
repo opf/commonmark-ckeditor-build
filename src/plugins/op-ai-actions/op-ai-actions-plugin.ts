@@ -5,6 +5,7 @@ import { Collection } from '@ckeditor/ckeditor5-utils';
 
 import sparkleIcon from '../../icons/sparkle.svg';
 import { getOPFieldName, getOPI18n, getOPResource, getPluginContext } from '../op-context/op-context';
+import { liftPanelToTopLayer } from '../op-toolbar-panels/top-layer-panel';
 import type { OpAiTextTransformAction, OpServices } from '../../op-types';
 
 type AiActionsService = NonNullable<OpServices['aiActions']>;
@@ -17,6 +18,8 @@ export default class OpAiActionsPlugin extends Plugin {
 	public dropdownView?: DropdownView;
 
 	private destroyed = false;
+
+	private releasePanel?: () => void;
 
 	static get pluginName() {
 		return 'OPAiActions' as const;
@@ -44,6 +47,7 @@ export default class OpAiActionsPlugin extends Plugin {
 		super.destroy();
 
 		if (dropdownView) {
+			this.releasePanel?.();
 			if (toolbar?.focusables.has(dropdownView)) {
 				toolbar.focusables.remove(dropdownView);
 			}
@@ -87,8 +91,9 @@ export default class OpAiActionsPlugin extends Plugin {
 			model: new UIModel({ action, label: action.label, withText: true, role: 'menuitem' }),
 		}))), { role: 'menu', ariaLabel: caption });
 		dropdownView.set('class', 'op-ai-actions');
-		// The button sits at the toolbar's end; a panel growing outwards is clipped by the editor's pane.
+		// The button sits at the toolbar's end; a panel growing outwards would leave the editor.
 		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
+		this.releasePanel = liftPanelToTopLayer(dropdownView);
 		dropdownView.buttonView.set({ icon: sparkleIcon, withText: true, tooltip: true, tabindex: 0 });
 		// The arrow opens the menu, so it keeps the caption as its tooltip and accessible name.
 		splitButtonView.arrowView.unbind('label', 'tooltip');

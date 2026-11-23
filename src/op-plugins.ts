@@ -29,6 +29,7 @@ import { PasteFromOffice } from '@ckeditor/ckeditor5-paste-from-office';
 import { TodoList } from '@ckeditor/ckeditor5-list';
 import OPMacroListPlugin from "./plugins/op-macro-list-plugin";
 import OpAiActionsPlugin from './plugins/op-ai-actions/op-ai-actions-plugin';
+import OpToolbarPanelsPlugin from './plugins/op-toolbar-panels/op-toolbar-panels-plugin';
 import OPAttachmentListenerPlugin from './plugins/op-attachment-listener-plugin';
 import OpImageAttachmentLookup from './plugins/op-image-attachment-lookup/op-image-attachment-lookup-plugin';
 import CommonMark from './commonmark/commonmark';
@@ -112,6 +113,7 @@ export const builtinPlugins = [
 
 	OPMacroListPlugin,
 	OpAiActionsPlugin,
+	OpToolbarPanelsPlugin,
 
 	OpCustomCssClassesPlugin,
 ].concat(
