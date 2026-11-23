@@ -5,15 +5,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-const core = process.env.OPENPROJECT_CORE;
-
-if (!core) {
-  throw new Error("Expected OPENPROJECT_CORE to be present, but wasn't.");
-}
+import { distDir } from './lib/paths.mjs';
+import { renderTranslationsIndex, TRANSLATIONS_INDEX_DTS } from './lib/translations-index.mjs';
 
 const cwd = process.cwd();
 const nodeModulesRoot = path.join(cwd, 'node_modules', '@ckeditor');
-const outputDir = path.join(core, 'frontend', 'src', 'vendor', 'ckeditor', 'translations');
+const outputDir = path.join(distDir, 'translations');
 
 function serializePluralForm(fn) {
   const source = fn.toString().trim();
@@ -115,5 +112,12 @@ window.CKEDITOR_TRANSLATIONS[locale].getPluralForm = getPluralForm;
 
   await fs.writeFile(path.join(outputDir, `${locale}.js`), content, 'utf8');
 }
+
+await fs.writeFile(
+  path.join(outputDir, 'index.js'),
+  renderTranslationsIndex([...localeMap.keys()]),
+  'utf8',
+);
+await fs.writeFile(path.join(outputDir, 'index.d.ts'), TRANSLATIONS_INDEX_DTS, 'utf8');
 
 console.log(`Generated CKEditor translations: ${localeMap.size} locales -> ${outputDir}`);

@@ -1,0 +1,56 @@
+name: Canary build
+
+# Builds the tarball for a canary release of a pull request. This workflow
+# runs the pull request's own code, so it gets no npm identity and no write
+# permission. The `canary-publish` job in release.yml, which always runs
+# from master, validates the tarball and publishes it.
+
+on:
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build canary
+    # Same-repository pull requests carrying the `canary` label only.
+    if: >-
+      ${{ github.repository == 'opf/commonmark-ckeditor-build'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'canary') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # The pull request head, not the merge commit: the published
+          # version names this commit.
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Set canary version
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        # The full commit SHA makes the version unique per commit, so two
+        # pull requests can never be handed the same version.
+        run: npm version --no-git-tag-version "0.0.0-canary-$(date -u +%Y%m%d%H%M%S)-${HEAD_SHA}"
+      - run: npm run build
+      - run: npm run verify:build
+      - run: npm run verify:package
+      - run: npm pack --ignore-scripts
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: canary-tarball
+          path: openproject-commonmark-ckeditor-build-*.tgz
+          if-no-files-found: error
+          retention-days: 1
