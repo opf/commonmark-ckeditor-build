@@ -5,9 +5,16 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/actions-lock.yml':
         - 'actions/checkout@v7.0.1'
+    '.github/workflows/changeset-check.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'brettcannon/check-for-changed-files@v1.2.1'
     '.github/workflows/ci.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
+    '.github/workflows/release.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-node@v6.4.0'
+        - 'changesets/action@v2.1.2'
 dependencies:
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'
@@ -19,3 +26,13 @@ dependencies:
         commit: 'sha1-48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         owner_id: 44036562
         repo_id: 189476904
+    'brettcannon/check-for-changed-files@v1.2.1':
+        ref: 'v1.2.1'
+        commit: 'sha1-871d7b8b5917a4f6f06662e2262e8ffc51dff6d1'
+        owner_id: 54418
+        repo_id: 324871402
+    'changesets/action@v2.1.2':
+        ref: 'v2.1.2'
+        commit: 'sha1-ae32849d5ba541f9ae29e40e22a623bc13562f51'
+        owner_id: 51163350
+        repo_id: 202093906
