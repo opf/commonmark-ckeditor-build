@@ -24,10 +24,10 @@ class FakeIntersectionObserver {
 		this.targets = [];
 	}
 
-	static report(target: Element, isIntersecting: boolean) {
+	static report(target: Element, ...isIntersecting: boolean[]) {
 		this.observers
 			.filter(observer => observer.targets.includes(target))
-			.forEach(observer => observer.callback([{ target, isIntersecting }]));
+			.forEach(observer => observer.callback(isIntersecting.map(intersecting => ({ target, isIntersecting: intersecting }))));
 	}
 }
 
@@ -52,13 +52,8 @@ class FakeResizeObserver {
 	}
 }
 
-let frames: FrameRequestCallback[] = [];
-
-function flushFrames() {
-	const pending = frames;
-
-	frames = [];
-	pending.forEach(callback => callback(0));
+function nextFrame() {
+	jest.advanceTimersByTime(16);
 }
 
 function rect(left: number, top: number, width: number, height: number) {
@@ -96,11 +91,9 @@ describe('liftPanelToTopLayer', () => {
 		Object.assign(HTMLElement.prototype, { showPopover, hidePopover });
 		FakeIntersectionObserver.observers = [];
 		FakeResizeObserver.observers = [];
-		frames = [];
+		jest.useFakeTimers();
 		window.IntersectionObserver = FakeIntersectionObserver as unknown as typeof IntersectionObserver;
 		window.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
-		jest.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => frames.push(callback));
-		jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => { frames = []; });
 		Object.defineProperties(document.documentElement, {
 			clientWidth: { value: 1000, configurable: true },
 			clientHeight: { value: 800, configurable: true },
@@ -108,6 +101,7 @@ describe('liftPanelToTopLayer', () => {
 	});
 
 	afterEach(() => {
+		jest.useRealTimers();
 		jest.restoreAllMocks();
 		delete (HTMLElement.prototype as Partial<HTMLElement>).showPopover;
 		delete (HTMLElement.prototype as Partial<HTMLElement>).hidePopover;
@@ -115,6 +109,7 @@ describe('liftPanelToTopLayer', () => {
 		delete (window as unknown as Record<string, unknown>).ResizeObserver;
 		delete (document.documentElement as unknown as Record<string, unknown>).clientWidth;
 		delete (document.documentElement as unknown as Record<string, unknown>).clientHeight;
+		delete (window as unknown as Record<string, unknown>).visualViewport;
 		document.body.innerHTML = '';
 	});
 
@@ -239,26 +234,26 @@ describe('liftPanelToTopLayer', () => {
 		dropdownView.isOpen = true;
 		FakeIntersectionObserver.report(button, true);
 
-		flushFrames();
+		nextFrame();
 		placeElement(button, rect(600, 200, 40, 30));
 		document.dispatchEvent(new Event('scroll'));
 		document.dispatchEvent(new Event('scroll'));
 		expect(panel.style.top).toBe('130px');
-		flushFrames();
+		nextFrame();
 		expect(panel.style.top).toBe('230px');
 
 		placeElement(button, rect(600, 260, 40, 30));
 		panel.dispatchEvent(new Event('scroll'));
-		flushFrames();
+		nextFrame();
 		expect(panel.style.top).toBe('230px');
 
 		window.dispatchEvent(new Event('resize'));
-		flushFrames();
+		nextFrame();
 		expect(panel.style.top).toBe('290px');
 
 		placeElement(button, rect(600, 360, 40, 30));
 		FakeResizeObserver.report(panel);
-		flushFrames();
+		nextFrame();
 		expect(panel.style.top).toBe('390px');
 		expect(dropdownView.isOpen).toBe(true);
 
@@ -324,6 +319,10 @@ describe('liftPanelToTopLayer', () => {
 		balloon.isVisible = false;
 		expect(balloon.element!.hasAttribute('popover')).toBe(false);
 		expect(balloon.element!.style).toMatchObject({ margin: '', overflow: '' });
+
+		balloon.isVisible = true;
+		dropdownView.isOpen = false;
+		expect(balloon.element!.hasAttribute('popover')).toBe(false);
 	});
 
 	test('lifts a tooltip that is already visible when a panel opens', () => {
@@ -343,11 +342,88 @@ describe('liftPanelToTopLayer', () => {
 		balloon.isVisible = false;
 	});
 
+	test('stays open when the button is visible again by the time the observer reports', () => {
+		const dropdownView = dropdown();
+
+		liftPanelToTopLayer(dropdownView);
+		dropdownView.isOpen = true;
+		FakeIntersectionObserver.report(dropdownView.buttonView.element!, false, true);
+
+		expect(dropdownView.isOpen).toBe(true);
+	});
+
+	test('places the panel within the visible part of a pinch-zoomed page, and follows it', () => {
+		const dropdownView = dropdown();
+		const panel = panelOf(dropdownView);
+		const visualViewport = Object.assign(new EventTarget(), { offsetLeft: 20, offsetTop: 7, width: 360, height: 320 });
+
+		Object.defineProperty(window, 'visualViewport', { value: visualViewport, configurable: true });
+		placeElement(dropdownView.buttonView.element!, rect(250, 257, 40, 32));
+		sizePanel(dropdownView, 200, 220);
+		liftPanelToTopLayer(dropdownView);
+		dropdownView.isOpen = true;
+
+		expect(dropdownView.panelView.position).toBe('nw');
+		expect(panel.style).toMatchObject({ top: '37px', left: '90px' });
+
+		visualViewport.offsetTop = 0;
+		visualViewport.dispatchEvent(new Event('scroll'));
+		nextFrame();
+		expect(panel.style.top).toBe('37px');
+		expect(panel.style.maxHeight).toBe('');
+
+		visualViewport.offsetTop = 100;
+		visualViewport.dispatchEvent(new Event('scroll'));
+		nextFrame();
+		expect(panel.style).toMatchObject({ top: '108px', maxHeight: '149px', overflowY: 'auto' });
+
+		dropdownView.isOpen = false;
+		visualViewport.offsetTop = 0;
+		visualViewport.dispatchEvent(new Event('scroll'));
+		nextFrame();
+		expect(panel.hasAttribute('style')).toBe(false);
+	});
+
+	test('cleans up a panel that is released while open, even once it has left the document', () => {
+		const balloon = new BalloonPanelView();
+		const dropdownView = dropdown();
+		const panel = panelOf(dropdownView);
+		const releaseTooltips = liftTooltipsAboveLiftedPanels(balloon);
+		const release = liftPanelToTopLayer(dropdownView);
+
+		balloon.render();
+		document.body.appendChild(balloon.element!);
+		dropdownView.isOpen = true;
+		document.dispatchEvent(new Event('scroll'));
+		dropdownView.element!.remove();
+		release();
+
+		expect(dropdownView.isOpen).toBe(false);
+		expect(hidePopover).not.toHaveBeenCalled();
+		expect(panel.hasAttribute('popover')).toBe(false);
+		expect(panel.hasAttribute('style')).toBe(false);
+		expect(FakeIntersectionObserver.observers[0].targets).toEqual([]);
+		expect(FakeResizeObserver.observers[0].targets).toEqual([]);
+		// The reposition scheduled by the scroll above is cancelled.
+		nextFrame();
+		expect(panel.hasAttribute('style')).toBe(false);
+
+		// The released panel no longer counts as open, so tooltips stay where they are.
+		balloon.isVisible = true;
+		expect(balloon.element!.hasAttribute('popover')).toBe(false);
+
+		document.body.appendChild(dropdownView.element!);
+		dropdownView.isOpen = false;
+		dropdownView.isOpen = true;
+		expect(panel.hasAttribute('popover')).toBe(false);
+		releaseTooltips();
+	});
+
 	describe('OpToolbarPanelsPlugin', () => {
-		function editorWithToolbar() {
+		function editorWithToolbar(balloonPanelView = new BalloonPanelView(new Locale())) {
 			const locale = new Locale();
 			const toolbar = new ToolbarView(locale);
-			const tooltipManager = { balloonPanelView: new BalloonPanelView(locale) };
+			const tooltipManager = { balloonPanelView };
 			const ui = Object.assign(new (EmitterMixin())(), { view: { toolbar }, tooltipManager });
 			const plugin = new OpToolbarPanelsPlugin({ ui } as unknown as Editor);
 
@@ -357,7 +433,7 @@ describe('liftPanelToTopLayer', () => {
 			toolbar.items.add(new ButtonView(locale));
 			plugin.init();
 
-			return { locale, toolbar, ui };
+			return { locale, toolbar, ui, plugin };
 		}
 
 		function toolbarDropdown(locale: Locale) {
@@ -395,6 +471,39 @@ describe('liftPanelToTopLayer', () => {
 			showMore.isOpen = true;
 
 			expect(panelOf(showMore).style.left).toBe('700px');
+		});
+
+		test('closes its open panels when destroyed, and keeps tooltips lifted for the editors that remain', () => {
+			const balloon = new BalloonPanelView();
+			const first = editorWithToolbar(balloon);
+			const second = editorWithToolbar(balloon);
+			const firstDropdown = toolbarDropdown(first.locale);
+			const secondDropdown = toolbarDropdown(second.locale);
+
+			balloon.render();
+			document.body.appendChild(balloon.element!);
+			first.toolbar.items.add(firstDropdown);
+			second.toolbar.items.add(secondDropdown);
+			first.ui.fire('ready');
+			second.ui.fire('ready');
+			firstDropdown.isOpen = true;
+			first.plugin.destroy();
+
+			expect(panelOf(firstDropdown).hasAttribute('popover')).toBe(false);
+
+			secondDropdown.isOpen = true;
+			balloon.isVisible = true;
+			expect(balloon.element!.getAttribute('popover')).toBe('manual');
+
+			second.plugin.destroy();
+			expect(balloon.element!.hasAttribute('popover')).toBe(false);
+			expect(panelOf(secondDropdown).hasAttribute('popover')).toBe(false);
+
+			balloon.isVisible = false;
+			secondDropdown.isOpen = false;
+			secondDropdown.isOpen = true;
+			balloon.isVisible = true;
+			expect(balloon.element!.hasAttribute('popover')).toBe(false);
 		});
 	});
 });

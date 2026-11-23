@@ -19,6 +19,8 @@ export default class OpAiActionsPlugin extends Plugin {
 
 	private destroyed = false;
 
+	private releasePanel?: () => void;
+
 	static get pluginName() {
 		return 'OPAiActions' as const;
 	}
@@ -45,6 +47,7 @@ export default class OpAiActionsPlugin extends Plugin {
 		super.destroy();
 
 		if (dropdownView) {
+			this.releasePanel?.();
 			if (toolbar?.focusables.has(dropdownView)) {
 				toolbar.focusables.remove(dropdownView);
 			}
@@ -89,7 +92,7 @@ export default class OpAiActionsPlugin extends Plugin {
 		dropdownView.set('class', 'op-ai-actions');
 		// The button sits at the toolbar's end; a panel growing outwards would leave the editor.
 		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
-		liftPanelToTopLayer(dropdownView);
+		this.releasePanel = liftPanelToTopLayer(dropdownView);
 		dropdownView.buttonView.set({ icon: sparkleIcon, withText: true, tooltip: caption, tabindex: 0 });
 		dropdownView.bind('isEnabled').to(this, 'isEnabled', editor, 'isReadOnly', (enabled, readOnly) => enabled && !readOnly);
 		dropdownView.on('change:isEnabled', (evt, name, isEnabled) => {

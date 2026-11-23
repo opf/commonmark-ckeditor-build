@@ -9,6 +9,9 @@ import { liftPanelToTopLayer, liftTooltipsAboveLiftedPanels } from './top-layer-
  * in the top layer, and keeps tooltips above them. See {@link liftPanelToTopLayer}.
  */
 export default class OpToolbarPanelsPlugin extends Plugin {
+	// A set, as "Show more items" is added again each time the toolbar starts grouping.
+	private releases = new Set<() => void>();
+
 	static get pluginName() {
 		return 'OPToolbarPanels' as const;
 	}
@@ -23,7 +26,7 @@ export default class OpToolbarPanelsPlugin extends Plugin {
 
 			const toolbarElement = () => toolbar.element!;
 
-			liftTooltipsAboveLiftedPanels(this.editor.ui.tooltipManager.balloonPanelView);
+			this.releases.add(liftTooltipsAboveLiftedPanels(this.editor.ui.tooltipManager.balloonPanelView));
 
 			this.liftDropdowns(toolbar.items);
 			// "Show more items" joins the children once the toolbar starts grouping. It sits
@@ -32,10 +35,16 @@ export default class OpToolbarPanelsPlugin extends Plugin {
 		});
 	}
 
+	override destroy() {
+		this.releases.forEach(release => release());
+		this.releases.clear();
+		super.destroy();
+	}
+
 	private liftDropdowns(views: ViewCollection, anchor?: () => HTMLElement) {
 		const lift = (view: View) => {
 			if (view instanceof DropdownView) {
-				liftPanelToTopLayer(view, anchor);
+				this.releases.add(liftPanelToTopLayer(view, anchor));
 			}
 		};
 
