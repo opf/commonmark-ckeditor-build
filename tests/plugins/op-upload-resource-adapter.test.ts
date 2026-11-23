@@ -49,7 +49,7 @@ it('logs upload errors without emitting an attachment event', async () => {
 	expect(fire).not.toHaveBeenCalled();
 });
 
-it('preserves editor cleanup when the upload completes without a result', async () => {
+it('still fires op:attachment-added on empty completion so core can clear the drop overlay', async () => {
 	const logError = jest.spyOn(console, 'error').mockImplementation(() => {});
 	const { adapter, fire } = setup(EMPTY);
 

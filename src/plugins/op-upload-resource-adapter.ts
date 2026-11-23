@@ -27,6 +27,8 @@ export default class OpUploadResourceAdapter {
 		return this.loader.file.then(file =>
 			lastValueFrom(resourceService.attachFiles(resource, [file!]), { defaultValue: undefined })
 				.then(result => {
+					// Fire before the result check: core's op-ckeditor listener clears
+					// the drop overlay on this event, even after an empty upload.
 					this.editor.model.fire('op:attachment-added', result);
 
 					const attachment = result?.[0];
