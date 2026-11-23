@@ -70,7 +70,8 @@ export default class OpAiActionsPlugin extends Plugin {
 	private attachDropdown(service: AiActionsService, actions: OpAiTextTransformAction[], toolbar: ToolbarView) {
 		const editor = this.editor;
 		const caption = getOPI18n(editor).t('js.editor.ai_actions.caption');
-		const dropdownView = createDropdown(editor.locale, SplitButtonView);
+		const splitButtonView = new SplitButtonView(editor.locale);
+		const dropdownView = createDropdown(editor.locale, splitButtonView);
 		let shownAction: OpAiTextTransformAction;
 
 		const show = (action: OpAiTextTransformAction) => {
@@ -93,7 +94,10 @@ export default class OpAiActionsPlugin extends Plugin {
 		// The button sits at the toolbar's end; a panel growing outwards would leave the editor.
 		dropdownView.panelPosition = editor.locale.uiLanguageDirection === 'rtl' ? 'se' : 'sw';
 		this.releasePanel = liftPanelToTopLayer(dropdownView);
-		dropdownView.buttonView.set({ icon: sparkleIcon, withText: true, tooltip: caption, tabindex: 0 });
+		dropdownView.buttonView.set({ icon: sparkleIcon, withText: true, tooltip: true, tabindex: 0 });
+		// The arrow opens the menu, so it keeps the caption as its tooltip and accessible name.
+		splitButtonView.arrowView.unbind('label', 'tooltip');
+		splitButtonView.arrowView.set({ label: caption, tooltip: true });
 		dropdownView.bind('isEnabled').to(this, 'isEnabled', editor, 'isReadOnly', (enabled, readOnly) => enabled && !readOnly);
 		dropdownView.on('change:isEnabled', (evt, name, isEnabled) => {
 			if (!isEnabled) {
@@ -102,6 +106,7 @@ export default class OpAiActionsPlugin extends Plugin {
 		});
 
 		dropdownView.buttonView.on('execute', () => run(shownAction));
+		// Before the dropdown closes and focuses its button, which shows the tooltip with the label it has then.
 		dropdownView.on('execute', evt => {
 			const { action } = evt.source as { action?: OpAiTextTransformAction };
 
@@ -109,7 +114,7 @@ export default class OpAiActionsPlugin extends Plugin {
 				show(action);
 				run(action);
 			}
-		});
+		}, { priority: 'high' });
 
 		// Outside the toolbar's items, so the toolbar never groups it into its overflow menu.
 		dropdownView.render();

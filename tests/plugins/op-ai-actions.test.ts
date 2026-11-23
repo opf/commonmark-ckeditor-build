@@ -76,6 +76,14 @@ function actionButton(plugin: OpAiActionsPlugin) {
 	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__action')!;
 }
 
+function arrowButton(plugin: OpAiActionsPlugin) {
+	return plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__arrow')!;
+}
+
+function accessibleName(button: HTMLElement) {
+	return document.getElementById(button.getAttribute('aria-labelledby')!)!.textContent;
+}
+
 function pressKey(keyCode: number) {
 	document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { keyCode, bubbles: true }));
 }
@@ -134,7 +142,9 @@ describe('OpAiActionsPlugin', () => {
 		expect(dropdownView.buttonView.icon).toContain('<svg');
 		expect(dropdownView.buttonView.withText).toBe(true);
 		expect(dropdownView.buttonView.label).toBe('Fix grammar');
-		expect(dropdownView.buttonView.tooltip).toBe('js.editor.ai_actions.caption');
+		expect(actionButton(plugin).dataset.ckeTooltipText).toBe('Fix grammar');
+		expect(arrowButton(plugin).dataset.ckeTooltipText).toBe('js.editor.ai_actions.caption');
+		expect(accessibleName(arrowButton(plugin))).toBe('js.editor.ai_actions.caption');
 		expect(actionButton(plugin).textContent).toContain('Fix grammar');
 		expect(actionButton(plugin).tabIndex).toBe(0);
 	});
@@ -156,17 +166,24 @@ describe('OpAiActionsPlugin', () => {
 		expect(run).toHaveBeenCalledWith(actions[0], editor, workPackage);
 		expect(dropdownView.isOpen).toBe(false);
 
-		plugin.dropdownView!.element!.querySelector<HTMLButtonElement>('.ck-splitbutton__arrow')!.click();
+		arrowButton(plugin).click();
 		expect(dropdownView.isOpen).toBe(true);
 
 		const buttons = menuButtons(plugin);
 		expect([...buttons].map(button => button.textContent!.trim())).toEqual(['Fix grammar', 'Make concise']);
 		expect(buttons[1].getAttribute('role')).toBe('menuitem');
 
+		const labelOnClose: string[] = [];
+		dropdownView.on('change:isOpen', () => labelOnClose.push(dropdownView.buttonView.label!));
+
 		buttons[1].click();
+		expect(labelOnClose).toEqual(['Make concise']);
 		expect(run).toHaveBeenLastCalledWith(actions[1], editor, workPackage);
 		expect(dropdownView.isOpen).toBe(false);
 		expect(dropdownView.buttonView.label).toBe('Make concise');
+		expect(actionButton(plugin).dataset.ckeTooltipText).toBe('Make concise');
+		expect(arrowButton(plugin).dataset.ckeTooltipText).toBe('js.editor.ai_actions.caption');
+		expect(accessibleName(arrowButton(plugin))).toBe('js.editor.ai_actions.caption');
 		expect(toolbar.regroups).toBe(2);
 
 		actionButton(plugin).click();
