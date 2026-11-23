@@ -1,0 +1,20 @@
+# Opt-in: copies each build over the package an OpenProject core checkout
+# installed from npm. Enable it in `.env`:
+#
+#   OPENPROJECT_CORE=/absolute/path/to/openproject
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.core.yml
+
+x-core-mirror: &core-mirror
+  volumes:
+    - type: bind
+      source: ${OPENPROJECT_CORE:?Set OPENPROJECT_CORE in .env}/frontend/node_modules/@openproject/commonmark-ckeditor-build
+      target: /openproject/frontend/node_modules/@openproject/commonmark-ckeditor-build
+      # Fail instead of creating an empty package directory in core.
+      bind:
+        create_host_path: false
+  environment:
+    OPENPROJECT_CORE: /openproject
+
+services:
+  build: *core-mirror
+  watch: *core-mirror
