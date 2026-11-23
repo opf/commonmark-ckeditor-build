@@ -1,6 +1,6 @@
 {
   "name": "@openproject/commonmark-ckeditor-build",
-  "version": "v11.1.1",
+  "version": "11.1.1",
   "description": "CKEditor 5 editor build with CommonMark and plugins for OpenProject.",
   "keywords": [
     "ckeditor5",
@@ -9,10 +9,49 @@
     "WYSIWYG",
     "rich-text editor"
   ],
-  "main": "./build/ckeditor.js",
+  "type": "module",
+  "main": "./dist/ckeditor.js",
+  "types": "./dist/ckeditor.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/ckeditor.d.ts",
+      "default": "./dist/ckeditor.js"
+    },
+    "./ckeditor.css": "./dist/ckeditor.css",
+    "./translations": {
+      "types": "./dist/translations/index.d.ts",
+      "default": "./dist/translations/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
-    "build"
+    "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "contributors": [
+    "CKSource Frederico Knabben (http://cksource.com/)",
+    "OpenProject GmbH"
+  ],
+  "license": "(GPL-2.0-or-later OR LGPL-2.1-or-later OR MPL-1.1+)",
+  "homepage": "https://github.com/opf/commonmark-ckeditor-build#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opf/commonmark-ckeditor-build.git"
+  },
+  "scripts": {
+    "build": "rm -rf dist && NODE_ENV=production node bin/build.mjs && node ./bin/build-ckeditor-translations.mjs && node ./bin/build-ckeditor-styles.mjs && node bin/mirror-to-core.mjs",
+    "watch": "node bin/build.mjs --watch",
+    "prepare": "patch-package",
+    "prepublishOnly": "npm run build && npm run verify:build && npm run verify:package",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "jest .",
+    "test:bin": "node --test \"bin/**/*.test.mjs\"",
+    "verify:build": "node bin/verify-build.mjs dist",
+    "verify:package": "node bin/verify-package.mjs && publint"
+  },
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
@@ -65,38 +104,11 @@
     "lz-string": "^1.5.0",
     "markdown-it": "^14.1.0",
     "markdown-it-task-lists": "^2.1.1",
+    "patch-package": "^8.0.1",
+    "publint": "^0.3.25",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.1"
-  },
-  "engines": {
-    "node": ">=6.9.0",
-    "npm": ">=3.0.0"
-  },
-  "author": "CKSource (http://cksource.com/)",
-  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
-  "homepage": "https://ckeditor5.github.io",
-  "bugs": "https://github.com/ckeditor/ckeditor5-build-balloon/issues",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-build-balloon.git"
-  },
-  "scripts": {
-    "build": "rm -rf dist && NODE_ENV=production node bin/build.mjs && node ./bin/build-ckeditor-translations.mjs && node ./bin/build-ckeditor-styles.mjs && node bin/mirror-to-core.mjs",
-    "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi",
-    "postinstall": "patch-package",
-    "watch": "node bin/build.mjs --watch",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "verify:build": "node bin/verify-build.mjs dist",
-    "test:bin": "node --test \"bin/**/*.test.mjs\"",
-    "test": "jest ."
-  },
-  "dependencies": {
-    "patch-package": "^8.0.0"
-  },
-  "peerDependencies": {
-    "@rails/request.js": "^0.0.13"
   }
 }
