@@ -2,7 +2,7 @@
 
 // What a published tarball may contain so that installing it runs nothing
 // on the consumer's machine. Shared by verify-package (the local build)
-// and verify-canary-tarball (an untrusted pull request build).
+// and verify-tarball (an untrusted pull request build).
 
 // The entry points the exports map and core rely on.
 export const REQUIRED_FILES = [

@@ -1,21 +1,27 @@
 name: Release
 
-# The only workflow npm trusts to publish this package. It only runs on a
-# push to master.
+# The only workflow npm trusts to publish this package. It only ever runs
+# from master: on a push to master, or through `workflow_run`, which always
+# uses the default branch's copy.
 #
 # Releases follow Changesets' trusted publishing recipe
 # (https://github.com/changesets/changesets/blob/main/docs/guide/automating.md):
 # only the publish job gets an npm identity, in the `npm` environment, and
-# it publishes the tarballs the pack job built.
+# it publishes the tarballs the pack job built. Canaries are built by the
+# Canary build workflow and published by the canary jobs below.
 
 on:
   push:
     branches: [master]
+  workflow_run:
+    workflows: [Canary build]
+    types: [completed]
 
 permissions: {}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Releases queue per branch; each pull request's canaries queue apart.
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }}
 
 jobs:
   select-mode:
@@ -119,3 +125,130 @@ jobs:
         uses: changesets/action/publish@v2.1.2
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
+
+  canary-publish:
+    name: Publish canary
+    # A successful canary build of a same-repository pull request. The
+    # tarball it uploaded is untrusted input: it is validated, never run.
+    if: >-
+      ${{ github.repository == 'opf/commonmark-ckeditor-build'
+      && github.event_name == 'workflow_run'
+      && github.event.workflow_run.event == 'pull_request'
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      actions: read # download the build's artifact
+      pull-requests: read # re-check the pull request
+      id-token: write # OIDC for npm Trusted Publishing
+    outputs:
+      pull-number: ${{ steps.pull.outputs.number }}
+      version: ${{ steps.verify.outputs.version }}
+    steps:
+      # master's copy of bin/. No npm ci: nothing
+      # from the pull request or its dependencies runs in this job.
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Check the pull request
+        id: pull
+        uses: actions/github-script@v8.0.0
+        with:
+          script: |
+            const run = context.payload.workflow_run
+            const [candidate] = run.pull_requests
+
+            if (!candidate) {
+              core.setFailed(`No pull request for ${run.head_sha}`)
+              return
+            }
+
+            const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: candidate.number })
+
+            if (!pull.labels.some((label) => label.name === 'canary')) {
+              core.setFailed(`#${pull.number} no longer carries the canary label`)
+              return
+            }
+            if (pull.head.sha !== run.head_sha) {
+              core.setFailed(`#${pull.number} moved on to ${pull.head.sha}; its own canary build will follow`)
+              return
+            }
+
+            core.setOutput('number', String(pull.number))
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: canary-tarball
+          path: ${{ runner.temp }}/canary
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Verify the tarball
+        id: verify
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        # Publishes npm's own repack of the checked files, never the upload.
+        run: node bin/verify-tarball.mjs --canary "$HEAD_SHA" "$RUNNER_TEMP/canary" "$RUNNER_TEMP/canary-work" >> "$GITHUB_OUTPUT"
+      - name: Publish to npm
+        env:
+          TARBALL: ${{ steps.verify.outputs.tarball }}
+        # No provenance: npm would attest this master run as the source,
+        # but the bundle was built from the pull request. The version and
+        # the pull request comment name the real source instead.
+        run: npm publish "$TARBALL" --tag canary --access public --ignore-scripts --provenance=false
+
+  canary-report:
+    name: Report canary
+    needs: canary-publish
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v8.0.0
+        env:
+          PULL_NUMBER: ${{ needs.canary-publish.outputs.pull-number }}
+          VERSION: ${{ needs.canary-publish.outputs.version }}
+        with:
+          script: |
+            const name = '@openproject/commonmark-ckeditor-build'
+            const version = process.env.VERSION
+            const issue_number = Number(process.env.PULL_NUMBER)
+            const { owner, repo } = context.repo
+
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: context.payload.workflow_run.head_sha,
+              state: 'success',
+              context: `Published ${name}`,
+              description: version,
+              target_url: `https://www.npmjs.com/package/${name}/v/${version}`,
+            })
+
+            const marker = '<!-- canary-release -->'
+            const body = [
+              marker,
+              `Canary published: \`${name}@${version}\``,
+              '',
+              `Built by [this run](${context.payload.workflow_run.html_url}) from ${context.payload.workflow_run.head_sha}. Canaries carry no npm provenance: it would name this repository's master run, not the pull request.`,
+              '',
+              'In `frontend/` of OpenProject core:',
+              '',
+              '```shell',
+              `npm install --save-exact ${name}@${version}`,
+              '```',
+            ].join('\n')
+
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
+            // Only our own comment; anyone can quote the marker.
+            const previous = comments.find((comment) => comment.user?.login === 'github-actions[bot]' && comment.body.startsWith(marker))
+
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body })
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body })
+            }
