@@ -23,8 +23,9 @@ function escapeHtml(string: string | null) {
  * @param {*} root An HTMLElement to look for text nodes within
  * @param {*} allowed_whitespace_nodes String array of allowed text nodes ( ['STRONG', 'EM'] ... )
  * @param {*} allowed_raw_nodes String array of allowed raw text nodes ( ['PRE', 'CODE'] ... )
+ * @param {*} raw_elements Specific elements whose text is also left raw
  */
-export function textNodesPreprocessor(root: Node, allowed_whitespace_nodes: string[], allowed_raw_nodes: string[]) {
+export function textNodesPreprocessor(root: Node, allowed_whitespace_nodes: string[], allowed_raw_nodes: string[], raw_elements: Set<Element> = new Set()) {
 	allowed_whitespace_nodes = allowed_whitespace_nodes.map(el => el.toUpperCase());
 	allowed_raw_nodes = allowed_raw_nodes.map(el => el.toUpperCase());
 
@@ -45,7 +46,7 @@ export function textNodesPreprocessor(root: Node, allowed_whitespace_nodes: stri
 
 		// Re-encode < and > that would otherwise be output as HTML by turndown
 		// https://github.com/domchristie/turndown/issues/106
-		if (!hasParentOfType(node, allowed_raw_nodes)) {
+		if (!hasParentOfType(node, allowed_raw_nodes) && !hasParentIn(node, raw_elements)) {
 			node.nodeValue = escapeHtml(node.nodeValue);
 		}
 	}
@@ -103,6 +104,20 @@ export function hasParentOfType(node: Node, tagNames: string[]) {
 
 	while (parent) {
 		if (tagNames.indexOf(parent.tagName) >= 0) {
+			return true;
+		}
+
+		parent = parent.parentElement;
+	}
+
+	return false;
+}
+
+function hasParentIn(node: Node, elements: Set<Element>) {
+	let parent = node.parentElement;
+
+	while (parent) {
+		if (elements.has(parent)) {
 			return true;
 		}
 

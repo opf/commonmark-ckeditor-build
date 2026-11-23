@@ -89,6 +89,8 @@ export const defaultConfig: EditorConfig = {
 		]
 	},
 	table: {
+		// New tables start with a header row so they can be stored as markdown (OP-17275)
+		defaultHeadings: { rows: 1 },
 		contentToolbar: [
 			'tableColumn', 'tableRow', 'mergeTableCells',
 			'tableProperties', 'tableCellProperties'

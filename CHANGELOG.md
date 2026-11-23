@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Simple tables are saved as GFM pipe tables instead of HTML, so tables written in markdown survive switching to the WYSIWYG editor and back ([OP-17275](https://community.openproject.org/wp/OP-17275)). A table qualifies when it has one header row, no merged cells, only inline cell content, and no styling other than uniform column alignment. Every other table is still saved as HTML so no formatting is lost. New tables inserted from the toolbar now start with a header row.
+
 ### Changed
 
 - Removed jQuery dependency from the CKEditor build. All jQuery usage has been replaced with vanilla JavaScript equivalents:

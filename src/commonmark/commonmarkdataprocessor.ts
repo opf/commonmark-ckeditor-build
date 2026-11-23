@@ -22,9 +22,12 @@ import markdownIt from 'markdown-it';
 import type { StateInline, Token } from 'markdown-it';
 import markdownItTaskLists from 'markdown-it-task-lists';
 import { isPageBreakNode, PAGE_BREAK_MARKDOWN } from "./utils/page-breaks";
+import { isMarkdownRepresentableTable, tableToMarkdown } from "./utils/markdown-tables";
 import { getOPPath } from "../plugins/op-context/op-context";
 
 export const originalSrcAttribute = 'data-original-src';
+
+const HTML_TABLE_MARKER = 'data-op-html-table';
 
 // `#` / `##` / `###` followed by either a numeric id (`6217`) or a
 // semantic identifier (`PROJ-7`, `MY_PROJ-1`, `MACROPROJ-42`). The
@@ -219,14 +222,26 @@ export default class CommonMarkDataProcessor {
 		// exists on document, so the call behaves as if the argument were absent.
 		const domFragment = this._domConverter.viewToDom(viewFragment, document as object);
 
+		// Turndown converts a clone of the fragment, so the decision travels as an attribute.
+		const htmlTables = new Set<Element>(
+			Array.from(domFragment.querySelectorAll('table')).filter(table => !isMarkdownRepresentableTable(table))
+		);
+		htmlTables.forEach(table => table.setAttribute(HTML_TABLE_MARKER, ''));
+		const isHtmlTable = (table: Element) => table.hasAttribute(HTML_TABLE_MARKER);
+		const htmlTableSource = (node: HTMLElement) => {
+			node.querySelectorAll(`[${HTML_TABLE_MARKER}]`).forEach(table => table.removeAttribute(HTML_TABLE_MARKER));
+			node.removeAttribute(HTML_TABLE_MARKER);
+			return node.outerHTML;
+		};
+
 		// Replace leading and trailing nbsp at the end of strong and em tags
 		// with single spaces
 		textNodesPreprocessor(
 			domFragment,
 			['strong', 'em'],
-			// Ensure tables are allowed to have HTML contents
-			// OP#29457
-			['pre', 'code', 'table']
+			['pre', 'code'],
+			// Tables kept as HTML are allowed to have HTML contents (OP#29457)
+			htmlTables
 		);
 
 		// Replace link attributes with their computed href attribute
@@ -355,33 +370,32 @@ export default class CommonMarkDataProcessor {
 			}
 		});
 
-		turndownService.addRule('markdownTables', {
-			filter: function (node) {
-				return node.nodeName === 'TABLE' && (!node.parentElement || node.parentElement.nodeName !== 'FIGURE');
-			},
-			replacement: function (_content, node) {
-				return node.outerHTML; // we do not convert back to markdown, but use HTML for tables
+		// A table is handled by its FIGURE wrapper when it has one, otherwise by itself.
+		const ownedTable = (node: HTMLElement): HTMLTableElement | null => {
+			if (node.nodeName === 'FIGURE') {
+				return node.querySelector('table');
 			}
-		});
+			return node.nodeName === 'TABLE' && node.parentElement?.nodeName !== 'FIGURE' ? node as HTMLTableElement : null;
+		};
 
-		// Keep HTML tables and remove filler elements
-		turndownService.addRule('htmlTables', {
-			// Returns a count instead of a boolean, which Turndown treats the same.
-			filter: function (node: HTMLElement) {
-				const tables = node.getElementsByTagName('table');
-				// check if we're a todo list item
-				return node.nodeName === 'FIGURE' && tables.length;
-			} as TurndownService.FilterFunction,
-			replacement: function (_content, node) {
+		turndownService.addRule('tables', {
+			filter: (node) => ownedTable(node) !== null,
+			replacement: (_content, node) => {
+				const table = ownedTable(node as HTMLElement)!;
+
+				if (!isHtmlTable(table)) {
+					return '\n\n' + tableToMarkdown(table, turndownService) + '\n\n';
+				}
+
 				// Remove filler attribute, but keep empty lines
-				node.querySelectorAll('td br[data-cke-filler]').forEach((node) => {
-					if (node.nextElementSibling) {
-						node.removeAttribute('data-cke-filler');
+				node.querySelectorAll('td br[data-cke-filler]').forEach((filler) => {
+					if (filler.nextElementSibling) {
+						filler.removeAttribute('data-cke-filler');
 					}
 				});
 
-				return node.outerHTML;
-			}
+				return htmlTableSource(node as HTMLElement);
+			},
 		});
 
 		turndownService.addRule('strikethrough', {
