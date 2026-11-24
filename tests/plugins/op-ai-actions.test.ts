@@ -271,6 +271,103 @@ describe('OpAiActionsPlugin', () => {
 		expect(plugin.dropdownView).toBeUndefined();
 	});
 
+	describe('when the core reports a changed context', () => {
+		const projected: OpResource = { id: 'new', _type: 'WorkPackage' };
+		const other: OpAiTextTransformAction[] = [{ id: 3, label: 'Sort into template' }];
+
+		test('attaches the dropdown once the new context has actions and runs them for its resource', async () => {
+			const actionsFor = jest.fn((resource: OpResource | undefined) => Promise.resolve(resource === projected ? actions : []));
+			const { services, run } = servicesWith({ actionsFor });
+			const { editor, toolbar, plugin } = await initialised({ services });
+
+			expect(plugin.dropdownView).toBeUndefined();
+
+			editor.fire('op:ai-actions:context-changed', { resource: projected });
+			await flushPromises();
+
+			expect(actionsFor).toHaveBeenLastCalledWith(projected, 'description');
+			expect(toolbar.element!.lastElementChild).toBe(plugin.dropdownView!.element);
+
+			actionButton(plugin).click();
+			expect(run).toHaveBeenCalledWith(actions[0], editor, projected);
+		});
+
+		test('replaces the list and stays the last focusable', async () => {
+			const actionsFor = jest.fn((resource: OpResource | undefined) => Promise.resolve(resource === projected ? other : actions));
+			const { services } = servicesWith({ actionsFor });
+			const { editor, toolbar, plugin } = await initialised({ services });
+			const first = plugin.dropdownView!;
+
+			editor.fire('op:ai-actions:context-changed', { resource: projected });
+			await flushPromises();
+
+			expect(plugin.dropdownView).not.toBe(first);
+			expect(toolbar.element!.querySelectorAll('.op-ai-actions')).toHaveLength(1);
+			expect(plugin.dropdownView!.buttonView.label).toBe('Sort into template');
+			expect(toolbar.focusables.has(first)).toBe(false);
+
+			toolbar.items.add(toolbarButton(editor.locale, 'Underline'));
+			expect(toolbar.focusables.getIndex(plugin.dropdownView!)).toBe(toolbar.focusables.length - 1);
+			expect(toolbar.focusables.length).toBe(4);
+		});
+
+		test('removes the dropdown when the new context has no actions', async () => {
+			const actionsFor = jest.fn((resource: OpResource | undefined) => Promise.resolve(resource === projected ? [] : actions));
+			const { services } = servicesWith({ actionsFor });
+			const { editor, toolbar, plugin } = await initialised({ services });
+			const regroups = toolbar.regroups;
+
+			editor.fire('op:ai-actions:context-changed', { resource: projected });
+			await flushPromises();
+
+			expect(plugin.dropdownView).toBeUndefined();
+			expect(toolbar.element!.childElementCount).toBe(1);
+			expect(toolbar.focusables.length).toBe(2);
+			expect(toolbar.regroups).toBe(regroups + 1);
+		});
+
+		test('runs an action for the resource it was listed for while a reload is pending', async () => {
+			const actionsFor = jest.fn((resource: OpResource | undefined) => (resource === projected
+				? new Promise<OpAiTextTransformAction[]>(() => {})
+				: Promise.resolve(actions)));
+			const { services, run } = servicesWith({ actionsFor });
+			const { editor, plugin } = await initialised({ services });
+
+			editor.fire('op:ai-actions:context-changed', { resource: projected });
+			actionButton(plugin).click();
+
+			expect(run).toHaveBeenCalledWith(actions[0], editor, workPackage);
+		});
+
+		test('reloads for the editor resource when the event carries none', async () => {
+			const { services, actionsFor } = servicesWith();
+			const { editor } = await initialised({ services });
+
+			editor.fire('op:ai-actions:context-changed');
+			await flushPromises();
+
+			expect(actionsFor).toHaveBeenCalledTimes(2);
+			expect(actionsFor).toHaveBeenLastCalledWith(workPackage, 'description');
+		});
+
+		test('keeps the answer for the latest context when an earlier one arrives last', async () => {
+			let answerFirst!: (list: OpAiTextTransformAction[]) => void;
+			const actionsFor = jest.fn((resource: OpResource | undefined) => (resource === projected
+				? Promise.resolve(other)
+				: new Promise<OpAiTextTransformAction[]>(resolve => { answerFirst = resolve; })));
+			const { services } = servicesWith({ actionsFor });
+			const { toolbar, plugin } = await initialised({ services }, ({ editor }) => {
+				editor.fire('op:ai-actions:context-changed', { resource: projected });
+			});
+
+			answerFirst(actions);
+			await flushPromises();
+
+			expect(toolbar.element!.querySelectorAll('.op-ai-actions')).toHaveLength(1);
+			expect(plugin.dropdownView!.buttonView.label).toBe('Sort into template');
+		});
+	});
+
 	test('removes the dropdown when destroyed', async () => {
 		const { services } = servicesWith();
 		const { toolbar, plugin } = await initialised({ services });
