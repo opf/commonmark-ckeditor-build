@@ -6,7 +6,7 @@ import { Collection } from '@ckeditor/ckeditor5-utils';
 import sparkleIcon from '../../icons/sparkle.svg';
 import { getOPFieldName, getOPI18n, getOPResource, getPluginContext } from '../op-context/op-context';
 import { liftPanelToTopLayer } from '../op-toolbar-panels/top-layer-panel';
-import type { OpAiTextTransformAction, OpServices } from '../../op-types';
+import type { OpAiTextTransformAction, OpResource, OpServices } from '../../op-types';
 
 type AiActionsService = NonNullable<OpServices['aiActions']>;
 
@@ -20,6 +20,12 @@ export default class OpAiActionsPlugin extends Plugin {
 	private destroyed = false;
 
 	private releasePanel?: () => void;
+
+	private leaveArrowKeyNavigation?: () => void;
+
+	private resource?: OpResource;
+
+	private loads = 0;
 
 	static get pluginName() {
 		return 'OPAiActions' as const;
@@ -36,38 +42,76 @@ export default class OpAiActionsPlugin extends Plugin {
 		this.listenTo(editor, 'op:source-code-enabled', () => this.forceDisabled('OPSourceCode'));
 		this.listenTo(editor, 'op:source-code-disabled', () => this.clearForceDisabled('OPSourceCode'));
 		this.listenTo(editor.ui, 'ready', () => void this.loadActions(service));
+		// The core fires this when the actions depend on values the user changes in a form around the editor.
+		this.listenTo(editor, 'op:ai-actions:context-changed', (evt, { resource }: { resource?: OpResource } = {}) => {
+			this.resource = resource;
+			void this.loadActions(service);
+		});
 	}
 
 	override destroy() {
-		const dropdownView = this.dropdownView;
-		const toolbar = this.editor.ui.view.toolbar;
-
 		this.destroyed = true;
-		// Stops listening to the focusables first, so removing the dropdown below does not append it again.
 		super.destroy();
+		this.detachDropdown();
+	}
 
-		if (dropdownView) {
-			this.releasePanel?.();
-			if (toolbar?.focusables.has(dropdownView)) {
-				toolbar.focusables.remove(dropdownView);
-			}
-			toolbar?.focusTracker.remove(dropdownView);
-			dropdownView.element?.remove();
-			dropdownView.destroy();
-		}
+	private currentResource() {
+		return this.resource ?? getOPResource(this.editor);
 	}
 
 	private async loadActions(service: AiActionsService) {
 		const editor = this.editor;
-		const actions = await service.actionsFor(getOPResource(editor), getOPFieldName(editor)).catch(() => []);
+		const load = ++this.loads;
+		const resource = this.currentResource();
+		const actions = await service.actionsFor(resource, getOPFieldName(editor)).catch(() => []);
 		const toolbar = editor.ui.view.toolbar;
 
-		if (!this.destroyed && actions.length > 0 && toolbar?.element) {
-			this.dropdownView = this.attachDropdown(service, actions, toolbar);
+		// A later load answers for a newer context.
+		if (this.destroyed || load !== this.loads) {
+			return;
+		}
+
+		const replaced = this.detachDropdown();
+		if (actions.length > 0 && toolbar?.element) {
+			this.dropdownView = this.attachDropdown(service, actions, resource, toolbar);
+		} else if (replaced && toolbar) {
+			this.regroup(toolbar);
 		}
 	}
 
-	private attachDropdown(service: AiActionsService, actions: OpAiTextTransformAction[], toolbar: ToolbarView) {
+	private detachDropdown() {
+		const dropdownView = this.dropdownView;
+		const toolbar = this.editor.ui.view.toolbar;
+
+		if (!dropdownView) {
+			return false;
+		}
+
+		// Stops listening to the focusables first, so removing the dropdown below does not append it again.
+		this.leaveArrowKeyNavigation?.();
+		this.releasePanel?.();
+		if (toolbar?.focusables.has(dropdownView)) {
+			toolbar.focusables.remove(dropdownView);
+		}
+		toolbar?.focusTracker.remove(dropdownView);
+		dropdownView.element?.remove();
+		dropdownView.destroy();
+		this.dropdownView = undefined;
+
+		return true;
+	}
+
+	// The toolbar regroups its items only when it is resized or when its maxWidth changes.
+	private regroup(toolbar: ToolbarView) {
+		toolbar.fire('change:maxWidth', 'maxWidth', toolbar.maxWidth, toolbar.maxWidth);
+	}
+
+	private attachDropdown(
+		service: AiActionsService,
+		actions: OpAiTextTransformAction[],
+		resource: OpResource | undefined,
+		toolbar: ToolbarView,
+	) {
 		const editor = this.editor;
 		const caption = getOPI18n(editor).t('js.editor.ai_actions.caption');
 		const splitButtonView = new SplitButtonView(editor.locale);
@@ -77,12 +121,12 @@ export default class OpAiActionsPlugin extends Plugin {
 		const show = (action: OpAiTextTransformAction) => {
 			shownAction = action;
 			dropdownView.buttonView.label = action.label;
-			// The toolbar regroups its items only when it is resized or when its maxWidth changes.
-			toolbar.fire('change:maxWidth', 'maxWidth', toolbar.maxWidth, toolbar.maxWidth);
+			this.regroup(toolbar);
 		};
 		const run = (action: OpAiTextTransformAction) => {
 			if (dropdownView.isEnabled) {
-				void service.run(action, editor, getOPResource(editor));
+				// The resource the actions were listed for, so a click during a reload cannot mix two contexts.
+				void service.run(action, editor, resource);
 			}
 		};
 
@@ -143,6 +187,7 @@ export default class OpAiActionsPlugin extends Plugin {
 
 		toolbar.focusTracker.add(dropdownView);
 		this.listenTo(focusables, 'change', keepLast);
+		this.leaveArrowKeyNavigation = () => this.stopListening(focusables, 'change', keepLast);
 		keepLast();
 	}
 }
